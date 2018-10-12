@@ -1,0 +1,132 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Project Health Check</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/health-check.css">
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.2/angular.js"></script>
+    <script type="text/javascript" src="js/health-check.js"></script>
+  </head>
+  <body ng-app="health-check" ng-controller="ProjectListController as vm">
+    <header class="navbar navbar-inverse navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a ng-href="{{ vm.projects[0].owner.html_url }}">
+            <h1 class="navbar-brand">
+              <img ng-src="{{ vm.projects[0].owner.avatar_url }}">
+              Project Health Check
+            </h1>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      <p class="alert alert-danger" ng-if="vm.error">
+        <span class="label label-danger">Error!</span>
+        {{ vm.error.message }}
+      </p>
+
+      <section class="projects projects-outdated" ng-if="vm.hasOutdatedProjects">
+        <header>
+          <h2><i class="glyphicon glyphicon-calendar"></i> Outdated Dependencies!</h2>
+        </header>
+
+        <div class="row">
+          <article class="project col-md-6"
+                   ng-include="'project'"
+                   ng-repeat="project in vm.projects | filter:vm.isOutdated | orderBy:'-total.outOfDate'">
+          </article>
+        </div>
+      </section>
+
+      <section class="projects projects-with-issues" ng-if="vm.hasProjectsWithIssues">
+        <header class="button-warning">
+          <h2><i class="glyphicon glyphicon-fire"></i> Open Issues!</h2>
+        </header>
+
+        <div class="row">
+          <article class="project col-md-6"
+                   ng-include="'project'"
+                   ng-repeat="project in vm.projects | filter:vm.hasIssues | orderBy:'-open_issues_count'">
+          </article>
+        </div>
+      </section>
+
+      <section class="projects projects-healthy" ng-if="vm.projects.length > 0">
+        <header>
+          <h2>Lookin' Good</h2>
+        </header>
+
+        <div class="row">
+          <article class="project col-md-6"
+                   ng-include="'project'"
+                   ng-repeat="project in vm.projects | filter:vm.isHealthy | orderBy:'-popularity'">
+          </article>
+        </div>
+      </section>
+
+      <script type="text/ng-template" id="project">
+        <header>
+          <h3><a ng-href="{{ project.html_url }}">{{ project.name }}</a></h3>
+        </header>
+
+        <nav class="badges">
+          <a class="label forks"
+             ng-class="project.forks_count > 0 ? 'label-success' : 'label-info'"
+             ng-href="{{ project.html_url + '/network/members' }}">
+            <i class="glyphicon glyphicon-cutlery"></i> Forks
+            <span>{{ project.forks_count }}</span>
+          </a>
+
+          <a class="label stars"
+             ng-class="project.stargazers_count > 0 ? 'label-success' : 'label-info'"
+             ng-href="{{ project.html_url + '/stargazers' }}">
+            <i class="glyphicon glyphicon-star"></i> Stars
+            <span>{{ project.stargazers_count }}</span>
+          </a>
+
+          <a class="label watchers"
+             ng-class="project.watchers_count > 0 ? 'label-success' : 'label-info'"
+             ng-href="{{ project.html_url + '/watchers' }}">
+            <i class="glyphicon glyphicon-eye-open"></i> Watchers
+            <span>{{ project.watchers_count }}</span>
+          </a>
+
+          <a class="label issues"
+             ng-class="project.open_issues_count > 0 ? 'label-warning' : 'label-success'"
+             ng-href="{{ project.html_url + '/issues' }}">
+            <i class="glyphicon glyphicon-fire"></i> Issues
+            <span>{{ project.open_issues_count }}</span>
+          </a>
+
+          <a class="label dependencies"
+             ng-class="project.totals.outOfDate || project.totals.advisories > 0 ? 'label-danger' : 'label-success'"
+             ng-href="{{ project.totals.html_url }}">
+            <span ng-if="project.totals.outOfDate">
+              <i class="glyphicon glyphicon-calendar"></i> Out of Date
+              <span>{{ project.totals.outOfDate || 0 }} / {{ project.totals.total || 0 }}</span>
+            </span>
+            <span ng-if="project.totals.advisories && !project.totals.outOfDate">
+              <i class="glyphicon glyphicon-calendar"></i> Insecure
+              <span>{{ project.totals.advisories || 0 }} / {{ project.totals.total || 0 }}</span>
+            </span>
+            <span ng-if="!project.totals.outOfDate && !project.totals.advisories">
+              <i class="glyphicon glyphicon-calendar"></i> Up-to-Date
+              <span>{{ project.totals.upToDate || 0 }} / {{ project.totals.total || 0 }}</span>
+            </span>
+          </a>
+        </nav>
+
+        <p class="description">
+          {{ project.description }}
+        </p>
+      </script>
+    </div>
+  </body>
+</html>
