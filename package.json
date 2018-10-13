@@ -1,0 +1,22 @@
+{
+  "name": "repo-health",
+  "version": "0.1.0",
+  "description": "See the health of all your GitHub repos on one page",
+  "private": true,
+  "author": {
+    "name": "James Messinger",
+    "url": "https://jamesmessinger.com"
+  },
+  "homepage": "https://repohealth.github.io/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RepoHealth/repohealth.github.io.git"
+  },
+  "license": "MIT",
+  "scripts": {
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}
