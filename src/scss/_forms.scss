@@ -1,0 +1,110 @@
+button, input, select, textarea {
+  font: inherit;
+  margin: 0;
+}
+
+button, input {
+  overflow: visible;
+}
+
+.form-control, .form-select {
+  min-height: 34px;
+  padding: 6px 8px;
+  font-size: 16px;
+  line-height: 20px;
+  color: #24292e;
+  vertical-align: middle;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  border: 1px solid #d1d5da;
+  border-radius: 3px;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(27,31,35,0.075);
+}
+
+.form-group .form-control {
+  width: 100%;
+  margin-right: 5px;
+  background-color: #fafbfc;
+
+  &.short {
+    width: 200px;
+  }
+}
+
+label {
+  font-weight: 600;
+}
+
+dl.form-group {
+  margin: 15px 0;
+
+  > dt {
+    margin: 0 0 6px;
+  }
+
+  > dd {
+    margin-left: 0;
+  }
+}
+
+button, [type="button"], [type="reset"], [type="submit"], .btn {
+  position: relative;
+  display: inline-block;
+  color: #24292e;
+  background-color: #eff3f6;
+  background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
+  background-repeat: repeat-x;
+  background-position: -1px -1px;
+  background-size: 110% 110%;
+  border: 1px solid rgba(27,31,35,0.2);
+  border-radius: 0.25em;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  &:disabled,
+  &.disabled {
+    cursor: default;
+    background-position: 0 0;
+    color: rgba(36,41,46,0.4);
+    background-color: #eff3f6;
+    background-image: none;
+    border-color: rgba(27,31,35,0.2);
+    box-shadow: none;
+  }
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #28a745;
+  background-image: linear-gradient(-180deg,#34d058,#28a745 90%);
+
+  &:disabled,
+  &.disabled {
+    color: hsla(0,0%,100%,0.75);
+    background-color: #94d3a2;
+    background-image: none;
+    border-color: rgba(27,31,35,0.2);
+    box-shadow: none;
+  }
+}
+
+
+@media (min-width: $tablet-min-width) {
+  .form-control, .form-select {
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,31 @@
+.page-header {
+  border-bottom: 1px solid $light-border;
+
+  .content-wrapper {
+    position: relative;
+    padding-left: 70px;
+  }
+
+  img.logo {
+    position: absolute;
+    left: 10px;
+    height: 50px;
+    width: 50px;
+    vertical-align: middle;
+  }
+
+  h1 {
+    border: none;
+    margin: 10px 10px 5px 0;
+    padding: 0;
+  }
+
+  h2 {
+    color: $darker-gray;
+    font-size: 1em;
+    font-weight: normal;
+    border: none;
+    margin: 0 10px 10px 0;
+    padding: 0 0 0 2px;
+  }
+}

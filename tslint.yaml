@@ -1,0 +1,160 @@
+# TSLint configuration
+# https://palantir.github.io/tslint/usage/configuration/
+# https://palantir.github.io/tslint/rules/
+
+extends:
+  - tslint:all
+
+defaultSeverity: error
+
+rules:
+  # Allow any comments. Don't require specific formatting.
+  comment-format: false
+
+  # Don't enforce cyclomatic complexity limits
+  cyclomatic-complexity: false
+
+  # File names should be consistent and all-lowercase for cross-platform compatibility
+  file-name-casing:
+    - true
+    - kebab-case
+
+  # Don't prefix interfaces with "I"
+  interface-name:
+    - true
+    - never-prefix
+
+  # Allow type declarations
+  interface-over-type-literal: false
+
+  # Allow multiple clases in one file
+  max-classes-per-file: false
+
+  # Don't enforce a max line length
+  max-line-length: false
+
+  # Don't require class members to be ordered by type (public, private, static, etc.)
+  # or alphabetically.  This allows related members to be grouped together.
+  member-ordering: false
+
+  # Don't require a blank line before `return` statements
+  newline-before-return: false
+
+  # Allow single-line method chains
+  newline-per-chained-call: false
+
+  # Allow explicit use of the `any` type, but warn
+  no-any:
+    severity: warning
+
+  # Allow up to 2 blank lines between lines of code
+  no-consecutive-blank-lines:
+    - true
+    - 2
+
+  # Allow `console.log()` et al
+  no-console: false
+
+  # Warn about empty code blocks, but allow them, because they're sometimes useful
+  no-empty:
+    severity: warning
+
+  # Don't allow importing a module for side-effects
+  no-import-side-effect:
+    - true
+    - ignore-module: source-map-support/register
+
+  # Allow types to be explicitly declared, for clarity
+  no-inferrable-types: false
+
+  # Allow numeric literals
+  no-magic-numbers: false
+
+  # Type assertions on object literals are not enforced by the TypeScript compiler,
+  # which can lead to unexpected runtime errors.  For more details see:
+  # https://palantir.github.io/tslint/rules/no-object-literal-type-assertion/
+  no-object-literal-type-assertion: false
+
+  # Allow parameters to be reassigned
+  no-parameter-reassignment: false
+
+  # Shadowing can be useful
+  no-shadowed-variable:
+    severity: warning
+
+  # Don't allow importing sub-modules within a module
+  no-submodule-imports:
+    - true
+    - source-map-support/register
+
+  # This rule causes false positives for cases where a callback wrapper is used
+  # to prevent callback arguments from being passed to the called function
+  no-unnecessary-callback-wrapper: false
+
+  # Don't allow unused expression statements
+  no-unused-expression:
+    - true
+    - allow-fast-null-checks
+
+  # Don't require object literal members to be sorted alphabetically.
+  # This allows related members to be grouped together.
+  object-literal-sort-keys: false
+
+  # Require opening braces to be on the same line as the coresponding keyword
+  one-line:
+    - true
+    - check-open-brace
+    - check-whitespace
+
+  # Allow multiple variables to be declared in the same statement
+  one-variable-per-declaration: false
+
+  # Require all anonymous functions to use arrow syntax
+  only-arrow-functions:
+    - true
+    - allow-declarations
+    - allow-named-functions
+
+  # Allow ternary expressions, but don't _require_ them.
+  # if-else statements can make code clearer
+  prefer-conditional-expression: false
+
+  # Allow "let" for variables that are never mutated
+  prefer-const: false
+
+  # Allow classes to have methods that don't use `this`
+  prefer-function-over-method: false
+
+  # Prefer template strings over string concatenation
+  prefer-template:
+    severity: warning
+    options:
+      - allow-single-concat
+
+  # Prefer single-quoted strings, but allow for exceptions
+  quotemark:
+    - true
+    - double
+    - avoid-escape
+    - jsx-double
+
+  # Don't require a default for every switch statement
+  switch-default: false
+
+  # Don't require a `break` statement for the final switch case
+  switch-final-break: false
+
+  # Don't be strict about trailing commas
+  trailing-comma: false
+
+  # Don't require explicit type definitions for all variables.
+  # Allow type inference.
+  typedef: false
+
+  # Warn about overloads that can be merged, but don't require it, since having separately-defined
+  # overloads can make the code easier to read and understand
+  unified-signatures:
+    severity: warning
+
+  # This rule causes too many false positives
+  variable-name: false
