@@ -1,75 +1,60 @@
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+---
+layout: default
+---
 
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<dialog id="edit_dialog" class="closed">
+  <header class="dialog-header">
+    <img class="logo" src="img/logo.png" alt="logo image">
+    <h1>{{ site.title }}</h1>
+    <h2>{{ site.description }}</h2>
+  </header>
+  <div class="dialog-body">
+    <p>
+      Enter the GitHub repos that you want to include on your dashboard.
+      You can use wildcards (<code>*</code>) to include all public repos for an account.
+      You can also exclude specific repos if you want.
+    </p>
 
-    <title>GitHub Repo Health</title>
+    <form id="edit_url_form">
+      <div class="clearfix">
+        <dl class="form-group">
+          <dt class="input-label">
+            <label autofocus="autofocus" for="repo_owner">GitHub Username</label>
+          </dt>
+          <dd>
+            <input type="text" name="repo_owner" id="repo_owner"
+              maxlength="100" autocapitalize="off" autocomplete="off" spellcheck="false" autofocus="autofocus"
+              class="form-control short">
+          </dd>
+        </dl>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css">
-    <link rel="stylesheet" href="css/repo-health.css">
-  </head>
-  <body id="home-page">
-    <header class="page-header">
-      <div class="content-wrapper">
-        <img class="logo" src="img/logo.png" alt="logo image">
-        <h1>GitHub Repo Health</h1>
-        <h2>See the health of all your GitHub repos on one page</h2>
+        <span class="slash">/</span>
+
+        <dl class="form-group">
+          <dt class="input-label">
+            <label autofocus="autofocus" for="repo_name">Repo Name</label>
+          </dt>
+          <dd>
+            <input type="text" id="repo_name"
+              maxlength="100" autocapitalize="off" autocomplete="off" spellcheck="false" autofocus="autofocus"
+              class="form-control short">
+          </dd>
+        </dl>
+
+        <button type="submit" id="include_button" class="btn btn-primary">Include Repo</button>
+        <button type="button" id="exclude_button" class="btn">Exclude Repo</button>
       </div>
-    </header>
+    </form>
+  </div>
 
-    <main>
-      <div class="content-wrapper">
-        <p>
-          Use this form to build your custom dashboard URL.
-        </p>
+  <footer class="dialog-footer">
+    <button type="button" id="cancel_button" class="btn">Cancel</button>
+    <button type="button" id="ok_button" class="btn btn-primary">Update Dashboard</button>
+  </footer>
+</dialog>
 
-        <form id="build_url_form">
-          <div class="clearfix">
-            <dl class="form-group">
-              <dt class="input-label">
-                <label autofocus="autofocus" for="username">GitHub Username</label>
-              </dt>
-              <dd>
-                <input type="text" name="repo_owner" id="repo_owner"
-                  maxlength="100" autocapitalize="off" autocomplete="off" spellcheck="false" autofocus="autofocus"
-                  class="form-control short">
-              </dd>
-            </dl>
-
-            <span class="slash">/</span>
-
-            <dl class="form-group">
-              <dt class="input-label">
-                <label autofocus="autofocus" for="username">Repo Name</label>
-              </dt>
-              <dd>
-                <input type="text" name="repo_name" id="repo_name" placeholder="Use &quot;*&quot; for all repos"
-                  maxlength="100" autocapitalize="off" autocomplete="off" spellcheck="false" autofocus="autofocus"
-                  class="form-control short">
-              </dd>
-            </dl>
-
-            <button type="submit" disabled class="btn btn-primary">Include Repo</button>
-            <button type="button" disabled class="btn">Exclude Repo</button>
-          </div>
-
-
-        </form>
-
-        <hr>
-
-        <div class="url-sample">
-          <h4>Here's your custom dashboard:</h4>
-          <a id="sample_url" href="dashboard/?include=">https://repohealth.github.io/dashboard/?include=</a>
-        </div>
-
-      </div>
-    </main>
-
-    <script type="text/javascript" src="js/repo-health.js"></script>
-  </body>
-</html>
+<main>
+  <div class="content-wrapper">
+    body
+  </div>
+</main>

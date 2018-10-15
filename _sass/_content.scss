@@ -1,14 +1,14 @@
+main {
+  margin: 30px 10px 50px 10px;
+}
+
 .content-wrapper {
   display: block;
   width: 100%;
 }
 
-main {
-  margin: 30px 10px 50px 10px;
 
-}
-
-@media (min-width: $monitor-min-width) {
+@media (min-width: $tablet-min-width) {
   .content-wrapper {
     max-width: 800px;
     margin: 0 auto;

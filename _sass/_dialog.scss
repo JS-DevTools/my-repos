@@ -1,0 +1,130 @@
+dialog {
+  display: block;
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 1em;
+  background: white;
+  color: black;
+  border: none;
+
+  &.closed,
+  &:not([open]) {
+    display: none;
+  }
+
+  + .backdrop,
+  &::backdrop {
+    position: fixed;
+    z-index: 1;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: #fff;
+  }
+
+  .dialog-header {
+    border-bottom: 1px solid $light-border;
+    position: relative;
+    padding-left: 70px;
+
+    img.logo {
+      position: absolute;
+      left: 10px;
+      height: 50px;
+      width: 50px;
+      vertical-align: middle;
+    }
+
+    h1 {
+      border: none;
+      margin: 10px 10px 5px 0;
+      padding: 0;
+    }
+
+    h2 {
+      color: $darker-gray;
+      font-size: 1em;
+      font-weight: normal;
+      border: none;
+      margin: 0 10px 10px 0;
+      padding: 0 0 0 2px;
+    }
+  }
+
+  .dialog-body {
+    padding: 30px 10px;
+  }
+
+  #edit_url_form {
+    .slash {
+      display: none;
+    }
+
+    .btn {
+      margin-top: 10px;
+    }
+  }
+
+  .dialog-footer {
+    border-top: 1px solid $light-border;
+    padding-top: 20px;
+    text-align: right;
+
+    .btn {
+      margin-left: 10px;
+    }
+  }
+}
+
+@media (min-width: $tablet-min-width) {
+  dialog {
+    margin: auto;
+
+    max-width: 730px;
+    width: -moz-fit-content;
+    width: -webkit-fit-content;
+    width: fit-content;
+
+    min-height: auto;
+    height: -moz-fit-content;
+    height: -webkit-fit-content;
+    height: fit-content;
+
+    #edit_url_form {
+      .form-group {
+        float: left;
+      }
+
+      .slash {
+        display: inline-block;
+        float: left;
+        margin: 45px 10px 0 8px;
+        font-size: 21px;
+        color: #586069;
+      }
+
+      .btn {
+        float: left;
+        margin: 45px 0 0 8px;
+      }
+    }
+  }
+}
+
+@media (min-width: $monitor-min-width) {
+  dialog {
+    border: solid;
+    border-radius: 10px;
+    max-width: 800px;
+
+    + .backdrop,
+    &::backdrop {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: rgba(0,0,0,0.3);
+    }
+  }
+}

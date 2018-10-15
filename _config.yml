@@ -1,0 +1,56 @@
+repository: RepoHealth/repohealth.github.io
+
+title: GitHub Repo Health
+description: See the health of all your GitHub repos on one page
+logo: img/logo.png
+
+author:
+  twitter: JamesMessinger
+
+# google_analytics: UA-68102273-2
+
+twitter:
+  username: JamesMessinger
+  card: summary
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      image: img/logo.png
+
+# Jekyll Optional Front Matter
+# https://github.com/benbalter/jekyll-optional-front-matter/
+# optional_front_matter:
+#   remove_originals: true
+# include:
+#   - README.md
+
+plugins:
+  # Plugins that are activated by default on GitHub Pages
+  # https://github.com/github/pages-gem/blob/master/lib/github-pages/plugins.rb
+  - github-pages                    # https://github.com/github/pages-gem/
+  - jekyll-coffeescript             # https://github.com/jekyll/jekyll-coffeescript/
+  - jekyll-commonmark-ghpages       # https://github.com/github/jekyll-commonmark-ghpages/
+  - jekyll-gist                     # https://github.com/jekyll/jekyll-gist/
+  - jekyll-github-metadata          # https://github.com/jekyll/github-metadata
+  - jekyll-paginate                 # https://github.com/jekyll/jekyll-paginate/
+  - jekyll-relative-links           # https://github.com/benbalter/jekyll-relative-links/
+  - jekyll-optional-front-matter    # https://github.com/benbalter/jekyll-optional-front-matter/
+  - jekyll-readme-index             # https://github.com/benbalter/jekyll-readme-index/
+  - jekyll-default-layout           # https://github.com/benbalter/jekyll-default-layout/
+  - jekyll-titles-from-headings     # https://github.com/benbalter/jekyll-titles-from-headings/
+
+  # Plugins that are allowed by GitHub Pages and ENABLED for this site
+  - jekyll-seo-tag                  # https://github.com/jekyll/jekyll-seo-tag
+  - jekyll-octicons                 # https://github.com/primer/octicons/tree/master/lib/octicons_jekyll
+  - jekyll-sitemap                  # https://github.com/jekyll/jekyll-sitemap/
+
+  # Plugins that are allowed on GitHub Pages and DISABLED for this site
+  #- jekyll-feed                    # https://github.com/jekyll/jekyll-feed/
+  #- jekyll-redirect-from           # https://github.com/jekyll/jekyll-redirect-from/
+  #- jekyll-avatar                  # https://github.com/benbalter/jekyll-avatar/
+  #- jemoji                         # https://rubygems.org/gems/jemoji
+  #- jekyll-mentions                # https://github.com/jekyll/jekyll-mentions/
+  #- jekyll-include-cache           # https://github.com/benbalter/jekyll-include-cache/
+  #- jekyll-remote-theme            # https://github.com/benbalter/jekyll-remote-theme/
