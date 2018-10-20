@@ -5,6 +5,10 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "lib": [
+      "esnext",
+      "dom"
+    ],
 
     "outDir": "js",
     "sourceMap": true,
