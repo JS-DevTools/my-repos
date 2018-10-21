@@ -23,7 +23,7 @@
     "stripInternal": true
   },
   "include": [
-    "ts/**/*.ts"
+    "_ts/**/*.ts"
   ],
   "exclude": [
     "node_modules"

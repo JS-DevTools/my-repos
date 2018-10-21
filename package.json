@@ -15,8 +15,8 @@
   "license": "MIT",
   "scripts": {
     "lint": "tslint -p tsconfig.json",
-    "build": "simplifyify ts/index.ts --outfile js/repo-health.js --minify --debug",
-    "build:dev": "simplifyify ts/index.ts --outfile js/repo-health.js --bundle --debug",
+    "build": "simplifyify _ts/index.ts --outfile js/repo-health.js --minify --debug",
+    "build:dev": "simplifyify _ts/index.ts --outfile js/repo-health.js --bundle --debug",
     "watch": "npm-run-all --parallel watch:*",
     "watch:typescript": "npm run build:dev -- --watch",
     "watch:jekyll": "jekyll serve --livereload",

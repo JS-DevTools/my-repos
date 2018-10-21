@@ -2,96 +2,52 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const dom_1 = require("./dom");
-const params_1 = require("./params");
-class EditUrlDialog {
-    constructor() {
-        dom_1.dom.edit.form.addEventListener("submit", this.includeRepo.bind(this));
-        dom_1.dom.edit.exclude.addEventListener("click", this.excludeRepo.bind(this));
+class Dialog {
+    constructor(element) {
+        this._element = element;
     }
     showModal() {
         this.updateUI();
-        let me = dom_1.dom.edit.dialog;
-        me.className = "open";
-        if (typeof me.showModal === "function") {
-            me.showModal();
+        this._element.className = "open";
+        if (typeof this._element.showModal === "function") {
+            this._element.showModal();
         }
         else {
             // <dialog> Polyfill
             let backdrop = dom_1.dom.createElement("div", { className: "backdrop" });
-            me.insertAdjacentElement("afterend", backdrop);
-            me.setAttribute("open", "");
+            this._element.insertAdjacentElement("afterend", backdrop);
+            this._element.setAttribute("open", "");
         }
     }
     close() {
-        let me = dom_1.dom.edit.dialog;
-        me.className = "closed";
-        if (typeof me.close === "function") {
-            me.close();
+        this._element.className = "closed";
+        if (typeof this._element.close === "function") {
+            this._element.close();
         }
         else {
             // <dialog> Polyfill
-            me.removeAttribute("open");
-            let backdrop = me.nextElementSibling;
+            this._element.removeAttribute("open");
+            let backdrop = this._element.nextElementSibling;
             if (backdrop && backdrop.className === "backdrop") {
                 backdrop.remove();
             }
         }
     }
-    includeRepo(event) {
-        event.preventDefault();
-        let repoName = this.getFullRepoName();
-        if (!repoName) {
-            return;
-        }
-        params_1.params.include(repoName);
-        dom_1.dom.edit.repoOwner.value = "";
-        dom_1.dom.edit.repoName.value = "";
-        this.updateUI();
-    }
-    excludeRepo() {
-        let repoName = this.getFullRepoName();
-        if (!repoName) {
-            return;
-        }
-        this.updateUI();
-    }
-    getFullRepoName() {
-        let owner = dom_1.dom.edit.repoOwner.value.trim().toLowerCase();
-        let repo = dom_1.dom.edit.repoName.value.trim().toLowerCase();
-        if (owner && repo) {
-            return `${owner}/${repo}`;
-        }
-    }
-    updateUI() {
-        if (params_1.params.isNew) {
-            dom_1.dom.edit.cancel.style.display = "none";
-            dom_1.dom.edit.ok.innerText = "Show My Dashboard";
-        }
-        else {
-            dom_1.dom.edit.cancel.style.display = "";
-            dom_1.dom.edit.ok.innerText = "Update Dashboard";
-        }
-        if (params_1.params.isEmpty) {
-            dom_1.dom.edit.ok.disabled = true;
-        }
-    }
 }
-exports.dialog = new EditUrlDialog();
-},{"./dom":2,"./params":4}],2:[function(require,module,exports){
+exports.Dialog = Dialog;
+},{"./dom":2}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dom = {
     createElement,
-    edit: {
-        dialog: getElement("edit_dialog"),
-        form: getElement("edit_url_form"),
-        repoOwner: getElement("repo_owner"),
-        repoName: getElement("repo_name"),
-        include: getElement("include_button"),
-        exclude: getElement("exclude_button"),
+    editDashboard: {
+        dialog: getElement("edit_dashboard_dialog"),
+        form: getElement("edit_dashboard_form"),
+        accountName: getElement("account_name"),
+        add: getElement("add_button"),
         cancel: getElement("cancel_button"),
         ok: getElement("ok_button"),
-    }
+    },
 };
 function getElement(id) {
     let element = document.getElementById(id);
@@ -112,11 +68,36 @@ function createElement(tagName, props = {}) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const dialog_1 = require("./dialog");
+const dom_1 = require("./dom");
 const params_1 = require("./params");
-if (params_1.params.isEmpty) {
-    dialog_1.dialog.showModal();
+class EditDashboardDialog extends dialog_1.Dialog {
+    constructor() {
+        super(dom_1.dom.editDashboard.dialog);
+        dom_1.dom.editDashboard.form.addEventListener("submit", this.addAccount.bind(this));
+        dom_1.dom.editDashboard.add.addEventListener("click", this.addAccount.bind(this));
+    }
+    updateUI() {
+        if (params_1.params.isEmpty) {
+            dom_1.dom.editDashboard.ok.disabled = true;
+        }
+    }
+    async addAccount(event) {
+        event.preventDefault();
+        let accountName = dom_1.dom.editDashboard.accountName.value.trim();
+        // await fetchRepos(accountName);
+        dom_1.dom.editDashboard.accountName.value = "";
+    }
 }
-},{"./dialog":1,"./params":4}],4:[function(require,module,exports){
+exports.editDashboardDialog = new EditDashboardDialog();
+},{"./dialog":1,"./dom":2,"./params":5}],4:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const edit_dashboard_dialog_1 = require("./edit-dashboard-dialog");
+const params_1 = require("./params");
+if (params_1.params.isNew) {
+    edit_dashboard_dialog_1.editDashboardDialog.showModal();
+}
+},{"./edit-dashboard-dialog":3,"./params":5}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Params {
@@ -129,23 +110,26 @@ class Params {
     get isEmpty() {
         return !this._query.has("include");
     }
-    include(repoName) {
+    include(owner, repo = "") {
+        let fullName = repo ? `${owner}/${repo}` : owner;
         let includedRepos = this._query.getAll("include");
         let excludedRepos = this._query.getAll("exclude");
-        if (excludedRepos.includes(repoName)) {
-            // Remove this repo from the exclude list
+        // Is this repo currently excluded?
+        if (excludedRepos.some((excluded) => isSameRepo(excluded, fullName))) {
+            // Delete the "exclude" list (there's no method to remove a single item from it)
             this._query.delete("exclude");
+            // Re-create the "exclude" list without this repo
             for (let excludedRepo of excludedRepos) {
-                if (excludedRepo !== repoName) {
+                if (!isSameRepo(excludedRepo, fullName)) {
                     this._query.append("exclude", excludedRepo);
                 }
             }
         }
-        if (!includedRepos.includes(repoName)) {
-            this._query.append("include", repoName);
+        if (!includedRepos.includes(fullName)) {
+            this._query.append("include", fullName);
         }
     }
-    exclude(repoName) {
+    exclude(owner, repo) {
         // TODO
     }
     toString() {
@@ -153,6 +137,9 @@ class Params {
         return this._query.toString();
     }
 }
+function isSameRepo(repoA, repoB) {
+    return repoA.toLowerCase() === repoB.toLowerCase();
+}
 exports.params = new Params();
-},{}]},{},[3])
+},{}]},{},[4])
 //# sourceMappingURL=repo-health.js.map

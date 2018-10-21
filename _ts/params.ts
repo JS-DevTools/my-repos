@@ -15,27 +15,32 @@ class Params {
   }
 
 
-  public include(repoName: string): void {
+  public include(owner: string, repo: string = ""): void {
+    let fullName = repo ? `${owner}/${repo}` : owner;
+
     let includedRepos = this._query.getAll("include");
     let excludedRepos = this._query.getAll("exclude");
 
-    if (excludedRepos.includes(repoName)) {
-      // Remove this repo from the exclude list
+    // Is this repo currently excluded?
+    if (excludedRepos.some((excluded) => isSameRepo(excluded, fullName))) {
+      // Delete the "exclude" list (there's no method to remove a single item from it)
       this._query.delete("exclude");
+
+      // Re-create the "exclude" list without this repo
       for (let excludedRepo of excludedRepos) {
-        if (excludedRepo !== repoName) {
+        if (!isSameRepo(excludedRepo, fullName)) {
           this._query.append("exclude", excludedRepo);
         }
       }
     }
 
-    if (!includedRepos.includes(repoName)) {
-      this._query.append("include", repoName);
+    if (!includedRepos.includes(fullName)) {
+      this._query.append("include", fullName);
     }
   }
 
 
-  public exclude(repoName: string): void {
+  public exclude(owner: string, repo: string): void {
     // TODO
   }
 
@@ -44,6 +49,11 @@ class Params {
     this._query.sort();
     return this._query.toString();
   }
+}
+
+
+function isSameRepo(repoA: string, repoB: string): boolean {
+  return repoA.toLowerCase() === repoB.toLowerCase();
 }
 
 

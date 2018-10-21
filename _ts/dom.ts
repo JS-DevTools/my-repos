@@ -1,16 +1,14 @@
 export const dom = {
   createElement,
 
-  edit: {
-    dialog: getElement("edit_dialog") as HTMLDialogElement,
-    form: getElement("edit_url_form") as HTMLFontElement,
-    repoOwner: getElement("repo_owner") as HTMLInputElement,
-    repoName: getElement("repo_name") as HTMLInputElement,
-    include: getElement("include_button") as HTMLButtonElement,
-    exclude: getElement("exclude_button") as HTMLButtonElement,
+  editDashboard: {
+    dialog: getElement("edit_dashboard_dialog") as HTMLDialogElement,
+    form: getElement("edit_dashboard_form") as HTMLFontElement,
+    accountName: getElement("account_name") as HTMLInputElement,
+    add: getElement("add_button") as HTMLButtonElement,
     cancel: getElement("cancel_button") as HTMLButtonElement,
     ok: getElement("ok_button") as HTMLButtonElement,
-  }
+  },
 };
 
 
