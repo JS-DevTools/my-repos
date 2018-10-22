@@ -24,15 +24,16 @@
 }
 
 dialog {
-  display: block;
+  display: flex;
+  flex-direction: column;
   position: absolute;
   z-index: 2;
   left: 0;
   right: 0;
   width: 100%;
-  min-height: 100%;
+  height: 100%;
   margin: 0;
-  padding: 1em;
+  padding: 0;
   background: white;
   color: black;
   border: none;
@@ -64,9 +65,9 @@ dialog {
     img.logo {
       position: absolute;
       left: 10px;
+      top: 10px;
       height: 50px;
       width: 50px;
-      vertical-align: middle;
     }
 
     h1 {
@@ -86,26 +87,34 @@ dialog {
   }
 
   .dialog-body {
+    flex: 1;
     padding: 30px 10px;
+    overflow: auto;
 
     h3 {
       margin-top: 0;
     }
   }
 
-  #edit_dashboard_form {
-    .slash {
-      display: none;
+  #add_account_form {
+    .form-group {
+      margin-bottom: 0;
     }
 
+    .input-field,
     .btn {
-      margin-top: 10px;
+      float: left;
+      vertical-align: middle;
+    }
+
+    .input-field {
+      margin-right: 5px;
     }
   }
 
   .dialog-footer {
     border-top: 1px solid $light-border;
-    padding-top: 20px;
+    padding: 20px 10px 10px 0;
     text-align: right;
 
     .btn {
@@ -116,34 +125,25 @@ dialog {
 
 @media (min-width: $tablet-min-width) {
   dialog {
-    margin: auto;
+    margin: 5% auto;
+    max-height: 90%;
 
     max-width: 730px;
     width: -moz-fit-content;
     width: -webkit-fit-content;
     width: fit-content;
 
-    min-height: auto;
-    height: -moz-fit-content;
-    height: -webkit-fit-content;
-    height: fit-content;
-
-    #edit_dashboard_form {
-      .form-group {
+    #add_account_form {
+      .input-label {
         float: left;
+
+        > label {
+          vertical-align: middle;
+        }
       }
 
-      .slash {
-        display: inline-block;
-        float: left;
-        margin: 45px 10px 0 8px;
-        font-size: 21px;
-        color: #586069;
-      }
-
-      .btn {
-        float: left;
-        margin: 45px 0 0 8px;
+      .input-label {
+        margin-right: 10px;
       }
     }
   }
@@ -153,12 +153,35 @@ dialog {
   dialog {
     border: solid;
     border-radius: 10px;
+    transition: width .5s, height .5s;
+
     max-width: 800px;
+
+    min-height: 400px;
+    height: -moz-fit-content;
+    height: -webkit-fit-content;
+    height: fit-content;
+
+
+    .dialog-header {
+      padding: 30px 30px 10px 100px;
+
+      img.logo {
+        top: 40px;
+        left: 40px;
+      }
+    }
+
+    .dialog-body {
+      padding: 30px;
+    }
+
+    .dialog-footer {
+      padding: 20px;
+    }
 
     + .backdrop,
     &::backdrop {
-      position: fixed;
-      top: 0; right: 0; bottom: 0; left: 0;
       background: rgba(0,0,0,0.3);
     }
   }

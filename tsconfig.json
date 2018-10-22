@@ -5,10 +5,12 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "lib": [
       "esnext",
       "dom"
     ],
+    "jsx": "react",
 
     "outDir": "js",
     "sourceMap": true,
@@ -23,7 +25,8 @@
     "stripInternal": true
   },
   "include": [
-    "_ts/**/*.ts"
+    "_ts/**/*.ts",
+    "_ts/**/*.tsx"
   ],
   "exclude": [
     "node_modules"
