@@ -2,62 +2,82 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const params_1 = require("../params");
-const edit_dashboard_modal_1 = require("./edit-dashboard-modal");
+const modal_1 = require("./edit-dashboard/modal");
 function App() {
     if (params_1.params.isNew) {
-        return React.createElement(edit_dashboard_modal_1.EditDashboardModal, null);
+        return React.createElement(modal_1.EditDashboardModal, null);
     }
     else {
         return React.createElement("div", null, "Hello, world");
     }
 }
 exports.App = App;
-},{"../params":5,"./edit-dashboard-modal":3}],2:[function(require,module,exports){
+},{"../params":5,"./edit-dashboard/modal":3}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class EditDashboardForm extends React.Component {
-    getInitialState() {
-        return {
-            accountName: ""
+class AddAccountForm extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            accountName: "",
         };
+        this.handleChange = (event) => {
+            this.setState({ accountName: event.target.value });
+        };
+        this.handleSubmit = (event) => {
+            event.preventDefault();
+            this.addAccount(this.state.accountName);
+            this.setState({ accountName: "" });
+        };
+        this.addAccount = props.addAccount;
     }
     render() {
-        return (React.createElement("form", { id: "add_account_form" },
+        return (React.createElement("form", { id: "add_account_form", onSubmit: this.handleSubmit },
             React.createElement("div", { className: "clearfix" },
                 React.createElement("dl", { className: "form-group" },
                     React.createElement("dt", { className: "input-label" },
                         React.createElement("label", { htmlFor: "repo_owner" }, "GitHub Username")),
                     React.createElement("dd", { className: "input-field" },
-                        React.createElement("input", { type: "text", name: "account_name", autoFocus: true, maxLength: 100, autoCapitalize: "off", autoComplete: "off", spellCheck: false, className: "form-control short" }))),
+                        React.createElement("input", { type: "text", name: "account_name", className: "form-control short", maxLength: 100, autoFocus: true, autoCapitalize: "off", autoComplete: "off", spellCheck: false, value: this.state.accountName, onChange: this.handleChange }))),
                 React.createElement("button", { type: "submit", className: "btn btn-primary" }, "Add"))));
     }
-    async addAccount(event) {
-        event.preventDefault();
-        // let accountName = dom.editDashboard.accountName.value.trim();
-        // await fetchRepos(accountName);
-        // dom.editDashboard.accountName.value = "";
-    }
 }
-exports.EditDashboardForm = EditDashboardForm;
+exports.AddAccountForm = AddAccountForm;
 },{}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const params_1 = require("../params");
-const edit_dashboard_form_1 = require("./edit-dashboard-form");
-function EditDashboardModal() {
-    return (React.createElement("div", { className: "dialog-container" },
-        React.createElement("dialog", { open: true, className: "open" },
-            React.createElement("header", { className: "dialog-header" },
-                React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
-                React.createElement("h1", null, "GitHub Repo Health"),
-                React.createElement("h2", null, "See the health of all your GitHub repos on one page")),
-            React.createElement("div", { className: "dialog-body" },
-                React.createElement("h3", null, getTitle()),
-                React.createElement(edit_dashboard_form_1.EditDashboardForm, null)),
-            React.createElement("footer", { className: "dialog-footer" },
-                React.createElement("button", { type: "button", disabled: true, className: "btn" }, "Cancel"),
-                React.createElement("button", { type: "button", disabled: true, className: "btn btn-primary" }, "Create My Dashboard"))),
-        React.createElement("div", { className: "backdrop" })));
+const params_1 = require("../../params");
+const form_1 = require("./form");
+class EditDashboardModal extends React.Component {
+    constructor() {
+        super(...arguments);
+        this.state = {
+            accounts: {},
+        };
+        this.addAccount = (name) => {
+            this.setState({
+                accounts: {
+                    [name]: [],
+                    ...this.state.accounts,
+                }
+            });
+        };
+    }
+    render() {
+        return (React.createElement("div", { className: "dialog-container" },
+            React.createElement("dialog", { open: true, className: "open" },
+                React.createElement("header", { className: "dialog-header" },
+                    React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
+                    React.createElement("h1", null, "GitHub Repo Health"),
+                    React.createElement("h2", null, "See the health of all your GitHub repos on one page")),
+                React.createElement("div", { className: "dialog-body" },
+                    React.createElement("h3", null, getTitle()),
+                    React.createElement(form_1.AddAccountForm, { addAccount: this.addAccount })),
+                React.createElement("footer", { className: "dialog-footer" },
+                    React.createElement("button", { type: "button", disabled: true, className: "btn" }, "Cancel"),
+                    React.createElement("button", { type: "button", disabled: true, className: "btn btn-primary" }, "Create My Dashboard"))),
+            React.createElement("div", { className: "backdrop" })));
+    }
 }
 exports.EditDashboardModal = EditDashboardModal;
 function getTitle() {
@@ -68,7 +88,7 @@ function getTitle() {
         return "Edit Your Dashboard";
     }
 }
-},{"../params":5,"./edit-dashboard-form":2}],4:[function(require,module,exports){
+},{"../../params":5,"./form":2}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app");
@@ -97,3 +117,4 @@ class Params {
 exports.params = new Params();
 },{}]},{},[4])
 //# sourceMappingURL=repo-health.js.map
+ap

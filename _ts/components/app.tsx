@@ -1,5 +1,5 @@
 import { params } from "../params";
-import { EditDashboardModal } from "./edit-dashboard-modal";
+import { EditDashboardModal } from "./edit-dashboard/modal";
 
 
 export function App() {
