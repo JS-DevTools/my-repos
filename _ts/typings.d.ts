@@ -14,21 +14,23 @@ declare var ReactDOM: {
 };
 
 declare interface ComponentConstructor {
-  new <P, S>(): Component<P, S>;
+  new <P, S>(props: Readonly<P>): Component<P, S>;
 }
 
 declare class Component<P, S> {
-  context: any;
-  props: P;
-  state: S;
-  refs: {};
+  public readonly props: Readonly<P>;
+  public readonly state: Readonly<S>;
 
-  getDefaultProps?(): P;
-  getInitialState(): S;
-  setState(state: S, callback?: () => void): void;
-  render(): void;
-  componentDidMount(): void;
-  componentWillUnmount(): void;
-  componentDidUpdate(prevProps: P, prevState: S): void;
-  forceUpdate(callBack?: () => void): void;
+  public getDefaultProps?(): P;
+  public setState(state: S, callback?: () => void): void;
+  public render(): void;
+  public componentDidMount(): void;
+  public componentWillUnmount(): void;
+  public shouldComponentUpdate(nextProps: Readonly<P>, nextState: Readonly<S>, nextContext: any): boolean;
+  public componentDidUpdate(prevProps: Readonly<P>, prevState: Readonly<S>): void;
+  public forceUpdate(callBack?: () => void): void;
+
+  // deprecated members
+  public context: any;
+  public refs: {};
 }
