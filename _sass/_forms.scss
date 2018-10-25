@@ -25,7 +25,7 @@ button, input {
 
 .form-group .form-control {
   width: 100%;
-  margin-right: 5px;
+  margin-right: $horizontal-space-tiny;
   background-color: #fafbfc;
 
   &.short {
@@ -38,10 +38,10 @@ label {
 }
 
 dl.form-group {
-  margin: 15px 0;
+  margin: $vertical-space-medium 0;
 
   > dt {
-    margin: 0 0 6px;
+    margin: 0 0 $vertical-space-tiny;
   }
 
   > dd {
@@ -60,7 +60,7 @@ button, [type="button"], [type="reset"], [type="submit"], .btn {
   background-size: 110% 110%;
   border: 1px solid rgba(27,31,35,0.2);
   border-radius: 0.25em;
-  padding: 6px 12px;
+  padding: ($vertical-space-tiny + 1) ($vertical-space-small + 2);
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;

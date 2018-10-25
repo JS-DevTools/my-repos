@@ -24,6 +24,10 @@
 }
 
 dialog {
+  $logo-size: 50px;
+  $dialog-horizontal-padding: $horizontal-space-small;
+  $dialog-vertical-padding: $vertical-space-small;
+
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -58,22 +62,25 @@ dialog {
   }
 
   .dialog-header {
-    border-bottom: 1px solid $light-border;
     position: relative;
-    padding-left: 70px;
+    border-bottom: 1px solid $light-border;
+    padding: $dialog-vertical-padding $dialog-horizontal-padding;
+    padding-left: $logo-size + ($dialog-horizontal-padding * 2);
+    padding-bottom: $dialog-vertical-padding * 2;
 
     img.logo {
       position: absolute;
-      left: 10px;
-      top: 10px;
-      height: 50px;
-      width: 50px;
+      left: $dialog-horizontal-padding;
+      top: $dialog-vertical-padding;
+      height: $logo-size;
+      width: $logo-size;
     }
 
     h1 {
       border: none;
-      margin: 10px 10px 5px 0;
       padding: 0;
+      margin: 0;
+      margin-bottom: $vertical-space-tiny;
     }
 
     h2 {
@@ -81,14 +88,14 @@ dialog {
       font-size: 1em;
       font-weight: normal;
       border: none;
-      margin: 0 10px 10px 0;
+      margin: 0;
       padding: 0 0 0 2px;
     }
   }
 
   .dialog-body {
     flex: 1;
-    padding: 30px 10px;
+    padding: $dialog-vertical-padding $dialog-horizontal-padding;
     overflow: auto;
 
     h3 {
@@ -98,11 +105,12 @@ dialog {
 
   .dialog-footer {
     border-top: 1px solid $light-border;
-    padding: 20px 10px 10px 0;
+    padding: $dialog-vertical-padding $dialog-horizontal-padding;
+    padding-top: $dialog-vertical-padding * 2;
     text-align: right;
 
     .btn {
-      margin-left: 10px;
+      margin-left: $horizontal-space-small;
     }
   }
 }
@@ -121,6 +129,10 @@ dialog {
 
 @media (min-width: $monitor-min-width) {
   dialog {
+    $logo-size: 50px;
+    $dialog-horizontal-padding: $horizontal-space-large;
+    $dialog-vertical-padding: $vertical-space-large;
+
     border: solid;
     border-radius: 10px;
 
@@ -128,22 +140,23 @@ dialog {
     height: -webkit-fit-content;
     height: fit-content;
 
-
     .dialog-header {
-      padding: 30px 30px 10px 100px;
+      padding-top: $dialog-vertical-padding;
+      padding-left: $logo-size + $dialog-horizontal-padding + $horizontal-space-small;
 
       img.logo {
-        top: 40px;
-        left: 40px;
+        top: $dialog-vertical-padding;
+        left: $dialog-horizontal-padding;
       }
     }
 
     .dialog-body {
-      padding: 30px;
+      padding: $dialog-vertical-padding $dialog-horizontal-padding;
     }
 
     .dialog-footer {
-      padding: 20px;
+      padding-bottom: $dialog-vertical-padding;
+      padding-right: $dialog-horizontal-padding;
     }
 
     + .backdrop,
