@@ -9,15 +9,9 @@ interface State {
 }
 
 export class AddAccountForm extends React.Component<Props, State> {
-  public readonly addAccount: (name: string) => void;
   public readonly state: State = {
     accountName: "",
   };
-
-  public constructor(props: Readonly<Props>) {
-    super(props);
-    this.addAccount = props.addAccount;
-  }
 
   public render() {
     return (
@@ -46,7 +40,9 @@ export class AddAccountForm extends React.Component<Props, State> {
 
   private handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    this.addAccount(this.state.accountName);
-    this.setState({ accountName: "" });
+    if (this.state.accountName) {
+      this.props.addAccount(this.state.accountName);
+      this.setState({ accountName: "" });
+    }
   }
 }

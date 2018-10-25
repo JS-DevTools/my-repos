@@ -2,22 +2,48 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const params_1 = require("../params");
-const modal_1 = require("./edit-dashboard/modal");
+const dialog_1 = require("./edit-dashboard/dialog");
 function App() {
     if (params_1.params.isNew) {
-        return React.createElement(modal_1.EditDashboardModal, null);
+        return React.createElement(dialog_1.EditDashboardDialog, null);
     }
     else {
-        return React.createElement("div", null, "Hello, world");
+        return React.createElement("main", null, "Hello, world");
     }
 }
 exports.App = App;
-},{"../params":5,"./edit-dashboard/modal":3}],2:[function(require,module,exports){
+},{"../params":6,"./edit-dashboard/dialog":4}],2:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class AccountList extends React.Component {
+    constructor() {
+        super(...arguments);
+        this.state = {
+            selectedAccount: "",
+        };
+    }
+    render() {
+        // Determine the selected account, or fallback to the first account in the list
+        let selectedAccountKey = this.state.selectedAccount || [...this.props.accounts.keys()][0];
+        let selectedAccount = this.props.accounts.get(selectedAccountKey);
+        return (React.createElement("div", { id: "edit_account_list" },
+            React.createElement(AccountNameList, { accounts: this.props.accounts, selected: selectedAccount }),
+            React.createElement(RepoList, { account: selectedAccount })));
+    }
+}
+exports.AccountList = AccountList;
+function AccountNameList({ accounts, selected }) {
+    return (React.createElement("ul", { className: "account-name-list" }, [...accounts.entries()].map(([key, account]) => (React.createElement("li", { className: "account-name", key: key }, account.name)))));
+}
+function RepoList({ account }) {
+    return (React.createElement("ul", { className: "repo-list" }, account && [...account.repos.entries()].map(([key, repo]) => (React.createElement("li", { className: "repo", key: key }, repo.name)))));
+}
+},{}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class AddAccountForm extends React.Component {
-    constructor(props) {
-        super(props);
+    constructor() {
+        super(...arguments);
         this.state = {
             accountName: "",
         };
@@ -26,10 +52,11 @@ class AddAccountForm extends React.Component {
         };
         this.handleSubmit = (event) => {
             event.preventDefault();
-            this.addAccount(this.state.accountName);
-            this.setState({ accountName: "" });
+            if (this.state.accountName) {
+                this.props.addAccount(this.state.accountName);
+                this.setState({ accountName: "" });
+            }
         };
-        this.addAccount = props.addAccount;
     }
     render() {
         return (React.createElement("form", { id: "add_account_form", onSubmit: this.handleSubmit },
@@ -43,43 +70,65 @@ class AddAccountForm extends React.Component {
     }
 }
 exports.AddAccountForm = AddAccountForm;
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const params_1 = require("../../params");
-const form_1 = require("./form");
-class EditDashboardModal extends React.Component {
+const account_list_1 = require("./account-list");
+const add_account_form_1 = require("./add-account-form");
+class EditDashboardDialog extends React.Component {
     constructor() {
         super(...arguments);
         this.state = {
-            accounts: {},
+            accounts: new Map(),
         };
-        this.addAccount = (name) => {
-            this.setState({
-                accounts: {
-                    [name]: [],
-                    ...this.state.accounts,
-                }
-            });
+        this.addAccount = (accountName) => {
+            accountName = accountName.trim();
+            let accounts = new Map(this.state.accounts.entries());
+            let key = accountName.toLowerCase();
+            if (!accounts.has(key)) {
+                accounts.set(key, {
+                    name: accountName,
+                    repos: new Map(),
+                });
+            }
+            this.setState({ accounts });
+        };
+        this.removeAccount = (accountName) => {
+            accountName = accountName.trim();
+            let accounts = new Map(this.state.accounts.entries());
+            let key = accountName.toLowerCase();
+            accounts.delete(key);
+            this.setState({ accounts });
+        };
+        this.toggleRepo = (accountName, repoName, include) => {
+            accountName = accountName.trim();
+            repoName = repoName.trim();
+            let accounts = new Map(this.state.accounts.entries());
+            let accountKey = accountName.toLowerCase();
+            let repoKey = repoName.toLowerCase();
+            accounts.get(accountKey).repos.get(repoKey).include = include;
+            this.setState({ accounts });
         };
     }
     render() {
         return (React.createElement("div", { className: "dialog-container" },
-            React.createElement("dialog", { open: true, className: "open" },
+            React.createElement("dialog", { open: true, className: this.state.accounts.size === 0 ? "open empty" : "open" },
                 React.createElement("header", { className: "dialog-header" },
                     React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
                     React.createElement("h1", null, "GitHub Repo Health"),
                     React.createElement("h2", null, "See the health of all your GitHub repos on one page")),
                 React.createElement("div", { className: "dialog-body" },
                     React.createElement("h3", null, getTitle()),
-                    React.createElement(form_1.AddAccountForm, { addAccount: this.addAccount })),
+                    React.createElement(add_account_form_1.AddAccountForm, { addAccount: this.addAccount }),
+                    React.createElement(account_list_1.AccountList, { accounts: this.state.accounts, removeAccount: this.removeAccount, toggleRepo: this.toggleRepo })),
                 React.createElement("footer", { className: "dialog-footer" },
                     React.createElement("button", { type: "button", disabled: true, className: "btn" }, "Cancel"),
                     React.createElement("button", { type: "button", disabled: true, className: "btn btn-primary" }, "Create My Dashboard"))),
             React.createElement("div", { className: "backdrop" })));
     }
 }
-exports.EditDashboardModal = EditDashboardModal;
+exports.EditDashboardDialog = EditDashboardDialog;
 function getTitle() {
     if (params_1.params.isNew) {
         return "Hi! 👋 Enter your GitHub username below to get started";
@@ -88,12 +137,12 @@ function getTitle() {
         return "Edit Your Dashboard";
     }
 }
-},{"../../params":5,"./form":2}],4:[function(require,module,exports){
+},{"../../params":6,"./account-list":2,"./add-account-form":3}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app");
 ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("react-app"));
-},{"./components/app":1}],5:[function(require,module,exports){
+},{"./components/app":1}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Params {
@@ -115,6 +164,5 @@ class Params {
  * Singleton reference to the page's query params
  */
 exports.params = new Params();
-},{}]},{},[4])
+},{}]},{},[5])
 //# sourceMappingURL=repo-health.js.map
-ap

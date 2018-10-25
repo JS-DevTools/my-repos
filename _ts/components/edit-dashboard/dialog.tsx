@@ -1,23 +1,21 @@
 import { params } from "../../params";
+import { AccountList } from "./account-list";
 import { AddAccountForm } from "./add-account-form";
+import { GitHubAccountMap } from "./state";
 
 interface State {
-  accounts: Readonly<{
-    [accountName: string]: {
-      [repoName: string]: boolean;
-    };
-  }>;
+  accounts: GitHubAccountMap;
 }
 
-export class EditDashboardModal extends React.Component<{}, State> {
+export class EditDashboardDialog extends React.Component<{}, State> {
   public readonly state: State = {
-    accounts: {},
+    accounts: new Map(),
   };
 
   public render() {
     return (
       <div className="dialog-container">
-        <dialog open className="open">
+        <dialog open className={this.state.accounts.size === 0 ? "open empty" : "open"}>
           <header className="dialog-header">
             <img className="logo" src="img/logo.png" alt="logo image" />
             <h1>GitHub Repo Health</h1>
@@ -27,7 +25,7 @@ export class EditDashboardModal extends React.Component<{}, State> {
             <h3>{getTitle()}</h3>
             <AddAccountForm addAccount={this.addAccount} />
             <AccountList accounts={this.state.accounts}
-              removeAccount={this.removeAccount} updateRepo={this.updateRepo} />
+              removeAccount={this.removeAccount} toggleRepo={this.toggleRepo} />
           </div>
 
           <footer className="dialog-footer">
@@ -42,20 +40,39 @@ export class EditDashboardModal extends React.Component<{}, State> {
   }
 
   private addAccount = (accountName: string) => {
-    let accounts = { ...this.state.accounts };
-    accounts[accountName] = accounts[accountName] || {};
+    accountName = accountName.trim();
+    let accounts = new Map(this.state.accounts.entries());
+    let key = accountName.toLowerCase();
+
+    if (!accounts.has(key)) {
+      accounts.set(key, {
+        name: accountName,
+        repos: new Map(),
+      });
+    }
+
     this.setState({ accounts });
   }
 
   private removeAccount = (accountName: string) => {
-    let accounts = { ...this.state.accounts };
-    delete accounts[accountName];
+    accountName = accountName.trim();
+    let accounts = new Map(this.state.accounts.entries());
+    let key = accountName.toLowerCase();
+
+    accounts.delete(key);
+
     this.setState({ accounts });
   }
 
-  private updateRepo = (accountName: string, repoName: string, include: boolean) => {
-    let accounts = { ...this.state.accounts };
-    accounts[accountName][repoName] = include;
+  private toggleRepo = (accountName: string, repoName: string, include: boolean) => {
+    accountName = accountName.trim();
+    repoName = repoName.trim();
+    let accounts = new Map(this.state.accounts.entries());
+    let accountKey = accountName.toLowerCase();
+    let repoKey = repoName.toLowerCase();
+
+    accounts.get(accountKey)!.repos.get(repoKey)!.include = include;
+
     this.setState({ accounts });
   }
 }

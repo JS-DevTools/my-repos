@@ -74,6 +74,10 @@ rules:
   # Allow numeric literals
   no-magic-numbers: false
 
+  # Non-null assertions are useful because the TypeScript compiler is often unable
+  # to understand that a property is known to be non-null
+  no-non-null-assertion: false
+
   # Type assertions on object literals are not enforced by the TypeScript compiler,
   # which can lead to unexpected runtime errors.  For more details see:
   # https://palantir.github.io/tslint/rules/no-object-literal-type-assertion/

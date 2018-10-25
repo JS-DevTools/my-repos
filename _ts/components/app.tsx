@@ -1,12 +1,12 @@
 import { params } from "../params";
-import { EditDashboardModal } from "./edit-dashboard/modal";
+import { EditDashboardDialog } from "./edit-dashboard/dialog";
 
 
 export function App() {
   if (params.isNew) {
-    return <EditDashboardModal />;
+    return <EditDashboardDialog />;
   }
   else {
-    return <div>Hello, world</div>;
+    return <main>Hello, world</main>;
   }
 }
