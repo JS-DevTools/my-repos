@@ -96,22 +96,6 @@ dialog {
     }
   }
 
-  #add_account_form {
-    .form-group {
-      margin-bottom: 0;
-    }
-
-    .input-field,
-    .btn {
-      float: left;
-      vertical-align: middle;
-    }
-
-    .input-field {
-      margin-right: 5px;
-    }
-  }
-
   .dialog-footer {
     border-top: 1px solid $light-border;
     padding: 20px 10px 10px 0;
@@ -132,20 +116,6 @@ dialog {
     width: -moz-fit-content;
     width: -webkit-fit-content;
     width: fit-content;
-
-    #add_account_form {
-      .input-label {
-        float: left;
-
-        > label {
-          vertical-align: middle;
-        }
-      }
-
-      .input-label {
-        margin-right: 10px;
-      }
-    }
   }
 }
 
@@ -153,11 +123,7 @@ dialog {
   dialog {
     border: solid;
     border-radius: 10px;
-    transition: width .5s, height .5s;
 
-    max-width: 800px;
-
-    min-height: 400px;
     height: -moz-fit-content;
     height: -webkit-fit-content;
     height: fit-content;

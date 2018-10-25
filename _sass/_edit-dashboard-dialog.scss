@@ -1,0 +1,57 @@
+#add_account_form {
+  .form-group {
+    margin-bottom: 0;
+  }
+
+  .input-field,
+  .btn {
+    float: left;
+    vertical-align: middle;
+  }
+
+  .input-field {
+    margin-right: $horizontal-space-tiny;
+  }
+}
+
+#edit_account_list {
+  margin-top: $vertical-space-large;
+}
+
+@media (min-width: $tablet-min-width) {
+  #add_account_form {
+    .input-label {
+      float: left;
+
+      > label {
+        vertical-align: middle;
+      }
+    }
+
+    .input-label {
+      margin-right: $horizontal-space-small;
+    }
+  }
+
+  #edit_account_list {
+
+  }
+}
+
+@media (min-width: $monitor-min-width) {
+  dialog {
+    min-width: 500px;
+    max-width: 800px;
+    height: auto;
+
+    transition: min-height .75s;
+
+    &.empty {
+      min-height: 400px;
+    }
+
+    &:not(.empty) {
+      min-height: 600px;
+    }
+  }
+}
