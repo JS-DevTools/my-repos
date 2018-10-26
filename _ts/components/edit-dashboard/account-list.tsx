@@ -1,56 +1,69 @@
-import { GitHubAccount, GitHubAccountMap } from "./state";
+import { MouseEvent } from "react";
+import { GitHubAccount, GitHubRepo } from "./state";
 
 interface Props {
-  accounts: GitHubAccountMap;
-  removeAccount(accountName: string): void;
+  accounts: GitHubAccount[];
+  selected?: GitHubAccount;
+  selectAccount(name: string): void;
+  removeAccount(name: string): void;
   toggleRepo(accountName: string, repoName: string, include: boolean): void;
 }
 
-interface State {
-  selectedAccount: string;
+export function AccountList(props: Props) {
+  let { accounts, selected } = props;
+  let empty = accounts.length === 0;
+
+  return (
+    <div id="edit_account_list">
+      <ul className={empty ? "account-list empty" : "account-list"}>
+        {accounts.map((account) => <AccountItem account={account} {...props} />)}
+      </ul>
+      <ul className="repo-list">
+        {
+          selected && selected.repos.map((repo) =>
+            <RepoItem account={selected!} repo={repo} {...props} />)
+        }
+      </ul>
+    </div>
+  );
 }
 
-export class AccountList extends React.Component<Props, State> {
-  public readonly state: State = {
-    selectedAccount: "",
-  };
+interface AccountProps extends Props {
+  account: GitHubAccount;
+}
 
+class AccountItem extends React.Component<AccountProps, object> {
   public render() {
-    // Determine the selected account, or fallback to the first account in the list
-    let selectedAccountKey = this.state.selectedAccount || [...this.props.accounts.keys()][0];
-    let selectedAccount = this.props.accounts.get(selectedAccountKey);
+    let { account, selected } = this.props;
 
     return (
-      <div id="edit_account_list">
-        <AccountNameList accounts={this.props.accounts} selected={selectedAccount} />
-        <RepoList account={selectedAccount} />
-      </div>
+      <li key={account.name} className={account === selected ? "account selected" : "account"}>
+        <a data-key={account.name} onClick={this.handleAccountClick}>
+          {account.name}
+        </a>
+      </li>
     );
+  }
+
+  private handleAccountClick = (event: MouseEvent) => {
+    let key = (event.target as HTMLElement).dataset.key!;
+    this.props.selectAccount(key);
   }
 }
 
-
-function AccountNameList({ accounts, selected }: { accounts: GitHubAccountMap, selected: GitHubAccount | undefined }) {
-  return (
-    <ul className="account-name-list">
-      {[...accounts.entries()].map(([key, account]) => (
-        <li className="account-name" key={key}>
-          {account.name}
-        </li>
-      ))}
-    </ul>
-  );
+interface RepoProps extends Props {
+  account: GitHubAccount;
+  repo: GitHubRepo;
 }
 
+class RepoItem extends React.Component<RepoProps, object> {
+  public render() {
+    let { repo } = this.props;
 
-function RepoList({ account }: { account: GitHubAccount | undefined }) {
-  return (
-    <ul className="repo-list">
-      {account && [...account.repos.entries()].map(([key, repo]) => (
-        <li className="repo" key={key}>
-          {repo.name}
-        </li>
-      ))}
-    </ul>
-  );
+    return (
+      <li key={repo.name} className="repo">
+        {repo.name}
+      </li>
+    );
+  }
 }

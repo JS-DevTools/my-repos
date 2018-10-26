@@ -1,9 +1,4 @@
 /**
- * A map of GitHub accounts, keyed by the lowercase name
- */
-export interface GitHubAccountMap extends Map<string, GitHubAccount> { }
-
-/**
  * A GitHub user or organization account
  */
 export interface GitHubAccount {
@@ -13,9 +8,9 @@ export interface GitHubAccount {
   readonly name: string;
 
   /**
-   * A map of GitHub accounts, keyed by the lowercase name
+   * This account's GitHub repos
    */
-  readonly repos: Map<string, GitHubRepo>;
+  readonly repos: GitHubRepo[];
 }
 
 /**

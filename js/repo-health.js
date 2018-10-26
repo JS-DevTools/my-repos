@@ -15,28 +15,33 @@ exports.App = App;
 },{"../params":6,"./edit-dashboard/dialog":4}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class AccountList extends React.Component {
+function AccountList(props) {
+    let { accounts, selected } = props;
+    let empty = accounts.length === 0;
+    return (React.createElement("div", { id: "edit_account_list" },
+        React.createElement("ul", { className: empty ? "account-list empty" : "account-list" }, accounts.map((account) => React.createElement(AccountItem, Object.assign({ account: account }, props)))),
+        React.createElement("ul", { className: "repo-list" }, selected && selected.repos.map((repo) => React.createElement(RepoItem, Object.assign({ account: selected, repo: repo }, props))))));
+}
+exports.AccountList = AccountList;
+class AccountItem extends React.Component {
     constructor() {
         super(...arguments);
-        this.state = {
-            selectedAccount: "",
+        this.handleAccountClick = (event) => {
+            let key = event.target.dataset.key;
+            this.props.selectAccount(key);
         };
     }
     render() {
-        // Determine the selected account, or fallback to the first account in the list
-        let selectedAccountKey = this.state.selectedAccount || [...this.props.accounts.keys()][0];
-        let selectedAccount = this.props.accounts.get(selectedAccountKey);
-        return (React.createElement("div", { id: "edit_account_list" },
-            React.createElement(AccountNameList, { accounts: this.props.accounts, selected: selectedAccount }),
-            React.createElement(RepoList, { account: selectedAccount })));
+        let { account, selected } = this.props;
+        return (React.createElement("li", { key: account.name, className: account === selected ? "account selected" : "account" },
+            React.createElement("a", { "data-key": account.name, onClick: this.handleAccountClick }, account.name)));
     }
 }
-exports.AccountList = AccountList;
-function AccountNameList({ accounts, selected }) {
-    return (React.createElement("ul", { className: "account-name-list" }, [...accounts.entries()].map(([key, account]) => (React.createElement("li", { className: "account-name", key: key }, account.name)))));
-}
-function RepoList({ account }) {
-    return (React.createElement("ul", { className: "repo-list" }, account && [...account.repos.entries()].map(([key, repo]) => (React.createElement("li", { className: "repo", key: key }, repo.name)))));
+class RepoItem extends React.Component {
+    render() {
+        let { repo } = this.props;
+        return (React.createElement("li", { key: repo.name, className: "repo" }, repo.name));
+    }
 }
 },{}],3:[function(require,module,exports){
 "use strict";
@@ -53,7 +58,7 @@ class AddAccountForm extends React.Component {
         this.handleSubmit = (event) => {
             event.preventDefault();
             if (this.state.accountName) {
-                this.props.addAccount(this.state.accountName);
+                this.props.addAccount(this.state.accountName.trim());
                 this.setState({ accountName: "" });
             }
         };
@@ -80,40 +85,75 @@ class EditDashboardDialog extends React.Component {
     constructor() {
         super(...arguments);
         this.state = {
-            accounts: new Map(),
+            accounts: [
+                {
+                    name: "JamesMessinger", repos: [
+                        { name: "some-repo", include: true },
+                        { name: "some-other-repo", include: true },
+                        { name: "yet-another-repo", include: true },
+                        { name: "my-repo", include: true },
+                    ]
+                },
+                {
+                    name: "APIDevTools", repos: [
+                        { name: "swagger-parser", include: true },
+                        { name: "json-schema-ref-parser", include: true },
+                        { name: "swagger-express-middleware", include: true },
+                        { name: "swagger-cli", include: true },
+                    ]
+                },
+                {
+                    name: "JS-DevTools", repos: [
+                        { name: "simplifyify", include: true },
+                        { name: "ono", include: true },
+                        { name: "version-bump-promt", include: true },
+                        { name: "karma-host-environment", include: true },
+                    ]
+                },
+            ],
+            selectedAccount: undefined,
         };
-        this.addAccount = (accountName) => {
-            accountName = accountName.trim();
-            let accounts = new Map(this.state.accounts.entries());
-            let key = accountName.toLowerCase();
-            if (!accounts.has(key)) {
-                accounts.set(key, {
-                    name: accountName,
-                    repos: new Map(),
-                });
+        this.addAccount = (name) => {
+            let accounts = this.state.accounts.slice();
+            let account = accounts.find(byName(name));
+            if (account) {
+                // This account already exists, so select it
+                this.setState({ selectedAccount: account });
             }
-            this.setState({ accounts });
+            else {
+                // Add this account
+                account = { name, repos: [] };
+                accounts.push(account);
+                this.setState({ accounts });
+            }
+            this.setState({ accounts, selectedAccount: account });
         };
-        this.removeAccount = (accountName) => {
-            accountName = accountName.trim();
-            let accounts = new Map(this.state.accounts.entries());
-            let key = accountName.toLowerCase();
-            accounts.delete(key);
-            this.setState({ accounts });
+        this.removeAccount = (name) => {
+            let accounts = this.state.accounts.slice();
+            let index = accounts.findIndex(byName(name));
+            if (index >= 0) {
+                accounts.splice(index, 1);
+                this.setState({ accounts });
+            }
+        };
+        this.selectAccount = (name) => {
+            let account = this.state.accounts.find(byName(name));
+            if (!account) {
+                account = this.state.accounts[0];
+            }
+            this.setState({ selectedAccount: account });
         };
         this.toggleRepo = (accountName, repoName, include) => {
-            accountName = accountName.trim();
-            repoName = repoName.trim();
-            let accounts = new Map(this.state.accounts.entries());
-            let accountKey = accountName.toLowerCase();
-            let repoKey = repoName.toLowerCase();
-            accounts.get(accountKey).repos.get(repoKey).include = include;
+            let accounts = this.state.accounts.slice();
+            let account = accounts.find(byName(accountName));
+            let repo = account.repos.find(byName(repoName));
+            repo.include = include;
             this.setState({ accounts });
         };
     }
     render() {
         return (React.createElement("div", { className: "dialog-container" },
-            React.createElement("dialog", { open: true, className: this.state.accounts.size === 0 ? "open empty" : "open" },
+            React.createElement("dialog", { open: true, className: this.state.accounts.length === 0 ? "open empty" : "open" },
                 React.createElement("header", { className: "dialog-header" },
                     React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
                     React.createElement("h1", null, "GitHub Repo Health"),
@@ -121,7 +161,7 @@ class EditDashboardDialog extends React.Component {
                 React.createElement("div", { className: "dialog-body" },
                     React.createElement("h3", null, getTitle()),
                     React.createElement(add_account_form_1.AddAccountForm, { addAccount: this.addAccount }),
-                    React.createElement(account_list_1.AccountList, { accounts: this.state.accounts, removeAccount: this.removeAccount, toggleRepo: this.toggleRepo })),
+                    React.createElement(account_list_1.AccountList, { accounts: this.state.accounts, selected: this.state.selectedAccount, selectAccount: this.selectAccount, removeAccount: this.removeAccount, toggleRepo: this.toggleRepo })),
                 React.createElement("footer", { className: "dialog-footer" },
                     React.createElement("button", { type: "button", disabled: true, className: "btn" }, "Cancel"),
                     React.createElement("button", { type: "button", disabled: true, className: "btn btn-primary" }, "Create My Dashboard"))),
@@ -136,6 +176,10 @@ function getTitle() {
     else {
         return "Edit Your Dashboard";
     }
+}
+function byName(name) {
+    name = name.trim().toLowerCase();
+    return (obj) => obj.name.trim().toLowerCase() === name;
 }
 },{"../../params":6,"./account-list":2,"./add-account-form":3}],5:[function(require,module,exports){
 "use strict";

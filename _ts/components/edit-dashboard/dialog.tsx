@@ -1,21 +1,48 @@
 import { params } from "../../params";
 import { AccountList } from "./account-list";
 import { AddAccountForm } from "./add-account-form";
-import { GitHubAccountMap } from "./state";
+import { GitHubAccount } from "./state";
 
 interface State {
-  accounts: GitHubAccountMap;
+  accounts: GitHubAccount[];
+  selectedAccount?: GitHubAccount;
 }
 
 export class EditDashboardDialog extends React.Component<{}, State> {
   public readonly state: State = {
-    accounts: new Map(),
+    accounts: [
+      {
+        name: "JamesMessinger", repos: [
+          { name: "some-repo", include: true },
+          { name: "some-other-repo", include: true },
+          { name: "yet-another-repo", include: true },
+          { name: "my-repo", include: true },
+        ]
+      },
+      {
+        name: "APIDevTools", repos: [
+          { name: "swagger-parser", include: true },
+          { name: "json-schema-ref-parser", include: true },
+          { name: "swagger-express-middleware", include: true },
+          { name: "swagger-cli", include: true },
+        ]
+      },
+      {
+        name: "JS-DevTools", repos: [
+          { name: "simplifyify", include: true },
+          { name: "ono", include: true },
+          { name: "version-bump-promt", include: true },
+          { name: "karma-host-environment", include: true },
+        ]
+      },
+    ],
+    selectedAccount: undefined,
   };
 
   public render() {
     return (
       <div className="dialog-container">
-        <dialog open className={this.state.accounts.size === 0 ? "open empty" : "open"}>
+        <dialog open className={this.state.accounts.length === 0 ? "open empty" : "open"}>
           <header className="dialog-header">
             <img className="logo" src="img/logo.png" alt="logo image" />
             <h1>GitHub Repo Health</h1>
@@ -24,8 +51,9 @@ export class EditDashboardDialog extends React.Component<{}, State> {
           <div className="dialog-body">
             <h3>{getTitle()}</h3>
             <AddAccountForm addAccount={this.addAccount} />
-            <AccountList accounts={this.state.accounts}
-              removeAccount={this.removeAccount} toggleRepo={this.toggleRepo} />
+            <AccountList accounts={this.state.accounts} selected={this.state.selectedAccount}
+              selectAccount={this.selectAccount} removeAccount={this.removeAccount}
+              toggleRepo={this.toggleRepo} />
           </div>
 
           <footer className="dialog-footer">
@@ -39,44 +67,50 @@ export class EditDashboardDialog extends React.Component<{}, State> {
     );
   }
 
-  private addAccount = (accountName: string) => {
-    accountName = accountName.trim();
-    let accounts = new Map(this.state.accounts.entries());
-    let key = accountName.toLowerCase();
+  private addAccount = (name: string) => {
+    let accounts = this.state.accounts.slice();
+    let account = accounts.find(byName(name));
 
-    if (!accounts.has(key)) {
-      accounts.set(key, {
-        name: accountName,
-        repos: new Map(),
-      });
+    if (account) {
+      // This account already exists, so select it
+      this.setState({ selectedAccount: account });
+    }
+    else {
+      // Add this account
+      account = { name, repos: [] };
+      accounts.push(account);
+      this.setState({ accounts });
     }
 
-    this.setState({ accounts });
+    this.setState({ accounts, selectedAccount: account });
   }
 
-  private removeAccount = (accountName: string) => {
-    accountName = accountName.trim();
-    let accounts = new Map(this.state.accounts.entries());
-    let key = accountName.toLowerCase();
+  private removeAccount = (name: string) => {
+    let accounts = this.state.accounts.slice();
+    let index = accounts.findIndex(byName(name));
 
-    accounts.delete(key);
+    if (index >= 0) {
+      accounts.splice(index, 1);
+      this.setState({ accounts });
+    }
+  }
 
-    this.setState({ accounts });
+  private selectAccount = (name: string) => {
+    let account = this.state.accounts.find(byName(name));
+    if (!account) {
+      account = this.state.accounts[0];
+    }
+    this.setState({ selectedAccount: account });
   }
 
   private toggleRepo = (accountName: string, repoName: string, include: boolean) => {
-    accountName = accountName.trim();
-    repoName = repoName.trim();
-    let accounts = new Map(this.state.accounts.entries());
-    let accountKey = accountName.toLowerCase();
-    let repoKey = repoName.toLowerCase();
-
-    accounts.get(accountKey)!.repos.get(repoKey)!.include = include;
-
+    let accounts = this.state.accounts.slice();
+    let account = accounts.find(byName(accountName))!;
+    let repo = account.repos.find(byName(repoName))!;
+    repo.include = include;
     this.setState({ accounts });
   }
 }
-
 
 function getTitle(): string {
   if (params.isNew) {
@@ -85,4 +119,9 @@ function getTitle(): string {
   else {
     return "Edit Your Dashboard";
   }
+}
+
+function byName(name: string) {
+  name = name.trim().toLowerCase();
+  return (obj: { name: string }) => obj.name.trim().toLowerCase() === name;
 }

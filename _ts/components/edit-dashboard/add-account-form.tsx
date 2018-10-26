@@ -40,8 +40,9 @@ export class AddAccountForm extends React.Component<Props, State> {
 
   private handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     if (this.state.accountName) {
-      this.props.addAccount(this.state.accountName);
+      this.props.addAccount(this.state.accountName.trim());
       this.setState({ accountName: "" });
     }
   }
