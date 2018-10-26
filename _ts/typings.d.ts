@@ -22,7 +22,7 @@ declare class Component<P, S> {
   public readonly state: Readonly<S>;
 
   public getDefaultProps?(): P;
-  public setState(state: S, callback?: () => void): void;
+  public setState(state: Partial<S>, callback?: () => void): void;
   public render(): void;
   public componentDidMount(): void;
   public componentWillUnmount(): void;
