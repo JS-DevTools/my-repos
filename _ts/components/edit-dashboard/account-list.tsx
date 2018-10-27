@@ -1,16 +1,16 @@
 import { MouseEvent } from "react";
-import { GitHubAccount, GitHubRepo } from "./state";
+import { GitHubAccount, GitHubRepo } from "../app/state";
 
-interface Props {
+interface AccountListProps {
   accounts: GitHubAccount[];
-  selected?: GitHubAccount;
-  selectAccount(name: string): void;
-  removeAccount(name: string): void;
-  toggleRepo(accountName: string, repoName: string, include: boolean): void;
+  selectedAccountID: string;
+  selectAccount(id: string): void;
+  removeAccount(id: string): void;
+  toggleRepo(accountID: string, repoID: string, include: boolean): void;
 }
 
-export function AccountList(props: Props) {
-  let { accounts, selected } = props;
+export function AccountList(props: AccountListProps) {
+  let { accounts } = props;
 
   return (
     <div id="edit_account_list" className={accounts.length === 0 ? "empty" : ""}>
@@ -22,18 +22,17 @@ export function AccountList(props: Props) {
   );
 }
 
-interface AccountItemProps extends Props {
+interface AccountItemProps extends AccountListProps {
   account: GitHubAccount;
 }
 
-
 class AccountItem extends React.Component<AccountItemProps, object> {
   public render() {
-    let { account, selected } = this.props;
+    let { account, selectedAccountID } = this.props;
 
     return (
-      <li key={account.name} className={account === selected ? "account selected" : "account"}>
-        <a data-key={account.name} onClick={this.handleAccountClick}>
+      <li key={account.id} className={account.id === selectedAccountID ? "account selected" : "account"}>
+        <a data-key={account.id} onClick={this.handleAccountClick}>
           {account.name}
         </a>
       </li>
@@ -46,15 +45,15 @@ class AccountItem extends React.Component<AccountItemProps, object> {
   }
 }
 
-interface RepoListProps extends Props {
+interface RepoListProps extends AccountListProps {
   account: GitHubAccount;
 }
 
 function RepoList(props: RepoListProps) {
-  let { account, selected } = props;
+  let { account, selectedAccountID } = props;
 
   return (
-    <section className={account === selected ? "repo-list selected" : "repo-list"}>
+    <section className={account.id === selectedAccountID ? "repo-list selected" : "repo-list"}>
       <header>
         <h3>{account.name}</h3>
       </header>
@@ -74,7 +73,7 @@ class RepoItem extends React.Component<RepoItemProps, object> {
     let { repo } = this.props;
 
     return (
-      <li key={repo.name} className="repo">
+      <li key={repo.id} className="repo">
         {repo.name}
       </li>
     );
