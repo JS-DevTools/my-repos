@@ -16,41 +16,25 @@
 
 #edit_account_list {
   display: flex;
+  flex-direction: column;
   margin-top: $vertical-space-large;
+
+  &.empty {
+    display: none;
+  }
 
   ul {
     list-style: none;
     margin: 0;
     padding: 0;
-
-    &.empty {
-      display: none;
-    }
   }
 
   .account-list {
-    .account {
-      > a {
-        display: block;
-        padding: $vertical-space-small $horizontal-space-small;
-        color: $link-color;
-        cursor: pointer;
-      }
-
-      &.selected {
-        background-color: $light-gray;
-
-        > a {
-          color: $text-color;
-          text-decoration: none;
-        }
-      }
-    }
+    display: none;
   }
 
   .repo-list {
-    flex-grow: 1;
-    padding-left: $horizontal-space-medium;
+    margin-bottom: $vertical-space-medium;
 
     .repo {
       padding: $vertical-space-small $horizontal-space-small;
@@ -74,7 +58,59 @@
   }
 
   #edit_account_list {
+    flex-direction: row;
+    position: relative;
+    left: -2px;
 
+    .account-list {
+      display: unset;
+      position: relative;
+      left: 2px;
+      padding-top: 10px;
+
+      .account {
+        > a {
+          display: block;
+          padding: $vertical-space-small $horizontal-space-small;
+          color: $link-color;
+          cursor: pointer;
+        }
+
+        &.selected {
+          border: solid 1px $medium-gray;
+          border-right: solid 3px $bg-color;
+          border-top-left-radius: 5px;
+          border-bottom-left-radius: 5px;
+
+          > a {
+            color: $text-color;
+            text-decoration: none;
+          }
+        }
+      }
+    }
+
+    .repo-list {
+      display: none;
+      min-height: 300px;
+
+      &.selected {
+        display: unset;
+      }
+
+      header {
+        display: none;
+      }
+
+      flex-grow: 1;
+      border: solid 1px $medium-gray;
+      border-radius: 5px;
+      padding-left: $horizontal-space-medium;
+
+      .repo {
+        padding: $vertical-space-small $horizontal-space-small;
+      }
+    }
   }
 }
 
@@ -82,16 +118,24 @@
   dialog {
     min-width: 500px;
     max-width: 800px;
-    height: auto;
 
     transition: min-height .75s;
 
     &.empty {
-      min-height: 400px;
+      height: 400px;
     }
 
     &:not(.empty) {
-      min-height: 600px;
+      height: 700px;
+
+      #edit_account_list {
+        .repo-list {
+          height: 305px;
+          margin: 0;
+          overflow: hidden;
+          overflow-y: auto;
+        }
+      }
     }
   }
 }

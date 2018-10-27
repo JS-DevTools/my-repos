@@ -17,10 +17,9 @@ exports.App = App;
 Object.defineProperty(exports, "__esModule", { value: true });
 function AccountList(props) {
     let { accounts, selected } = props;
-    let empty = accounts.length === 0;
-    return (React.createElement("div", { id: "edit_account_list" },
-        React.createElement("ul", { className: empty ? "account-list empty" : "account-list" }, accounts.map((account) => React.createElement(AccountItem, Object.assign({ account: account }, props)))),
-        React.createElement("ul", { className: "repo-list" }, selected && selected.repos.map((repo) => React.createElement(RepoItem, Object.assign({ account: selected, repo: repo }, props))))));
+    return (React.createElement("div", { id: "edit_account_list", className: accounts.length === 0 ? "empty" : "" },
+        React.createElement("ul", { className: "account-list" }, accounts.map((account) => React.createElement(AccountItem, Object.assign({ account: account }, props)))),
+        accounts.map((account) => React.createElement(RepoList, Object.assign({ account: account }, props)))));
 }
 exports.AccountList = AccountList;
 class AccountItem extends React.Component {
@@ -36,6 +35,13 @@ class AccountItem extends React.Component {
         return (React.createElement("li", { key: account.name, className: account === selected ? "account selected" : "account" },
             React.createElement("a", { "data-key": account.name, onClick: this.handleAccountClick }, account.name)));
     }
+}
+function RepoList(props) {
+    let { account, selected } = props;
+    return (React.createElement("section", { className: account === selected ? "repo-list selected" : "repo-list" },
+        React.createElement("header", null,
+            React.createElement("h3", null, account.name)),
+        React.createElement("ul", null, account.repos.map((repo) => React.createElement(RepoItem, Object.assign({ repo: repo }, props))))));
 }
 class RepoItem extends React.Component {
     render() {
@@ -81,37 +87,46 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const params_1 = require("../../params");
 const account_list_1 = require("./account-list");
 const add_account_form_1 = require("./add-account-form");
+const dummyAccounts = [
+    {
+        name: "JamesMessinger", repos: [
+            { name: "some-repo", include: true },
+            { name: "some-other-repo", include: true },
+            { name: "yet-another-repo", include: true },
+            { name: "my-repo", include: true },
+        ]
+    },
+    {
+        name: "APIDevTools", repos: [
+            { name: "swagger-parser", include: true },
+            { name: "json-schema-ref-parser", include: true },
+            { name: "swagger-express-middleware", include: true },
+            { name: "swagger-cli", include: true },
+            { name: "swagger-parser-3", include: true },
+            { name: "json-schema-ref-parser-3", include: true },
+            { name: "swagger-express-middleware-3", include: true },
+            { name: "swagger-cli-3", include: true },
+            { name: "swagger-parser-2", include: true },
+            { name: "json-schema-ref-parser-2", include: true },
+            { name: "swagger-express-middleware-2", include: true },
+            { name: "swagger-cli-2", include: true },
+        ]
+    },
+    {
+        name: "JS-DevTools", repos: [
+            { name: "simplifyify", include: true },
+            { name: "ono", include: true },
+            { name: "version-bump-promt", include: true },
+            { name: "karma-host-environment", include: true },
+        ]
+    },
+];
 class EditDashboardDialog extends React.Component {
     constructor() {
         super(...arguments);
         this.state = {
-            accounts: [
-                {
-                    name: "JamesMessinger", repos: [
-                        { name: "some-repo", include: true },
-                        { name: "some-other-repo", include: true },
-                        { name: "yet-another-repo", include: true },
-                        { name: "my-repo", include: true },
-                    ]
-                },
-                {
-                    name: "APIDevTools", repos: [
-                        { name: "swagger-parser", include: true },
-                        { name: "json-schema-ref-parser", include: true },
-                        { name: "swagger-express-middleware", include: true },
-                        { name: "swagger-cli", include: true },
-                    ]
-                },
-                {
-                    name: "JS-DevTools", repos: [
-                        { name: "simplifyify", include: true },
-                        { name: "ono", include: true },
-                        { name: "version-bump-promt", include: true },
-                        { name: "karma-host-environment", include: true },
-                    ]
-                },
-            ],
-            selectedAccount: undefined,
+            accounts: dummyAccounts,
+            selectedAccount: dummyAccounts[0],
         };
         this.addAccount = (name) => {
             let accounts = this.state.accounts.slice();
@@ -121,9 +136,10 @@ class EditDashboardDialog extends React.Component {
                 this.setState({ selectedAccount: account });
             }
             else {
-                // Add this account
+                // Add this account to the BEGINNING of the array.
+                // This makes sure it's visible on small mobile screens.
                 account = { name, repos: [] };
-                accounts.push(account);
+                accounts.unshift(account);
                 this.setState({ accounts });
             }
             this.setState({ accounts, selectedAccount: account });

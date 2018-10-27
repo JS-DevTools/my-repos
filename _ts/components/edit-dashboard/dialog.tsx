@@ -3,6 +3,42 @@ import { AccountList } from "./account-list";
 import { AddAccountForm } from "./add-account-form";
 import { GitHubAccount } from "./state";
 
+
+const dummyAccounts = [
+  {
+    name: "JamesMessinger", repos: [
+      { name: "some-repo", include: true },
+      { name: "some-other-repo", include: true },
+      { name: "yet-another-repo", include: true },
+      { name: "my-repo", include: true },
+    ]
+  },
+  {
+    name: "APIDevTools", repos: [
+      { name: "swagger-parser", include: true },
+      { name: "json-schema-ref-parser", include: true },
+      { name: "swagger-express-middleware", include: true },
+      { name: "swagger-cli", include: true },
+      { name: "swagger-parser-3", include: true },
+      { name: "json-schema-ref-parser-3", include: true },
+      { name: "swagger-express-middleware-3", include: true },
+      { name: "swagger-cli-3", include: true },
+      { name: "swagger-parser-2", include: true },
+      { name: "json-schema-ref-parser-2", include: true },
+      { name: "swagger-express-middleware-2", include: true },
+      { name: "swagger-cli-2", include: true },
+    ]
+  },
+  {
+    name: "JS-DevTools", repos: [
+      { name: "simplifyify", include: true },
+      { name: "ono", include: true },
+      { name: "version-bump-promt", include: true },
+      { name: "karma-host-environment", include: true },
+    ]
+  },
+];
+
 interface State {
   accounts: GitHubAccount[];
   selectedAccount?: GitHubAccount;
@@ -10,33 +46,8 @@ interface State {
 
 export class EditDashboardDialog extends React.Component<{}, State> {
   public readonly state: State = {
-    accounts: [
-      {
-        name: "JamesMessinger", repos: [
-          { name: "some-repo", include: true },
-          { name: "some-other-repo", include: true },
-          { name: "yet-another-repo", include: true },
-          { name: "my-repo", include: true },
-        ]
-      },
-      {
-        name: "APIDevTools", repos: [
-          { name: "swagger-parser", include: true },
-          { name: "json-schema-ref-parser", include: true },
-          { name: "swagger-express-middleware", include: true },
-          { name: "swagger-cli", include: true },
-        ]
-      },
-      {
-        name: "JS-DevTools", repos: [
-          { name: "simplifyify", include: true },
-          { name: "ono", include: true },
-          { name: "version-bump-promt", include: true },
-          { name: "karma-host-environment", include: true },
-        ]
-      },
-    ],
-    selectedAccount: undefined,
+    accounts: dummyAccounts,
+    selectedAccount: dummyAccounts[0],
   };
 
   public render() {
@@ -76,9 +87,10 @@ export class EditDashboardDialog extends React.Component<{}, State> {
       this.setState({ selectedAccount: account });
     }
     else {
-      // Add this account
+      // Add this account to the BEGINNING of the array.
+      // This makes sure it's visible on small mobile screens.
       account = { name, repos: [] };
-      accounts.push(account);
+      accounts.unshift(account);
       this.setState({ accounts });
     }
 
