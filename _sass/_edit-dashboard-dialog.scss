@@ -62,6 +62,18 @@
     position: relative;
     left: -2px;
 
+    &.multiple {
+      header {
+        display: none;
+      }
+    }
+
+    &.one {
+      .account-list {
+        display: none;
+      }
+    }
+
     .account-list {
       display: unset;
       position: relative;
@@ -92,20 +104,20 @@
 
     .repo-list {
       display: none;
+      flex-grow: 1;
       min-height: 300px;
 
       &.selected {
-        display: unset;
+        display: flex;
+        flex-direction: column;
       }
 
-      header {
-        display: none;
+      ul {
+        flex-grow: 1;
+        border: solid 1px $medium-gray;
+        border-radius: 5px;
+        padding-left: $horizontal-space-medium;
       }
-
-      flex-grow: 1;
-      border: solid 1px $medium-gray;
-      border-radius: 5px;
-      padding-left: $horizontal-space-medium;
 
       .repo {
         padding: $vertical-space-small $horizontal-space-small;
@@ -133,8 +145,18 @@
         .repo-list {
           height: 305px;
           margin: 0;
+        }
+
+        .account-list {
           overflow: hidden;
           overflow-y: auto;
+        }
+
+        .repo-list {
+          ul {
+            overflow: hidden;
+            overflow-y: auto;
+          }
         }
       }
     }

@@ -11,9 +11,10 @@ interface AccountListProps {
 
 export function AccountList(props: AccountListProps) {
   let { accounts } = props;
+  let count = accounts.length === 0 ? "empty" : accounts.length === 1 ? "one" : "multiple";
 
   return (
-    <div id="edit_account_list" className={accounts.length === 0 ? "empty" : ""}>
+    <div id="edit_account_list" className={count}>
       <ul className="account-list">
         {accounts.map((account) => <AccountItem account={account} {...props} />)}
       </ul>
