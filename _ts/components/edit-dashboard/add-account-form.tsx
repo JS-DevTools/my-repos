@@ -23,7 +23,7 @@ export class AddAccountForm extends React.Component<Props, State> {
             </dt>
             <dd className="input-field">
               <input type="text" name="account_name" className="form-control short"
-                maxLength={100} autoFocus autoCapitalize="off" autoComplete="off" spellCheck={false}
+                maxLength={100} autoFocus autoCapitalize="off" autoComplete="on" spellCheck={false}
                 value={this.state.accountName} onChange={this.handleChange} />
             </dd>
           </dl>
