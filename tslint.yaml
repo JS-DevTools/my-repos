@@ -133,11 +133,8 @@ rules:
   # Allow classes to have methods that don't use `this`
   prefer-function-over-method: false
 
-  # Prefer template strings over string concatenation
-  prefer-template:
-    severity: warning
-    options:
-      - allow-single-concat
+  # Template strings are nice, but sometimes concatenation is more readable
+  prefer-template: false
 
   # Prefer single-quoted strings, but allow for exceptions
   quotemark:
