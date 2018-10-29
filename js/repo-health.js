@@ -1,73 +1,152 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * A wrapper around the Fetch API, with added error handling and automatic response parsing.
+ */
+exports.apiClient = {
+    /**
+     * Returns the parsed response, or throws an error if an error response is returned
+     */
+    async fetch(input, init) {
+        let response = await fetch(input, init);
+        let parsedResponseBody = await parseResponseBody(response);
+        if (!response.ok) {
+            throw exports.apiClient.createError(`${getUrl(input)} returned an HTTP ${response.status} (${response.statusText || "Error"}) response`, parsedResponseBody);
+        }
+        return parsedResponseBody;
+    },
+    /**
+     * Returns the parsed response if it's a valid JSON array; otherwise, or throws an error.
+     */
+    async fetchArray(input, init) {
+        let parsedResponseBody = await exports.apiClient.fetch(input, init);
+        if (!Array.isArray(parsedResponseBody)) {
+            throw exports.apiClient.createError(`${getUrl(input)} did not return a JSON array as expected`, parsedResponseBody);
+        }
+        return parsedResponseBody;
+    },
+    /**
+     * Returns the parsed response if it's a valid JSON object; otherwise, or throws an error.
+     */
+    async fetchObject(input, init) {
+        let parsedResponseBody = await exports.apiClient.fetch(input, init);
+        if (typeof parsedResponseBody !== "object") {
+            throw exports.apiClient.createError(`${getUrl(input)} did not return a JSON object as expected`, parsedResponseBody);
+        }
+        else if (Array.isArray(parsedResponseBody)) {
+            throw exports.apiClient.createError(`${getUrl(input)} returned a JSON array, but a JSON object was expected`, parsedResponseBody);
+        }
+        return parsedResponseBody;
+    },
+    /**
+     * Creates an Error with the specified message, including the parsed response body
+     */
+    createError(message, parsedResponseBody) {
+        return new Error(message + "\n" + JSON.stringify(parsedResponseBody, undefined, 2));
+    },
+};
+/**
+ * Returns the URL from the given RequestInfo value
+ */
+function getUrl(input) {
+    return typeof input === "string" ? input : input.url;
+}
+/**
+ * Tries to parse the response as JSON, but falls back to text if that fails
+ */
+async function parseResponseBody(response) {
+    let responseBody;
+    try {
+        responseBody = await response.text();
+    }
+    catch (error) {
+        // The response could not be read
+        return undefined;
+    }
+    try {
+        // Try to parse the response as JSON
+        let parsedResponseBody = JSON.parse(responseBody);
+        if (typeof parsedResponseBody === "object") {
+            // Return the parsed object or array
+            return parsedResponseBody;
+        }
+        else {
+            // Coerce the result to a string
+            return String(parsedResponseBody);
+        }
+    }
+    catch (error) {
+        // The response couldn't be parsed as JSON, so just return it as a string
+        return responseBody;
+    }
+}
+},{}],2:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const dialog_1 = require("../edit-dashboard/dialog");
-const dummyAccounts = [
-    {
-        id: "jamesmessinger",
-        name: "JamesMessinger",
-        repos: [
-            { id: "some-repo", name: "some-repo", include: true },
-            { id: "some-other-repo", name: "some-other-repo", include: true },
-            { id: "yet-another-repo", name: "yet-another-repo", include: true },
-            { id: "my-repo", name: "my-repo", include: true },
-        ]
-    },
-    {
-        id: "apidevtools",
-        name: "APIDevTools",
-        repos: [
-            { id: "swagger-parser", name: "swagger-parser", include: true },
-            { id: "json-schema-ref-parser", name: "json-schema-ref-parser", include: true },
-            { id: "swagger-express-middleware", name: "swagger-express-middleware", include: true },
-            { id: "swagger-cli", name: "swagger-cli", include: true },
-            { id: "swagger-parser-3", name: "swagger-parser-3", include: true },
-            { id: "json-schema-ref-parser-3", name: "json-schema-ref-parser-3", include: true },
-            { id: "swagger-express-middleware-3", name: "swagger-express-middleware-3", include: true },
-            { id: "swagger-cli-3", name: "swagger-cli-3", include: true },
-            { id: "swagger-parser-2", name: "swagger-parser-2", include: true },
-            { id: "json-schema-ref-parser-2", name: "json-schema-ref-parser-2", include: true },
-            { id: "swagger-express-middleware-2", name: "swagger-express-middleware-2", include: true },
-            { id: "swagger-cli-2", name: "swagger-cli-2", include: true },
-        ]
-    },
-    {
-        id: "js-devtools",
-        name: "JS-DevTools",
-        repos: [
-            { id: "simplifyify", name: "simplifyify", include: true },
-            { id: "ono", name: "ono", include: true },
-            { id: "version-bump-promt", name: "version-bump-promt", include: true },
-            { id: "karma-host-environment", name: "karma-host-environment", include: true },
-        ]
-    },
-];
+const fetch_github_account_1 = require("./fetch-github-account");
 class App extends React.Component {
     constructor() {
         super(...arguments);
         this.state = {
-            accounts: dummyAccounts,
+            accounts: [],
+            selectedAccount: undefined,
         };
         this.getAccount = (id) => this.state.accounts.find(byID(id));
         this.addAccount = (name) => {
-            let id = createId(name);
-            let account = this.getAccount(id);
-            let accounts = this.state.accounts.slice();
-            if (!account) {
-                // Add this account to the BEGINNING of the array.
-                // This makes sure it's visible on small mobile screens.
-                account = { id, name, repos: [] };
-                accounts.unshift(account);
-                this.setState({ accounts });
+            // Does this account already exist
+            let account = this.state.accounts.find(byName(name));
+            if (account) {
+                // The account already exists, so just select it
+                return this.selectAccount(account.id);
             }
-            return id;
+            // Create a temporary account object to populate the UI
+            // while we fetch the account info from GitHub
+            account = {
+                id: Math.random(),
+                name,
+                login: name,
+                avatar_url: "",
+                bio: "",
+                repos: [],
+            };
+            // Add this account to the BEGINNING of the array.
+            // This makes sure it's visible on small mobile screens.
+            let accounts = this.state.accounts.slice();
+            accounts.unshift(account);
+            this.setState({ accounts, selectedAccount: account });
+            // Fetch the account info from GitHub and replace this temporary account
+            // object with the real info
+            fetch_github_account_1.fetchGitHubAccount(account, this.replaceAccount);
+        };
+        this.replaceAccount = (oldAccountID, newAccount) => {
+            let accounts = this.state.accounts.slice();
+            // Just to ensure we don't accidentally add duplicate accounts,
+            // remove the new account if it already exists
+            removeByID(accounts, newAccount.id);
+            // Remove the old account, and get its index,
+            // so we can insert the new account at the same location
+            let index = removeByID(accounts, oldAccountID);
+            // If the old account didn't exist, then just add new account at index zero
+            if (index === -1) {
+                index = 0;
+            }
+            // Add the new account at the same index as the removed account
+            accounts.splice(index, 0, newAccount);
+            this.setState({ accounts, selectedAccount: newAccount });
         };
         this.removeAccount = (id) => {
             let accounts = this.state.accounts.slice();
-            let index = accounts.findIndex(byID(id));
+            let index = removeByID(accounts, id);
             if (index >= 0) {
-                accounts.splice(index, 1);
                 this.setState({ accounts });
+            }
+        };
+        this.selectAccount = (id) => {
+            let account = this.state.accounts.find(byID(id));
+            if (account) {
+                this.setState({ selectedAccount: account });
             }
         };
         this.toggleRepo = (accountID, repoID, include) => {
@@ -80,23 +159,83 @@ class App extends React.Component {
     }
     render() {
         return [
-            React.createElement(dialog_1.EditDashboardDialog, { key: "dialog", accounts: this.state.accounts, getAccount: this.getAccount, addAccount: this.addAccount, removeAccount: this.removeAccount, toggleRepo: this.toggleRepo }),
+            // @ts-ignore - TypeScript doesn't support React componnents that return arrays
+            React.createElement(dialog_1.EditDashboardDialog, Object.assign({ key: "dialog", getAccount: this.getAccount, addAccount: this.addAccount, removeAccount: this.removeAccount, selectAccount: this.selectAccount, toggleRepo: this.toggleRepo }, this.state)),
         ];
     }
 }
 exports.App = App;
-function createId(name) {
-    return name.trim().toLowerCase();
+function removeByID(array, id) {
+    let index = array.findIndex(byID(id));
+    if (index >= 0) {
+        array.splice(index, 1);
+    }
+    return index;
 }
 function byID(id) {
     return (obj) => obj.id === id;
 }
-},{"../edit-dashboard/dialog":4}],2:[function(require,module,exports){
+function byName(name) {
+    name = name.trim().toLowerCase();
+    return (obj) => obj.name.trim().toLowerCase() === name;
+}
+},{"../edit-dashboard/dialog":6,"./fetch-github-account":3}],3:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const github_1 = require("../../github");
+/**
+ * Fetches the specified GitHub account and its repos, and then calls the given callback function
+ * to update the app state.
+ */
+async function fetchGitHubAccount(accountPOJO, replaceAccount) {
+    // Fetch the GitHub account and repos at the same time
+    let safeResults = await Promise.all([
+        safeResolve(github_1.github.fetchAccount(accountPOJO.login)),
+        safeResolve(github_1.github.fetchRepos(accountPOJO.login)),
+        artificialDelay(10000),
+    ]);
+    // @ts-ignore - This line totally confuses the TypeScript compiler
+    let [{ result: account, error: accountError }, { result: repos, error: repoError }] = safeResults;
+    if (accountError) {
+        // An error occurred while fetching the account, so create a dummy account
+        // with the error message
+        account = {
+            ...accountPOJO,
+            repos: [],
+            error: accountError.message,
+        };
+    }
+    else if (account && repoError) {
+        // An error occurred while fetching the repos, so add the error message to the account
+        account.error = repoError.message;
+    }
+    else if (account && repos) {
+        // Everything succeeded, so add the repos to the account
+        account.repos = repos;
+    }
+    replaceAccount(accountPOJO.id, account);
+}
+exports.fetchGitHubAccount = fetchGitHubAccount;
+async function safeResolve(promise) {
+    let result, error;
+    try {
+        result = await promise;
+    }
+    catch (err) {
+        error = err;
+    }
+    return { result, error };
+}
+function artificialDelay(milliseconds) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+},{"../../github":7}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function AccountList(props) {
     let { accounts } = props;
-    return (React.createElement("div", { id: "edit_account_list", className: accounts.length === 0 ? "empty" : "" },
+    let count = accounts.length === 0 ? "empty" : accounts.length === 1 ? "one" : "multiple";
+    return (React.createElement("div", { id: "edit_account_list", className: count },
         React.createElement("ul", { className: "account-list" }, accounts.map((account) => React.createElement(AccountItem, Object.assign({ account: account }, props)))),
         accounts.map((account) => React.createElement(RepoList, Object.assign({ account: account }, props)))));
 }
@@ -106,18 +245,18 @@ class AccountItem extends React.Component {
         super(...arguments);
         this.handleAccountClick = (event) => {
             let key = event.target.dataset.key;
-            this.props.selectAccount(key);
+            this.props.selectAccount(parseFloat(key));
         };
     }
     render() {
-        let { account, selectedAccountID } = this.props;
-        return (React.createElement("li", { key: account.id, className: account.id === selectedAccountID ? "account selected" : "account" },
+        let { account, selectedAccount } = this.props;
+        return (React.createElement("li", { key: account.id, className: account === selectedAccount ? "account selected" : "account" },
             React.createElement("a", { "data-key": account.id, onClick: this.handleAccountClick }, account.name)));
     }
 }
 function RepoList(props) {
-    let { account, selectedAccountID } = props;
-    return (React.createElement("section", { className: account.id === selectedAccountID ? "repo-list selected" : "repo-list" },
+    let { account, selectedAccount } = props;
+    return (React.createElement("section", { className: account === selectedAccount ? "repo-list selected" : "repo-list" },
         React.createElement("header", null,
             React.createElement("h3", null, account.name)),
         React.createElement("ul", null, account.repos.map((repo) => React.createElement(RepoItem, Object.assign({ repo: repo }, props))))));
@@ -128,7 +267,7 @@ class RepoItem extends React.Component {
         return (React.createElement("li", { key: repo.id, className: "repo" }, repo.name));
     }
 }
-},{}],3:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class AddAccountForm extends React.Component {
@@ -155,48 +294,33 @@ class AddAccountForm extends React.Component {
                     React.createElement("dt", { className: "input-label" },
                         React.createElement("label", { htmlFor: "repo_owner" }, "GitHub Username")),
                     React.createElement("dd", { className: "input-field" },
-                        React.createElement("input", { type: "text", name: "account_name", className: "form-control short", maxLength: 100, autoFocus: true, autoCapitalize: "off", autoComplete: "off", spellCheck: false, value: this.state.accountName, onChange: this.handleChange }))),
+                        React.createElement("input", { type: "text", name: "account_name", className: "form-control short", maxLength: 100, autoFocus: true, autoCapitalize: "off", autoComplete: "on", spellCheck: false, value: this.state.accountName, onChange: this.handleChange }))),
                 React.createElement("button", { type: "submit", className: "btn btn-primary" }, "Add"))));
     }
 }
 exports.AddAccountForm = AddAccountForm;
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const params_1 = require("../../params");
 const account_list_1 = require("./account-list");
 const add_account_form_1 = require("./add-account-form");
-class EditDashboardDialog extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.state = {
-            selectedAccountID: "apidevtools",
-        };
-        this.addAccount = (name) => {
-            let id = this.props.addAccount(name);
-            this.selectAccount(id);
-        };
-        this.selectAccount = (id) => {
-            this.setState({ selectedAccountID: id });
-        };
-    }
-    render() {
-        return [
-            React.createElement("dialog", { key: "dialog", open: true, className: this.props.accounts.length === 0 ? "open empty" : "open" },
-                React.createElement("header", { className: "dialog-header" },
-                    React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
-                    React.createElement("h1", null, "GitHub Repo Health"),
-                    React.createElement("h2", null, "See the health of all your GitHub repos on one page")),
-                React.createElement("div", { className: "dialog-body" },
-                    React.createElement("h3", null, getTitle()),
-                    React.createElement(add_account_form_1.AddAccountForm, { addAccount: this.addAccount }),
-                    React.createElement(account_list_1.AccountList, { accounts: this.props.accounts, selectedAccountID: this.state.selectedAccountID, selectAccount: this.selectAccount, removeAccount: this.props.removeAccount, toggleRepo: this.props.toggleRepo })),
-                React.createElement("footer", { className: "dialog-footer" },
-                    React.createElement("button", { type: "button", disabled: true, className: "btn" }, "Cancel"),
-                    React.createElement("button", { type: "button", disabled: true, className: "btn btn-primary" }, "Create My Dashboard"))),
-            React.createElement("div", { key: "backdrop", className: "backdrop" })
-        ];
-    }
+function EditDashboardDialog(props) {
+    return [
+        React.createElement("dialog", { key: "dialog", open: true, className: props.accounts.length === 0 ? "open empty" : "open" },
+            React.createElement("header", { className: "dialog-header" },
+                React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
+                React.createElement("h1", null, "GitHub Repo Health"),
+                React.createElement("h2", null, "See the health of all your GitHub repos on one page")),
+            React.createElement("div", { className: "dialog-body" },
+                React.createElement("h3", null, getTitle()),
+                React.createElement(add_account_form_1.AddAccountForm, { addAccount: props.addAccount }),
+                React.createElement(account_list_1.AccountList, Object.assign({}, props))),
+            React.createElement("footer", { className: "dialog-footer" },
+                React.createElement("button", { type: "button", disabled: true, className: "btn" }, "Cancel"),
+                React.createElement("button", { type: "button", disabled: true, className: "btn btn-primary" }, "Create My Dashboard"))),
+        React.createElement("div", { key: "backdrop", className: "backdrop" })
+    ];
 }
 exports.EditDashboardDialog = EditDashboardDialog;
 function getTitle() {
@@ -207,12 +331,63 @@ function getTitle() {
         return "Edit Your Dashboard";
     }
 }
-},{"../../params":6,"./account-list":2,"./add-account-form":3}],5:[function(require,module,exports){
+},{"../../params":9,"./account-list":4,"./add-account-form":5}],7:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const api_client_1 = require("./api-client");
+exports.github = {
+    /**
+     * Fetches the specified GitHub account's info, NOT including its repos
+     */
+    async fetchAccount(name) {
+        let accountPOJO = await api_client_1.apiClient.fetchObject(`https://api.github.com/users/${name}`);
+        if (isGitHubAccountPOJO(accountPOJO)) {
+            return {
+                ...accountPOJO,
+                repos: [],
+            };
+        }
+        else {
+            throw api_client_1.apiClient.createError("Invalid GitHub account object:", accountPOJO);
+        }
+    },
+    /**
+     * Fetches the GitHub repos for the specified account
+     */
+    async fetchRepos(accountName) {
+        let repoPOJOs = await api_client_1.apiClient.fetchArray(`https://api.github.com/users/${accountName}/repos`);
+        if (isArrayOfGitHubRepoPOJO(repoPOJOs)) {
+            let repos = [];
+            for (let repoPOJO of repoPOJOs) {
+                repos.push({ ...repoPOJO, include: true });
+            }
+            return repos;
+        }
+        else {
+            throw api_client_1.apiClient.createError("Invalid GitHub repos:", repoPOJOs);
+        }
+    },
+};
+// tslint:disable-next-line:no-any
+function isGitHubAccountPOJO(account) {
+    return typeof account === "object" &&
+        "login" in account && typeof account.login === "string" &&
+        "name" in account && typeof account.name === "string" &&
+        "bio" in account && typeof account.bio === "string" &&
+        "avatar_url" in account && typeof account.avatar_url === "string";
+}
+// tslint:disable-next-line:no-any
+function isArrayOfGitHubRepoPOJO(repos) {
+    return repos.length > 0 &&
+        typeof repos[0] === "object" &&
+        typeof repos[0].name === "string";
+}
+},{"./api-client":1}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app/app");
 ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("react-app"));
-},{"./components/app/app":1}],6:[function(require,module,exports){
+},{"./components/app/app":2}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Params {
@@ -234,5 +409,5 @@ class Params {
  * Singleton reference to the page's query params
  */
 exports.params = new Params();
-},{}]},{},[5])
+},{}]},{},[8])
 //# sourceMappingURL=repo-health.js.map

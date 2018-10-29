@@ -1,15 +1,8 @@
 import { MouseEvent } from "react";
-import { GitHubAccount, GitHubRepo } from "../app/state";
+import { GitHubAccount, GitHubRepo } from "../../github";
+import { Props } from "./props";
 
-interface AccountListProps {
-  accounts: GitHubAccount[];
-  selectedAccountID: string;
-  selectAccount(id: string): void;
-  removeAccount(id: string): void;
-  toggleRepo(accountID: string, repoID: string, include: boolean): void;
-}
-
-export function AccountList(props: AccountListProps) {
+export function AccountList(props: Props) {
   let { accounts } = props;
   let count = accounts.length === 0 ? "empty" : accounts.length === 1 ? "one" : "multiple";
 
@@ -23,16 +16,16 @@ export function AccountList(props: AccountListProps) {
   );
 }
 
-interface AccountItemProps extends AccountListProps {
+interface AccountItemProps extends Props {
   account: GitHubAccount;
 }
 
 class AccountItem extends React.Component<AccountItemProps, object> {
   public render() {
-    let { account, selectedAccountID } = this.props;
+    let { account, selectedAccount } = this.props;
 
     return (
-      <li key={account.id} className={account.id === selectedAccountID ? "account selected" : "account"}>
+      <li key={account.id} className={account === selectedAccount ? "account selected" : "account"}>
         <a data-key={account.id} onClick={this.handleAccountClick}>
           {account.name}
         </a>
@@ -42,19 +35,19 @@ class AccountItem extends React.Component<AccountItemProps, object> {
 
   private handleAccountClick = (event: MouseEvent) => {
     let key = (event.target as HTMLElement).dataset.key!;
-    this.props.selectAccount(key);
+    this.props.selectAccount(parseFloat(key));
   }
 }
 
-interface RepoListProps extends AccountListProps {
+interface RepoListProps extends Props {
   account: GitHubAccount;
 }
 
 function RepoList(props: RepoListProps) {
-  let { account, selectedAccountID } = props;
+  let { account, selectedAccount } = props;
 
   return (
-    <section className={account.id === selectedAccountID ? "repo-list selected" : "repo-list"}>
+    <section className={account === selectedAccount ? "repo-list selected" : "repo-list"}>
       <header>
         <h3>{account.name}</h3>
       </header>
