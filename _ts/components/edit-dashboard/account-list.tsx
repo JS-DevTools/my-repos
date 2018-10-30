@@ -2,16 +2,16 @@ import { MouseEvent } from "react";
 import { GitHubAccount, GitHubRepo } from "../../github";
 import { Props } from "./props";
 
-export function AccountList(props: Props) {
+export function AccountsAndRepos(props: Props) {
   let { accounts } = props;
   let count = accounts.length === 0 ? "empty" : accounts.length === 1 ? "one" : "multiple";
 
   return (
-    <div id="edit_account_list" className={count}>
+    <div id="accounts_and_repos" className={count}>
       <ul className="account-list">
         {accounts.map((account) => <AccountItem account={account} {...props} />)}
       </ul>
-      {accounts.map((account) => <RepoList account={account} {...props} />)}
+      {accounts.map((account) => <RepoListContainer account={account} {...props} />)}
     </div>
   );
 }
@@ -20,21 +20,30 @@ interface AccountItemProps extends Props {
   account: GitHubAccount;
 }
 
-class AccountItem extends React.Component<AccountItemProps, object> {
+function AccountItem(props: AccountItemProps) {
+  let { account, selectedAccount } = props;
+
+  return (
+    <li key={account.id} className={account === selectedAccount ? "account selected" : "account"}>
+      <AccountName {...props} />
+    </li>
+  );
+}
+
+class AccountName extends React.Component<AccountItemProps, object> {
   public render() {
-    let { account, selectedAccount } = this.props;
+    let { account } = this.props;
 
     return (
-      <li key={account.id} className={account === selectedAccount ? "account selected" : "account"}>
-        <a data-key={account.id} onClick={this.handleAccountClick}>
-          {account.name}
-        </a>
-      </li>
+      <a key="name" className="account-name" data-key={account.id} onClick={this.handleAccountClick}>
+        {account.avatar_url && <img src={account.avatar_url} className="avatar" />}
+        {account.name}
+      </a>
     );
   }
 
   private handleAccountClick = (event: MouseEvent) => {
-    let key = (event.target as HTMLElement).dataset.key!;
+    let key = (event.currentTarget as HTMLElement).dataset.key!;
     this.props.selectAccount(parseFloat(key));
   }
 }

@@ -14,7 +14,7 @@
   }
 }
 
-#edit_account_list {
+#accounts_and_repos {
   display: flex;
   flex-direction: column;
   margin-top: $vertical-space-large;
@@ -33,8 +33,27 @@
     display: none;
   }
 
-  .repo-list {
+  .avatar {
+    height: 40px;
+    width: 40px;
+    border-radius: 5px;
+    vertical-align: middle;
+    margin-right: $horizontal-space-small;
+  }
+
+  .repo-list-container {
     margin-bottom: $vertical-space-medium;
+
+    .account-name {
+      display: inline-block;
+      min-height: 40px;
+      margin-bottom: $vertical-space-medium;
+      font-size: 1.2em;
+      font-weight: 600;
+      color: $text-color;
+      text-decoration: none;
+    }
+  }
 
   .repo-list {
     &.loading {
@@ -84,7 +103,7 @@
     }
   }
 
-  #edit_account_list {
+  #accounts_and_repos {
     flex-direction: row;
     position: relative;
     left: -2px;
@@ -108,11 +127,15 @@
       padding-top: 10px;
 
       .account {
-        > a {
-          display: block;
+        border: solid 1px $bg-color;
+        border-right: none;
+
+        .account-name {
+          display: inline-block;
           padding: $vertical-space-small $horizontal-space-small;
           color: $link-color;
           cursor: pointer;
+          text-decoration: none;
         }
 
         &.selected {
@@ -120,16 +143,11 @@
           border-right: solid 3px $bg-color;
           border-top-left-radius: 5px;
           border-bottom-left-radius: 5px;
-
-          > a {
-            color: $text-color;
-            text-decoration: none;
-          }
         }
       }
     }
 
-    .repo-list {
+    .repo-list-container {
       display: none;
       flex-grow: 1;
       min-height: 300px;
@@ -138,12 +156,14 @@
         display: flex;
         flex-direction: column;
       }
+    }
 
-      ul {
-        flex-grow: 1;
-        border: solid 1px $medium-gray;
-        border-radius: 5px;
-        padding-left: $horizontal-space-medium;
+    .repo-list {
+      flex-grow: 1;
+      border: solid 1px $medium-gray;
+      border-radius: 5px;
+      padding-left: $horizontal-space-medium;
+
       &.loading {
         justify-content: center;
         padding: $vertical-space-small $horizontal-space-small;
@@ -170,9 +190,9 @@
     &:not(.empty) {
       height: 700px;
 
-      #edit_account_list {
+      #accounts_and_repos {
         .account-list,
-        .repo-list {
+        .repo-list-container {
           height: 305px;
           margin: 0;
         }

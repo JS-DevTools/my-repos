@@ -192,7 +192,7 @@ async function fetchGitHubAccount(accountPOJO, replaceAccount) {
     let safeResults = await Promise.all([
         safeResolve(github_1.github.fetchAccount(accountPOJO.login)),
         safeResolve(github_1.github.fetchRepos(accountPOJO.login)),
-        artificialDelay(10000),
+        artificialDelay(),
     ]);
     // @ts-ignore - This line totally confuses the TypeScript compiler
     let [{ result: account, error: accountError }, { result: repos, error: repoError }] = safeResults;
@@ -226,40 +226,64 @@ async function safeResolve(promise) {
     }
     return { result, error };
 }
-function artificialDelay(milliseconds) {
+function artificialDelay() {
+    let milliseconds = 0;
+    if (location.hostname === "localhost") {
+        milliseconds = 800;
+    }
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 },{"../../github":7}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function AccountList(props) {
+function AccountsAndRepos(props) {
     let { accounts } = props;
     let count = accounts.length === 0 ? "empty" : accounts.length === 1 ? "one" : "multiple";
-    return (React.createElement("div", { id: "edit_account_list", className: count },
+    return (React.createElement("div", { id: "accounts_and_repos", className: count },
         React.createElement("ul", { className: "account-list" }, accounts.map((account) => React.createElement(AccountItem, Object.assign({ account: account }, props)))),
-        accounts.map((account) => React.createElement(RepoList, Object.assign({ account: account }, props)))));
+        accounts.map((account) => React.createElement(RepoListContainer, Object.assign({ account: account }, props)))));
 }
-exports.AccountList = AccountList;
-class AccountItem extends React.Component {
+exports.AccountsAndRepos = AccountsAndRepos;
+function AccountItem(props) {
+    let { account, selectedAccount } = props;
+    return (React.createElement("li", { key: account.id, className: account === selectedAccount ? "account selected" : "account" },
+        React.createElement(AccountName, Object.assign({}, props))));
+}
+class AccountName extends React.Component {
     constructor() {
         super(...arguments);
         this.handleAccountClick = (event) => {
-            let key = event.target.dataset.key;
+            let key = event.currentTarget.dataset.key;
             this.props.selectAccount(parseFloat(key));
         };
     }
     render() {
-        let { account, selectedAccount } = this.props;
-        return (React.createElement("li", { key: account.id, className: account === selectedAccount ? "account selected" : "account" },
-            React.createElement("a", { "data-key": account.id, onClick: this.handleAccountClick }, account.name)));
+        let { account } = this.props;
+        return (React.createElement("a", { key: "name", className: "account-name", "data-key": account.id, onClick: this.handleAccountClick },
+            account.avatar_url && React.createElement("img", { src: account.avatar_url, className: "avatar" }),
+            account.name));
     }
 }
-function RepoList(props) {
+function RepoListContainer(props) {
     let { account, selectedAccount } = props;
-    return (React.createElement("section", { className: account === selectedAccount ? "repo-list selected" : "repo-list" },
+    return (React.createElement("section", { className: account === selectedAccount ? "repo-list-container selected" : "repo-list-container" },
         React.createElement("header", null,
-            React.createElement("h3", null, account.name)),
-        React.createElement("ul", null, account.repos.map((repo) => React.createElement(RepoItem, Object.assign({ repo: repo }, props))))));
+            React.createElement(AccountName, Object.assign({}, props))),
+        React.createElement(RepoList, Object.assign({}, props))));
+}
+function RepoList(props) {
+    let { account } = props;
+    if (account.repos.length > 0) {
+        return (React.createElement("ul", { className: "repo-list" }, account.repos.map((repo) => React.createElement(RepoItem, Object.assign({ repo: repo }, props)))));
+    }
+    else if (account.error) {
+        return (React.createElement("div", { className: "repo-list error" },
+            React.createElement("div", { className: "error-message" }, account.error)));
+    }
+    else {
+        return (React.createElement("div", { className: "repo-list loading" },
+            React.createElement("div", { className: "loading-message" }, "Loading...")));
+    }
 }
 class RepoItem extends React.Component {
     render() {
@@ -315,7 +339,7 @@ function EditDashboardDialog(props) {
             React.createElement("div", { className: "dialog-body" },
                 React.createElement("h3", null, getTitle()),
                 React.createElement(add_account_form_1.AddAccountForm, { addAccount: props.addAccount }),
-                React.createElement(account_list_1.AccountList, Object.assign({}, props))),
+                React.createElement(account_list_1.AccountsAndRepos, Object.assign({}, props))),
             React.createElement("footer", { className: "dialog-footer" },
                 React.createElement("button", { type: "button", disabled: true, className: "btn" }, "Cancel"),
                 React.createElement("button", { type: "button", disabled: true, className: "btn btn-primary" }, "Create My Dashboard"))),

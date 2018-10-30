@@ -1,5 +1,5 @@
 import { params } from "../../params";
-import { AccountList } from "./account-list";
+import { AccountsAndRepos } from "./account-list";
 import { AddAccountForm } from "./add-account-form";
 import { Props } from "./props";
 
@@ -14,7 +14,7 @@ export function EditDashboardDialog(props: Props) {
       <div className="dialog-body">
         <h3>{getTitle()}</h3>
         <AddAccountForm addAccount={props.addAccount} />
-        <AccountList {...props} />
+        <AccountsAndRepos {...props} />
       </div>
 
       <footer className="dialog-footer">
