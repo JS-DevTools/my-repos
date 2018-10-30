@@ -233,23 +233,19 @@ function artificialDelay() {
     }
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
-},{"../../github":7}],4:[function(require,module,exports){
+},{"../../github":8}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const repo_list_1 = require("./repo-list");
 function AccountsAndRepos(props) {
     let { accounts } = props;
     let count = accounts.length === 0 ? "empty" : accounts.length === 1 ? "one" : "multiple";
     return (React.createElement("div", { id: "accounts_and_repos", className: count },
         React.createElement("ul", { className: "account-list" }, accounts.map((account) => React.createElement(AccountItem, Object.assign({ account: account }, props)))),
-        accounts.map((account) => React.createElement(RepoListContainer, Object.assign({ account: account }, props)))));
+        accounts.map((account) => React.createElement(repo_list_1.RepoList, Object.assign({ account: account }, props)))));
 }
 exports.AccountsAndRepos = AccountsAndRepos;
-function AccountItem(props) {
-    let { account, selectedAccount } = props;
-    return (React.createElement("li", { key: account.id, className: account === selectedAccount ? "account selected" : "account" },
-        React.createElement(AccountName, Object.assign({}, props))));
-}
-class AccountName extends React.Component {
+class AccountItem extends React.Component {
     constructor() {
         super(...arguments);
         this.handleAccountClick = (event) => {
@@ -258,40 +254,14 @@ class AccountName extends React.Component {
         };
     }
     render() {
-        let { account } = this.props;
-        return (React.createElement("a", { key: "name", className: "account-name", "data-key": account.id, onClick: this.handleAccountClick },
-            account.avatar_url && React.createElement("img", { src: account.avatar_url, className: "avatar" }),
-            account.name));
+        let { account, selectedAccount } = this.props;
+        return (React.createElement("li", { key: account.id, className: account === selectedAccount ? "account selected" : "account" },
+            React.createElement("a", { className: "account-name", "data-key": account.id, onClick: this.handleAccountClick },
+                account.avatar_url && React.createElement("img", { src: account.avatar_url, className: "avatar" }),
+                account.name)));
     }
 }
-function RepoListContainer(props) {
-    let { account, selectedAccount } = props;
-    return (React.createElement("section", { className: account === selectedAccount ? "repo-list-container selected" : "repo-list-container" },
-        React.createElement("header", null,
-            React.createElement(AccountName, Object.assign({}, props))),
-        React.createElement(RepoList, Object.assign({}, props))));
-}
-function RepoList(props) {
-    let { account } = props;
-    if (account.repos.length > 0) {
-        return (React.createElement("ul", { className: "repo-list" }, account.repos.map((repo) => React.createElement(RepoItem, Object.assign({ repo: repo }, props)))));
-    }
-    else if (account.error) {
-        return (React.createElement("div", { className: "repo-list error" },
-            React.createElement("div", { className: "error-message" }, account.error)));
-    }
-    else {
-        return (React.createElement("div", { className: "repo-list loading" },
-            React.createElement("div", { className: "loading-message" }, "Loading...")));
-    }
-}
-class RepoItem extends React.Component {
-    render() {
-        let { repo } = this.props;
-        return (React.createElement("li", { key: repo.id, className: "repo" }, repo.name));
-    }
-}
-},{}],5:[function(require,module,exports){
+},{"./repo-list":7}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class AddAccountForm extends React.Component {
@@ -355,7 +325,40 @@ function getTitle() {
         return "Edit Your Dashboard";
     }
 }
-},{"../../params":9,"./account-list":4,"./add-account-form":5}],7:[function(require,module,exports){
+},{"../../params":10,"./account-list":4,"./add-account-form":5}],7:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function RepoList(props) {
+    let { account, selectedAccount } = props;
+    return (React.createElement("section", { className: account === selectedAccount ? "repo-list-container selected" : "repo-list-container" },
+        React.createElement("header", null,
+            React.createElement("h3", { className: "account-name" },
+                account.avatar_url && React.createElement("img", { src: account.avatar_url, className: "avatar" }),
+                account.name)),
+        React.createElement(RepoListContents, Object.assign({}, props))));
+}
+exports.RepoList = RepoList;
+function RepoListContents(props) {
+    let { account } = props;
+    if (account.repos.length > 0) {
+        return (React.createElement("ul", { className: "repo-list" }, account.repos.map((repo) => React.createElement(RepoItem, Object.assign({ repo: repo }, props)))));
+    }
+    else if (account.error) {
+        return (React.createElement("div", { className: "repo-list error" },
+            React.createElement("div", { className: "error-message" }, account.error)));
+    }
+    else {
+        return (React.createElement("div", { className: "repo-list loading" },
+            React.createElement("div", { className: "loading-message" }, "Loading...")));
+    }
+}
+class RepoItem extends React.Component {
+    render() {
+        let { repo } = this.props;
+        return (React.createElement("li", { key: repo.id, className: "repo" }, repo.name));
+    }
+}
+},{}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_client_1 = require("./api-client");
@@ -406,12 +409,12 @@ function isArrayOfGitHubRepoPOJO(repos) {
         typeof repos[0] === "object" &&
         typeof repos[0].name === "string";
 }
-},{"./api-client":1}],8:[function(require,module,exports){
+},{"./api-client":1}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app/app");
 ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("react-app"));
-},{"./components/app/app":2}],9:[function(require,module,exports){
+},{"./components/app/app":2}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Params {
@@ -433,5 +436,5 @@ class Params {
  * Singleton reference to the page's query params
  */
 exports.params = new Params();
-},{}]},{},[8])
+},{}]},{},[9])
 //# sourceMappingURL=repo-health.js.map

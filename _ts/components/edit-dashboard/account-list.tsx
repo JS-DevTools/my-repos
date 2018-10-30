@@ -1,6 +1,7 @@
 import { MouseEvent } from "react";
-import { GitHubAccount, GitHubRepo } from "../../github";
+import { GitHubAccount } from "../../github";
 import { Props } from "./props";
+import { RepoList } from "./repo-list";
 
 export function AccountsAndRepos(props: Props) {
   let { accounts } = props;
@@ -11,7 +12,7 @@ export function AccountsAndRepos(props: Props) {
       <ul className="account-list">
         {accounts.map((account) => <AccountItem account={account} {...props} />)}
       </ul>
-      {accounts.map((account) => <RepoListContainer account={account} {...props} />)}
+      {accounts.map((account) => <RepoList account={account} {...props} />)}
     </div>
   );
 }
@@ -20,89 +21,22 @@ interface AccountItemProps extends Props {
   account: GitHubAccount;
 }
 
-function AccountItem(props: AccountItemProps) {
-  let { account, selectedAccount } = props;
-
-  return (
-    <li key={account.id} className={account === selectedAccount ? "account selected" : "account"}>
-      <AccountName {...props} />
-    </li>
-  );
-}
-
-class AccountName extends React.Component<AccountItemProps, object> {
+class AccountItem extends React.Component<AccountItemProps, object> {
   public render() {
-    let { account } = this.props;
+    let { account, selectedAccount } = this.props;
 
     return (
-      <a key="name" className="account-name" data-key={account.id} onClick={this.handleAccountClick}>
-        {account.avatar_url && <img src={account.avatar_url} className="avatar" />}
-        {account.name}
-      </a>
+      <li key={account.id} className={account === selectedAccount ? "account selected" : "account"}>
+        <a className="account-name" data-key={account.id} onClick={this.handleAccountClick}>
+          {account.avatar_url && <img src={account.avatar_url} className="avatar" />}
+          {account.name}
+        </a>
+      </li>
     );
   }
 
   private handleAccountClick = (event: MouseEvent) => {
     let key = (event.currentTarget as HTMLElement).dataset.key!;
     this.props.selectAccount(parseFloat(key));
-  }
-}
-
-interface RepoListProps extends Props {
-  account: GitHubAccount;
-}
-
-function RepoListContainer(props: RepoListProps) {
-  let { account, selectedAccount } = props;
-
-  return (
-    <section className={account === selectedAccount ? "repo-list-container selected" : "repo-list-container"}>
-      <header>
-        <AccountName {...props} />
-      </header>
-      <RepoList {...props} />
-    </section>
-  );
-}
-
-function RepoList(props: RepoListProps) {
-  let { account } = props;
-
-  if (account.repos.length > 0) {
-    return (
-      <ul className="repo-list">
-        {account.repos.map((repo) => <RepoItem repo={repo} {...props} />)}
-      </ul>
-    );
-  }
-  else if (account.error) {
-    return (
-      <div className="repo-list error">
-        <div className="error-message">{account.error}</div>
-      </div>
-    );
-  }
-  else {
-    return (
-      <div className="repo-list loading">
-        <div className="loading-message">Loading...</div>
-      </div>
-    );
-  }
-}
-
-interface RepoItemProps extends RepoListProps {
-  repo: GitHubRepo;
-}
-
-class RepoItem extends React.Component<RepoItemProps, object> {
-  public render() {
-    let { repo } = this.props;
-
-    return (
-      <li key={repo.id} className="repo">
-        {repo.name}
-      </li>
-    );
   }
 }
