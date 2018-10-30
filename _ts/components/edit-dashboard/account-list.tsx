@@ -43,19 +43,43 @@ interface RepoListProps extends Props {
   account: GitHubAccount;
 }
 
-function RepoList(props: RepoListProps) {
+function RepoListContainer(props: RepoListProps) {
   let { account, selectedAccount } = props;
 
   return (
-    <section className={account === selectedAccount ? "repo-list selected" : "repo-list"}>
+    <section className={account === selectedAccount ? "repo-list-container selected" : "repo-list-container"}>
       <header>
-        <h3>{account.name}</h3>
+        <AccountName {...props} />
       </header>
-      <ul>
-        {account.repos.map((repo) => <RepoItem repo={repo} {...props} />)}
-      </ul>
+      <RepoList {...props} />
     </section>
   );
+}
+
+function RepoList(props: RepoListProps) {
+  let { account } = props;
+
+  if (account.repos.length > 0) {
+    return (
+      <ul className="repo-list">
+        {account.repos.map((repo) => <RepoItem repo={repo} {...props} />)}
+      </ul>
+    );
+  }
+  else if (account.error) {
+    return (
+      <div className="repo-list error">
+        <div className="error-message">{account.error}</div>
+      </div>
+    );
+  }
+  else {
+    return (
+      <div className="repo-list loading">
+        <div className="loading-message">Loading...</div>
+      </div>
+    );
+  }
 }
 
 interface RepoItemProps extends RepoListProps {

@@ -36,6 +36,33 @@
   .repo-list {
     margin-bottom: $vertical-space-medium;
 
+  .repo-list {
+    &.loading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding-left: $horizontal-space-medium;
+
+      .loading-message {
+        background-image: url("../img/loading-spinner.gif");
+        background-position: center left;
+        background-repeat: no-repeat;
+        background-size: 1.2em;
+        font-size: 1.2em;
+        padding-left: 1.5em;
+      }
+    }
+
+    &.error {
+      padding: $vertical-space-small $horizontal-space-small;
+
+      .error-message {
+        font-family: monospace;
+        color: red;
+        white-space: pre-wrap;
+      }
+    }
+
     .repo {
       padding: $vertical-space-small $horizontal-space-small;
     }
@@ -117,6 +144,9 @@
         border: solid 1px $medium-gray;
         border-radius: 5px;
         padding-left: $horizontal-space-medium;
+      &.loading {
+        justify-content: center;
+        padding: $vertical-space-small $horizontal-space-small;
       }
 
       .repo {
@@ -153,9 +183,12 @@
         }
 
         .repo-list {
-          ul {
-            overflow: hidden;
-            overflow-y: auto;
+          overflow: hidden;
+          overflow-y: auto;
+
+          &.loading {
+            align-items: center;
+            margin-left: 0;
           }
         }
       }
