@@ -11,7 +11,7 @@ export async function fetchGitHubAccount(accountPOJO: GitHubAccountPOJO, replace
   let safeResults = await Promise.all([
     safeResolve(github.fetchAccount(accountPOJO.login)),
     safeResolve(github.fetchRepos(accountPOJO.login)),
-    artificialDelay(10000),
+    artificialDelay(),
   ]);
 
   // @ts-ignore - This line totally confuses the TypeScript compiler
@@ -53,6 +53,12 @@ async function safeResolve<T>(promise: Promise<T>): Promise<{ result?: T; error?
 }
 
 
-function artificialDelay(milliseconds: number) {
+function artificialDelay() {
+  let milliseconds: number = 0;
+
+  if (location.hostname === "localhost") {
+    milliseconds = 800;
+  }
+
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
