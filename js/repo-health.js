@@ -84,22 +84,79 @@ async function parseResponseBody(response) {
 },{}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const dialog_1 = require("../edit-dashboard/dialog");
+function AccountItem(props) {
+    let { account } = props;
+    return (React.createElement("section", { key: account.id, className: "account" },
+        React.createElement("header", null,
+            React.createElement("h1", null,
+                account.avatar_url && React.createElement("img", { src: account.avatar_url, className: "avatar" }),
+                account.name))));
+}
+exports.AccountItem = AccountItem;
+},{}],3:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const add_account_1 = require("../add-account/add-account");
+const account_item_1 = require("./account-item");
+function AccountList(props) {
+    let { accounts } = props;
+    let count = accounts.length === 0 ? "no-accounts" : accounts.length === 1 ? "has-one-account" : "has-accounts";
+    return (React.createElement("main", { id: "account_list", className: count },
+        React.createElement("div", { className: "responsive-container" },
+            React.createElement(add_account_1.AddAccount, Object.assign({ submitButtonText: "Add" }, props)),
+            accounts.map((account) => React.createElement(account_item_1.AccountItem, Object.assign({ account: account }, props))))));
+}
+exports.AccountList = AccountList;
+},{"../add-account/add-account":4,"./account-item":2}],4:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class AddAccount extends React.Component {
+    constructor() {
+        super(...arguments);
+        this.state = {
+            accountName: "",
+        };
+        this.handleChange = (event) => {
+            this.setState({ accountName: event.target.value });
+        };
+        this.handleSubmit = (event) => {
+            event.preventDefault();
+            if (this.state.accountName) {
+                this.props.addAccount(this.state.accountName.trim());
+                this.setState({ accountName: "" });
+            }
+        };
+    }
+    render() {
+        let { submitButtonText } = this.props;
+        return (React.createElement("form", { className: "add-account form", onSubmit: this.handleSubmit },
+            React.createElement("dl", { className: "form-group" },
+                React.createElement("dt", { className: "input-label" },
+                    React.createElement("label", { htmlFor: "repo_owner" }, "GitHub Username")),
+                React.createElement("dd", { className: "input-field" },
+                    React.createElement("input", { type: "text", name: "account_name", className: "form-control short", maxLength: 100, autoFocus: true, autoCapitalize: "off", autoComplete: "on", spellCheck: false, placeholder: "GitHub Username", value: this.state.accountName, onChange: this.handleChange }))),
+            React.createElement("button", { type: "submit", className: "btn btn-primary" }, submitButtonText)));
+    }
+}
+exports.AddAccount = AddAccount;
+},{}],5:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const account_list_1 = require("../account-list/account-list");
+const first_time_1 = require("../first-time/first-time");
 const fetch_github_account_1 = require("./fetch-github-account");
 class App extends React.Component {
     constructor() {
         super(...arguments);
         this.state = {
             accounts: [],
-            selectedAccount: undefined,
         };
-        this.getAccount = (id) => this.state.accounts.find(byID(id));
         this.addAccount = (name) => {
             // Does this account already exist
             let account = this.state.accounts.find(byName(name));
             if (account) {
-                // The account already exists, so just select it
-                return this.selectAccount(account.id);
+                // The account already exists
+                return;
             }
             // Create a temporary account object to populate the UI
             // while we fetch the account info from GitHub
@@ -115,7 +172,7 @@ class App extends React.Component {
             // This makes sure it's visible on small mobile screens.
             let accounts = this.state.accounts.slice();
             accounts.unshift(account);
-            this.setState({ accounts, selectedAccount: account });
+            this.setState({ accounts });
             // Fetch the account info from GitHub and replace this temporary account
             // object with the real info
             fetch_github_account_1.fetchGitHubAccount(account, this.replaceAccount);
@@ -134,7 +191,7 @@ class App extends React.Component {
             }
             // Add the new account at the same index as the removed account
             accounts.splice(index, 0, newAccount);
-            this.setState({ accounts, selectedAccount: newAccount });
+            this.setState({ accounts });
         };
         this.removeAccount = (id) => {
             let accounts = this.state.accounts.slice();
@@ -143,24 +200,19 @@ class App extends React.Component {
                 this.setState({ accounts });
             }
         };
-        this.selectAccount = (id) => {
-            let account = this.state.accounts.find(byID(id));
-            if (account) {
-                this.setState({ selectedAccount: account });
-            }
-        };
-        this.toggleRepo = (accountID, repoID, include) => {
+        this.toggleRepo = (accountID, repoID, hidden) => {
             let accounts = this.state.accounts.slice();
             let account = accounts.find(byID(accountID));
             let repo = account.repos.find(byID(repoID));
-            repo.include = include;
+            repo.hidden = hidden;
             this.setState({ accounts });
         };
     }
     render() {
+        let { accounts } = this.state;
         return [
-            // @ts-ignore - TypeScript doesn't support React componnents that return arrays
-            React.createElement(dialog_1.EditDashboardDialog, Object.assign({ key: "dialog", getAccount: this.getAccount, addAccount: this.addAccount, removeAccount: this.removeAccount, selectAccount: this.selectAccount, toggleRepo: this.toggleRepo }, this.state)),
+            React.createElement(first_time_1.FirstTime, { key: "first_time", accounts: accounts, addAccount: this.addAccount }),
+            React.createElement(account_list_1.AccountList, Object.assign({ key: "account_list", addAccount: this.addAccount, removeAccount: this.removeAccount, toggleRepo: this.toggleRepo }, this.state)),
         ];
     }
 }
@@ -179,7 +231,7 @@ function byName(name) {
     name = name.trim().toLowerCase();
     return (obj) => obj.name.trim().toLowerCase() === name;
 }
-},{"../edit-dashboard/dialog":6,"./fetch-github-account":3}],3:[function(require,module,exports){
+},{"../account-list/account-list":3,"../first-time/first-time":7,"./fetch-github-account":6}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const github_1 = require("../../github");
@@ -233,132 +285,26 @@ function artificialDelay() {
     }
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
-},{"../../github":8}],4:[function(require,module,exports){
+},{"../../github":8}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const repo_list_1 = require("./repo-list");
-function AccountsAndRepos(props) {
+const add_account_1 = require("../add-account/add-account");
+function FirstTime(props) {
     let { accounts } = props;
-    let count = accounts.length === 0 ? "empty" : accounts.length === 1 ? "one" : "multiple";
-    return (React.createElement("div", { id: "accounts_and_repos", className: count },
-        React.createElement("ul", { className: "account-list" }, accounts.map((account) => React.createElement(AccountItem, Object.assign({ account: account }, props)))),
-        accounts.map((account) => React.createElement(repo_list_1.RepoList, Object.assign({ account: account }, props)))));
-}
-exports.AccountsAndRepos = AccountsAndRepos;
-class AccountItem extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.handleAccountClick = (event) => {
-            let key = event.currentTarget.dataset.key;
-            this.props.selectAccount(parseFloat(key));
-        };
-    }
-    render() {
-        let { account, selectedAccount } = this.props;
-        return (React.createElement("li", { key: account.id, className: account === selectedAccount ? "account selected" : "account" },
-            React.createElement("a", { className: "account-name", "data-key": account.id, onClick: this.handleAccountClick },
-                account.avatar_url && React.createElement("img", { src: account.avatar_url, className: "avatar" }),
-                account.name)));
-    }
-}
-},{"./repo-list":7}],5:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-class AddAccountForm extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.state = {
-            accountName: "",
-        };
-        this.handleChange = (event) => {
-            this.setState({ accountName: event.target.value });
-        };
-        this.handleSubmit = (event) => {
-            event.preventDefault();
-            if (this.state.accountName) {
-                this.props.addAccount(this.state.accountName.trim());
-                this.setState({ accountName: "" });
-            }
-        };
-    }
-    render() {
-        return (React.createElement("form", { id: "add_account_form", onSubmit: this.handleSubmit },
-            React.createElement("div", { className: "clearfix" },
-                React.createElement("dl", { className: "form-group" },
-                    React.createElement("dt", { className: "input-label" },
-                        React.createElement("label", { htmlFor: "repo_owner" }, "GitHub Username")),
-                    React.createElement("dd", { className: "input-field" },
-                        React.createElement("input", { type: "text", name: "account_name", className: "form-control short", maxLength: 100, autoFocus: true, autoCapitalize: "off", autoComplete: "on", spellCheck: false, value: this.state.accountName, onChange: this.handleChange }))),
-                React.createElement("button", { type: "submit", className: "btn btn-primary" }, "Add"))));
-    }
-}
-exports.AddAccountForm = AddAccountForm;
-},{}],6:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const params_1 = require("../../params");
-const account_list_1 = require("./account-list");
-const add_account_form_1 = require("./add-account-form");
-function EditDashboardDialog(props) {
-    return [
-        React.createElement("dialog", { key: "dialog", open: true, className: props.accounts.length === 0 ? "open empty" : "open" },
-            React.createElement("header", { className: "dialog-header" },
+    let count = accounts.length === 0 ? "no-accounts" : "has-accounts";
+    return (React.createElement("section", { id: "first_time", className: count },
+        React.createElement("header", { key: "header" },
+            React.createElement("div", { className: "responsive-container" },
                 React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
                 React.createElement("h1", null, "GitHub Repo Health"),
-                React.createElement("h2", null, "See the health of all your GitHub repos on one page")),
-            React.createElement("div", { className: "dialog-body" },
-                React.createElement("h3", null, getTitle()),
-                React.createElement(add_account_form_1.AddAccountForm, { addAccount: props.addAccount }),
-                React.createElement(account_list_1.AccountsAndRepos, Object.assign({}, props))),
-            React.createElement("footer", { className: "dialog-footer" },
-                React.createElement("button", { type: "button", disabled: true, className: "btn" }, "Cancel"),
-                React.createElement("button", { type: "button", disabled: true, className: "btn btn-primary" }, "Create My Dashboard"))),
-        React.createElement("div", { key: "backdrop", className: "backdrop" })
-    ];
+                React.createElement("h2", null, "See the health of all your GitHub repos on one page"))),
+        React.createElement("div", { className: "responsive-container" },
+            React.createElement("div", { className: "welcome-message" },
+                React.createElement("h3", null, "Hi! \uD83D\uDC4B Enter your GitHub username to get started"),
+                React.createElement(add_account_1.AddAccount, Object.assign({ submitButtonText: "Show My Repos" }, props))))));
 }
-exports.EditDashboardDialog = EditDashboardDialog;
-function getTitle() {
-    if (params_1.params.isNew) {
-        return "Hi! 👋 Enter your GitHub username below to get started";
-    }
-    else {
-        return "Edit Your Dashboard";
-    }
-}
-},{"../../params":10,"./account-list":4,"./add-account-form":5}],7:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function RepoList(props) {
-    let { account, selectedAccount } = props;
-    return (React.createElement("section", { className: account === selectedAccount ? "repo-list-container selected" : "repo-list-container" },
-        React.createElement("header", null,
-            React.createElement("h3", { className: "account-name" },
-                account.avatar_url && React.createElement("img", { src: account.avatar_url, className: "avatar" }),
-                account.name)),
-        React.createElement(RepoListContents, Object.assign({}, props))));
-}
-exports.RepoList = RepoList;
-function RepoListContents(props) {
-    let { account } = props;
-    if (account.repos.length > 0) {
-        return (React.createElement("ul", { className: "repo-list" }, account.repos.map((repo) => React.createElement(RepoItem, Object.assign({ repo: repo }, props)))));
-    }
-    else if (account.error) {
-        return (React.createElement("div", { className: "repo-list error" },
-            React.createElement("div", { className: "error-message" }, account.error)));
-    }
-    else {
-        return (React.createElement("div", { className: "repo-list loading" },
-            React.createElement("div", { className: "loading-message" }, "Loading...")));
-    }
-}
-class RepoItem extends React.Component {
-    render() {
-        let { repo } = this.props;
-        return (React.createElement("li", { key: repo.id, className: "repo" }, repo.name));
-    }
-}
-},{}],8:[function(require,module,exports){
+exports.FirstTime = FirstTime;
+},{"../add-account/add-account":4}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_client_1 = require("./api-client");
@@ -386,7 +332,10 @@ exports.github = {
         if (isArrayOfGitHubRepoPOJO(repoPOJOs)) {
             let repos = [];
             for (let repoPOJO of repoPOJOs) {
-                repos.push({ ...repoPOJO, include: true });
+                repos.push({
+                    ...repoPOJO,
+                    hidden: false,
+                });
             }
             return repos;
         }
@@ -414,27 +363,5 @@ function isArrayOfGitHubRepoPOJO(repos) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app/app");
 ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("react-app"));
-},{"./components/app/app":2}],10:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-class Params {
-    constructor() {
-        this._query = new URLSearchParams(location.search);
-        // If the params are empty when the page first loads, then we're building a new dashboard,
-        // rather than showing or editing an existing one
-        this.isNew = this.isEmpty;
-    }
-    get isEmpty() {
-        return !this._query.has("include");
-    }
-    toString() {
-        this._query.sort();
-        return this._query.toString();
-    }
-}
-/**
- * Singleton reference to the page's query params
- */
-exports.params = new Params();
-},{}]},{},[9])
+},{"./components/app/app":5}]},{},[9])
 //# sourceMappingURL=repo-health.js.map

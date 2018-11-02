@@ -1,10 +1,11 @@
 ---
 ---
 
-@import "utils";
 @import "variables";
+@import "utils";
 @import "github";
-@import "content";
+@import "scaffolding";
 @import "forms";
-@import "dialog";
-@import "edit-dashboard-dialog";
+@import "first-time";
+@import "account-list";
+@import "repo-list";
