@@ -43,9 +43,9 @@ export interface GitHubRepoPOJO {
  */
 export interface GitHubRepo extends GitHubRepoPOJO {
   /**
-   * Should this repo be included in the dashboard?
+   * Is this repo hidden from the dashboard?
    */
-  include: boolean;
+  hidden: boolean;
 }
 
 export const github = {
@@ -76,7 +76,10 @@ export const github = {
       let repos: GitHubRepo[] = [];
 
       for (let repoPOJO of repoPOJOs) {
-        repos.push({ ...repoPOJO, include: true } as GitHubRepo);
+        repos.push({
+          ...repoPOJO,
+          hidden: false,
+        } as GitHubRepo);
       }
 
       return repos;
