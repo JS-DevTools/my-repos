@@ -115,27 +115,30 @@ class AddAccount extends React.Component {
         super(...arguments);
         this.state = {
             accountName: "",
+            busy: false,
         };
         this.handleChange = (event) => {
             this.setState({ accountName: event.target.value });
         };
-        this.handleSubmit = (event) => {
+        this.handleSubmit = async (event) => {
             event.preventDefault();
             if (this.state.accountName) {
-                this.props.addAccount(this.state.accountName.trim());
-                this.setState({ accountName: "" });
+                this.setState({ busy: true });
+                await this.props.addAccount(this.state.accountName.trim());
+                this.setState({ accountName: "", busy: false });
             }
         };
     }
     render() {
         let { submitButtonText } = this.props;
-        return (React.createElement("form", { className: "add-account form", onSubmit: this.handleSubmit },
+        let { accountName, busy } = this.state;
+        return (React.createElement("form", { className: `add-account form ${busy ? "busy" : ""}`, onSubmit: this.handleSubmit },
             React.createElement("dl", { className: "form-group" },
                 React.createElement("dt", { className: "input-label" },
                     React.createElement("label", { htmlFor: "repo_owner" }, "GitHub Username")),
                 React.createElement("dd", { className: "input-field" },
-                    React.createElement("input", { type: "text", name: "account_name", className: "form-control short", maxLength: 100, autoFocus: true, autoCapitalize: "off", autoComplete: "on", spellCheck: false, placeholder: "GitHub Username", value: this.state.accountName, onChange: this.handleChange }))),
-            React.createElement("button", { type: "submit", className: "btn btn-primary" }, submitButtonText)));
+                    React.createElement("input", { type: "text", name: "account_name", className: "form-control short", maxLength: 100, autoFocus: true, autoCapitalize: "off", autoComplete: "on", spellCheck: false, placeholder: "GitHub Username", disabled: busy, value: accountName, onChange: this.handleChange }))),
+            React.createElement("button", { type: "submit", className: "btn btn-primary", disabled: busy }, submitButtonText)));
     }
 }
 exports.AddAccount = AddAccount;
@@ -144,69 +147,11 @@ exports.AddAccount = AddAccount;
 Object.defineProperty(exports, "__esModule", { value: true });
 const account_list_1 = require("../account-list/account-list");
 const first_time_1 = require("../first-time/first-time");
-const fetch_github_account_1 = require("./fetch-github-account");
+const state_store_1 = require("./state-store");
 class App extends React.Component {
-    constructor() {
-        super(...arguments);
-        this.state = {
-            accounts: [],
-        };
-        this.addAccount = (name) => {
-            // Does this account already exist
-            let account = this.state.accounts.find(byName(name));
-            if (account) {
-                // The account already exists
-                return;
-            }
-            // Create a temporary account object to populate the UI
-            // while we fetch the account info from GitHub
-            account = {
-                id: Math.random(),
-                name,
-                login: name,
-                avatar_url: "",
-                bio: "",
-                repos: [],
-            };
-            // Add this account to the BEGINNING of the array.
-            // This makes sure it's visible on small mobile screens.
-            let accounts = this.state.accounts.slice();
-            accounts.unshift(account);
-            this.setState({ accounts });
-            // Fetch the account info from GitHub and replace this temporary account
-            // object with the real info
-            fetch_github_account_1.fetchGitHubAccount(account, this.replaceAccount);
-        };
-        this.replaceAccount = (oldAccountID, newAccount) => {
-            let accounts = this.state.accounts.slice();
-            // Just to ensure we don't accidentally add duplicate accounts,
-            // remove the new account if it already exists
-            removeByID(accounts, newAccount.id);
-            // Remove the old account, and get its index,
-            // so we can insert the new account at the same location
-            let index = removeByID(accounts, oldAccountID);
-            // If the old account didn't exist, then just add new account at index zero
-            if (index === -1) {
-                index = 0;
-            }
-            // Add the new account at the same index as the removed account
-            accounts.splice(index, 0, newAccount);
-            this.setState({ accounts });
-        };
-        this.removeAccount = (id) => {
-            let accounts = this.state.accounts.slice();
-            let index = removeByID(accounts, id);
-            if (index >= 0) {
-                this.setState({ accounts });
-            }
-        };
-        this.toggleRepo = (accountID, repoID, hidden) => {
-            let accounts = this.state.accounts.slice();
-            let account = accounts.find(byID(accountID));
-            let repo = account.repos.find(byID(repoID));
-            repo.hidden = hidden;
-            this.setState({ accounts });
-        };
+    constructor(props) {
+        super(props);
+        state_store_1.StateStore.mixin(this);
     }
     render() {
         let { accounts } = this.state;
@@ -217,21 +162,7 @@ class App extends React.Component {
     }
 }
 exports.App = App;
-function removeByID(array, id) {
-    let index = array.findIndex(byID(id));
-    if (index >= 0) {
-        array.splice(index, 1);
-    }
-    return index;
-}
-function byID(id) {
-    return (obj) => obj.id === id;
-}
-function byName(name) {
-    name = name.trim().toLowerCase();
-    return (obj) => obj.name.trim().toLowerCase() === name;
-}
-},{"../account-list/account-list":3,"../first-time/first-time":7,"./fetch-github-account":6}],6:[function(require,module,exports){
+},{"../account-list/account-list":3,"../first-time/first-time":8,"./state-store":7}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const github_1 = require("../../github");
@@ -285,13 +216,137 @@ function artificialDelay() {
     }
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
-},{"../../github":8}],7:[function(require,module,exports){
+},{"../../github":9}],7:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const fetch_github_account_1 = require("./fetch-github-account");
+class StateStore {
+    constructor(app) {
+        this.state = {
+            accounts: [],
+        };
+        for (let obj of [this, Object.getPrototypeOf(this)]) {
+            for (let key of Object.getOwnPropertyNames(obj)) {
+                let value = obj[key];
+                if (key === "constructor") {
+                    continue;
+                }
+                if (typeof value === "function") {
+                    value = value.bind(app);
+                }
+                // @ts-ignore
+                app[key] = value;
+            }
+        }
+        this.setState = app.setState;
+    }
+    static mixin(app) {
+        return new StateStore(app);
+    }
+    /**
+     * Adds a new GitHub account with the specified name to the accounts list,
+     * and asynchronously fetches the account info from GitHub
+     */
+    async addAccount(name) {
+        // Does this account already exist
+        let account = this.state.accounts.find(byName(name));
+        if (account) {
+            // The account already exists
+            return;
+        }
+        // Create a temporary account object to populate the UI
+        // while we fetch the account info from GitHub
+        account = {
+            id: Math.random(),
+            name,
+            login: name,
+            avatar_url: "",
+            bio: "",
+            loading: true,
+            repos: [],
+        };
+        // Add this account to the BEGINNING of the array.
+        // This makes sure it's visible on small mobile screens.
+        let accounts = this.state.accounts.slice();
+        accounts.unshift(account);
+        this.setState({ accounts });
+        // Fetch the account info from GitHub and replace this temporary account
+        // object with the real info
+        return fetch_github_account_1.fetchGitHubAccount(account, this.replaceAccount);
+    }
+    /**
+     * Replaces the specified account in the accounts list with the given GitHub account object.
+     */
+    replaceAccount(oldAccountID, newAccount) {
+        let accounts = this.state.accounts.slice();
+        // Just to ensure we don't accidentally add duplicate accounts,
+        // remove the new account if it already exists
+        removeByID(accounts, newAccount.id);
+        // Remove the old account, and get its index,
+        // so we can insert the new account at the same location
+        let index = removeByID(accounts, oldAccountID);
+        // If the old account didn't exist, then just add new account at index zero
+        if (index === -1) {
+            index = 0;
+        }
+        // Add the new account at the same index as the removed account
+        accounts.splice(index, 0, newAccount);
+        this.setState({ accounts });
+    }
+    /**
+     * Removes the specified GitHub account from the accounts list
+     */
+    removeAccount(id) {
+        let accounts = this.state.accounts.slice();
+        let index = removeByID(accounts, id);
+        if (index >= 0) {
+            this.setState({ accounts });
+        }
+    }
+    /**
+     * Toggles the "hidden" property of the specified GitHub repo
+     */
+    toggleRepo(accountID, repoID, hidden) {
+        let accounts = this.state.accounts.slice();
+        let account = accounts.find(byID(accountID));
+        let repo = account.repos.find(byID(repoID));
+        repo.hidden = hidden;
+        this.setState({ accounts });
+    }
+}
+exports.StateStore = StateStore;
+/**
+ * Removes the object with the specified "id" property from the array.
+ *
+ * @returns The index of the removed object
+ */
+function removeByID(array, id) {
+    let index = array.findIndex(byID(id));
+    if (index >= 0) {
+        array.splice(index, 1);
+    }
+    return index;
+}
+/**
+ * Used to search an array for object with the specified "id" property
+ */
+function byID(id) {
+    return (obj) => obj.id === id;
+}
+/**
+ * Used to search an array for object with the specified "name" property
+ */
+function byName(name) {
+    name = name.trim().toLowerCase();
+    return (obj) => obj.name.trim().toLowerCase() === name;
+}
+},{"./fetch-github-account":6}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const add_account_1 = require("../add-account/add-account");
 function FirstTime(props) {
     let { accounts } = props;
-    let count = accounts.length === 0 ? "no-accounts" : "has-accounts";
+    let count = accounts.filter((acct) => !acct.loading).length === 0 ? "no-accounts" : "has-accounts";
     return (React.createElement("section", { id: "first_time", className: count },
         React.createElement("header", { key: "header" },
             React.createElement("div", { className: "responsive-container" },
@@ -304,7 +359,7 @@ function FirstTime(props) {
                 React.createElement(add_account_1.AddAccount, Object.assign({ submitButtonText: "Show My Repos" }, props))))));
 }
 exports.FirstTime = FirstTime;
-},{"../add-account/add-account":4}],8:[function(require,module,exports){
+},{"../add-account/add-account":4}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_client_1 = require("./api-client");
@@ -317,6 +372,7 @@ exports.github = {
         if (isGitHubAccountPOJO(accountPOJO)) {
             return {
                 ...accountPOJO,
+                loading: false,
                 repos: [],
             };
         }
@@ -358,10 +414,10 @@ function isArrayOfGitHubRepoPOJO(repos) {
         typeof repos[0] === "object" &&
         typeof repos[0].name === "string";
 }
-},{"./api-client":1}],9:[function(require,module,exports){
+},{"./api-client":1}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app/app");
 ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("react-app"));
-},{"./components/app/app":5}]},{},[9])
+},{"./components/app/app":5}]},{},[10])
 //# sourceMappingURL=repo-health.js.map
