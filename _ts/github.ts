@@ -21,6 +21,11 @@ export interface GitHubAccount extends GitHubAccountPOJO {
   repos: GitHubRepo[];
 
   /**
+   * Indicates whether we're currently fetching the account info from GitHub
+   */
+  loading: boolean;
+
+  /**
    * If an error occurred while fetching account info, then this is the error message
    */
   error?: string;
@@ -58,6 +63,7 @@ export const github = {
     if (isGitHubAccountPOJO(accountPOJO)) {
       return {
         ...accountPOJO,
+        loading: false,
         repos: [],
       };
     }

@@ -38,10 +38,17 @@
 //       </div>
 //     );
 //   }
-//   else {
+//   else if (account.loading) {
 //     return (
 //       <div className="repo-list loading">
 //         <div className="loading-message">Loading...</div>
+//       </div>
+//     );
+//   }
+//   else {
+//     return (
+//       <div className="repo-list">
+//         <div className="empty-message">There are no repos to show</div>
 //       </div>
 //     );
 //   }
