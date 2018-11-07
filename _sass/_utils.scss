@@ -1,10 +1,26 @@
-.clearfix::before {
-    display: table;
-    content: "";
+// @extend %visually-hidden
+// Hides an element, but ensures that it's still visible to screen readers
+%visually-hidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  white-space: nowrap;
 }
 
-.clearfix::after {
-    display: table;
-    clear: both;
-    content: "";
+// @extend %clearfix
+// Ensures that a container expands to include its floated children
+%clearfix::before {
+  display: table;
+  content: "";
+}
+
+%clearfix::after {
+  display: table;
+  clear: both;
+  content: "";
 }
