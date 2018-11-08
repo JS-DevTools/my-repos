@@ -1,6 +1,6 @@
 import { GitHubAccount } from "../../github";
+import { hash } from "../../hash";
 import { fetchGitHubAccount } from "./fetch-github-account";
-import { hash } from "./hash";
 
 export type AddAccount = (name: string) => Promise<void>;
 
