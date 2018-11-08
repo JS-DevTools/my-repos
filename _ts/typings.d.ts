@@ -13,7 +13,7 @@ declare var ReactDOM: {
   render: Function;
 };
 
-declare type SetState = (state: Partial<S>, callback?: () => void) => void;
+declare type SetState<S> = (state: Partial<S>, callback?: () => void) => void;
 
 declare interface ComponentConstructor {
   new <P, S>(props: Readonly<P>): Component<P, S>;
