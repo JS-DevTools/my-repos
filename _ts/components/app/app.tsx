@@ -18,7 +18,7 @@ export class App extends React.Component<{}, AppState> implements StateStore {
     let { accounts } = this.state;
 
     return [
-      <FirstTime key="first_time" accounts={accounts} addAccount={this.addAccount} />,
+      <FirstTime key="first_time" addAccount={this.addAccount} />,
       <AccountList key="account_list"
         addAccount={this.addAccount}
         removeAccount={this.removeAccount}

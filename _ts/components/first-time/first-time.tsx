@@ -1,9 +1,9 @@
+import { hash } from "../../hash";
 import { AddAccount } from "../add-account/add-account";
 import { FirstTimeProps } from "./props";
 
 export function FirstTime(props: FirstTimeProps) {
-  let { accounts } = props;
-  let count = accounts.filter((acct) => !acct.loading).length === 0 ? "no-accounts" : "has-accounts";
+  let count = hash.accounts.size === 0 ? "no-accounts" : "has-accounts";
 
   return (
     <section id="first_time" className={count}>
