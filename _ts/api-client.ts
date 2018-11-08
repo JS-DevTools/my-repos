@@ -1,8 +1,8 @@
-export interface POJO {
-  [key: string]: string | number | boolean | POJO | POJO[];
+interface JsonPojo {
+  [key: string]: string | number | boolean | JsonPojo | JsonPojo[];
 }
 
-export type ParsedResponseBody = string | POJO | POJO[] | undefined;
+export type ParsedResponseBody = string | JsonPojo | JsonPojo[] | undefined;
 
 /**
  * A wrapper around the Fetch API, with added error handling and automatic response parsing.
@@ -28,7 +28,7 @@ export const apiClient = {
   /**
    * Returns the parsed response if it's a valid JSON array; otherwise, or throws an error.
    */
-  async fetchArray(input: RequestInfo, init?: RequestInit): Promise<POJO[]> {
+  async fetchArray(input: RequestInfo, init?: RequestInit): Promise<JsonPojo[]> {
     let parsedResponseBody = await apiClient.fetch(input, init);
 
     if (!Array.isArray(parsedResponseBody)) {
@@ -44,7 +44,7 @@ export const apiClient = {
   /**
    * Returns the parsed response if it's a valid JSON object; otherwise, or throws an error.
    */
-  async fetchObject(input: RequestInfo, init?: RequestInit): Promise<POJO> {
+  async fetchObject(input: RequestInfo, init?: RequestInit): Promise<JsonPojo> {
     let parsedResponseBody = await apiClient.fetch(input, init);
 
     if (typeof parsedResponseBody !== "object") {
