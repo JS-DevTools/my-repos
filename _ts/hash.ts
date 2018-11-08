@@ -87,6 +87,11 @@ export class Hash {
     }
 
     let hashString = params.toString();
+
+    // Don't encode common characters that are valid in the hash
+    hashString = hashString.replace(/%2C/g, ",");
+    hashString = hashString.replace(/%2F/g, "/");
+
     location.hash = hashString;
   }
 }
