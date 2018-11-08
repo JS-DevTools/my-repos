@@ -1,4 +1,5 @@
 import { GitHubAccount } from "../../github";
+import { POJO } from "../../util";
 import { fetchGitHubAccount } from "./fetch-github-account";
 
 export type AddAccount = (name: string) => Promise<void>;
@@ -13,38 +14,22 @@ export interface AppState {
   accounts: GitHubAccount[];
 }
 
-type AppInstance = Component<{}, AppState>;
-
 export class StateStore {
-  public static mixin(app: AppInstance): StateStore {
-    return new StateStore(app);
+  public static mixin(obj: POJO) {
+    let store = new StateStore();
+    obj.state = store.state;
+    obj.addAccount = store.addAccount.bind(obj);
+    obj.replaceAccount = store.replaceAccount.bind(obj);
+    obj.removeAccount = store.removeAccount.bind(obj);
+    obj.toggleRepo = store.toggleRepo.bind(obj);
   }
 
-  private constructor(app: AppInstance) {
-    for (let obj of [this, Object.getPrototypeOf(this)]) {
-      for (let key of Object.getOwnPropertyNames(obj)) {
-        let value = obj[key];
-
-        if (key === "constructor") {
-          continue;
-        }
-
-        if (typeof value === "function") {
-          value = value.bind(app);
-        }
-
-        // @ts-ignore
-        app[key] = value;
-      }
-    }
-
-    this.setState = app.setState;
-  }
-
-  public readonly setState!: SetState;
-  public state: AppState = {
+  public readonly state: AppState = {
     accounts: [],
   };
+
+  // Just here to satisfy TypeScript
+  public readonly setState!: SetState<AppState>;
 
   /**
    * Adds a new GitHub account with the specified name to the accounts list,
