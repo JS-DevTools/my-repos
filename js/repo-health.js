@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * A wrapper around the Fetch API, with added error handling and automatic response parsing.
  */
-exports.apiClient = {
+class ApiClient {
     /**
      * Returns the parsed response, or throws an error if an error response is returned
      */
@@ -12,40 +12,41 @@ exports.apiClient = {
         let response = await fetch(input, init);
         let parsedResponseBody = await parseResponseBody(response);
         if (!response.ok) {
-            throw exports.apiClient.createError(`${getUrl(input)} returned an HTTP ${response.status} (${response.statusText || "Error"}) response`, parsedResponseBody);
+            throw this.createError(`${getUrl(input)} returned an HTTP ${response.status} (${response.statusText || "Error"}) response`, parsedResponseBody);
         }
         return parsedResponseBody;
-    },
+    }
     /**
      * Returns the parsed response if it's a valid JSON array; otherwise, or throws an error.
      */
     async fetchArray(input, init) {
-        let parsedResponseBody = await exports.apiClient.fetch(input, init);
+        let parsedResponseBody = await this.fetch(input, init);
         if (!Array.isArray(parsedResponseBody)) {
-            throw exports.apiClient.createError(`${getUrl(input)} did not return a JSON array as expected`, parsedResponseBody);
+            throw this.createError(`${getUrl(input)} did not return a JSON array as expected`, parsedResponseBody);
         }
         return parsedResponseBody;
-    },
+    }
     /**
      * Returns the parsed response if it's a valid JSON object; otherwise, or throws an error.
      */
     async fetchObject(input, init) {
-        let parsedResponseBody = await exports.apiClient.fetch(input, init);
+        let parsedResponseBody = await this.fetch(input, init);
         if (typeof parsedResponseBody !== "object") {
-            throw exports.apiClient.createError(`${getUrl(input)} did not return a JSON object as expected`, parsedResponseBody);
+            throw this.createError(`${getUrl(input)} did not return a JSON object as expected`, parsedResponseBody);
         }
         else if (Array.isArray(parsedResponseBody)) {
-            throw exports.apiClient.createError(`${getUrl(input)} returned a JSON array, but a JSON object was expected`, parsedResponseBody);
+            throw this.createError(`${getUrl(input)} returned a JSON array, but a JSON object was expected`, parsedResponseBody);
         }
         return parsedResponseBody;
-    },
+    }
     /**
      * Creates an Error with the specified message, including the parsed response body
      */
     createError(message, parsedResponseBody) {
         return new Error(message + "\n" + JSON.stringify(parsedResponseBody, undefined, 2));
-    },
-};
+    }
+}
+exports.ApiClient = ApiClient;
 /**
  * Returns the URL from the given RequestInfo value
  */
@@ -162,7 +163,7 @@ class App extends React.Component {
     }
 }
 exports.App = App;
-},{"../account-list/account-list":3,"../first-time/first-time":8,"./state-store":7}],6:[function(require,module,exports){
+},{"../account-list/account-list":3,"../first-time/first-time":9,"./state-store":8}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const github_1 = require("../../github");
@@ -216,32 +217,115 @@ function artificialDelay() {
     }
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
-},{"../../github":9}],7:[function(require,module,exports){
+},{"../../github":10}],7:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Reads and stores state in the URL hash
+ */
+class Hash {
+    constructor() {
+        let params = new URLSearchParams(location.hash.substr(1));
+        this.accounts = parseStringSet(params.get("u"));
+        this.hide = parseStringSet(params.get("hide"));
+        this.options = {
+            forks: parseBoolean(params.get("forks"))
+        };
+    }
+    /**
+     * Updates the URL hash to include the specified GitHub account
+     */
+    addAccount(name) {
+        this.accounts.add(name);
+        this._updateHash();
+    }
+    /**
+     * Updates the URL hash to remove the specified GitHub account
+     */
+    removeAccount(name) {
+        this.accounts.delete(name);
+        this._updateHash();
+    }
+    /**
+     * Updates the URL hash to hide or show the specified GitHub repo
+     */
+    toggleRepo(full_name, hidden) {
+        if (hidden) {
+            this.hide.add(full_name);
+        }
+        else {
+            this.hide.delete(full_name);
+        }
+        this._updateHash();
+    }
+    /**
+     * Updates the URL hash to with the specified options
+     */
+    setOptions(options) {
+        Object.assign(this.options, options);
+        this._updateHash();
+    }
+    /**
+     * Updates the URL hash to match the properties of this object
+     */
+    _updateHash() {
+        let params = new URLSearchParams();
+        if (this.accounts.size > 0) {
+            params.append("u", [...this.accounts].join(","));
+        }
+        if (this.hide.size > 0) {
+            params.append("hide", [...this.hide].join(","));
+        }
+        if (this.options.forks) {
+            params.append("forks", "yes");
+        }
+        let hashString = params.toString();
+        location.hash = hashString;
+    }
+}
+exports.Hash = Hash;
+/**
+ * The singleton instance of the Hash class.
+ */
+exports.hash = new Hash();
+function parseStringSet(value) {
+    if (!value) {
+        return new Set();
+    }
+    else {
+        return new Set(value.split(","));
+    }
+}
+function parseBoolean(value) {
+    if (!value) {
+        return false;
+    }
+    else {
+        return ["yes", "true", "on", "ok"].includes(value.toLowerCase());
+    }
+}
+},{}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const fetch_github_account_1 = require("./fetch-github-account");
+const hash_1 = require("./hash");
 class StateStore {
-    constructor(app) {
+    constructor() {
         this.state = {
             accounts: [],
         };
-        for (let obj of [this, Object.getPrototypeOf(this)]) {
-            for (let key of Object.getOwnPropertyNames(obj)) {
-                let value = obj[key];
-                if (key === "constructor") {
-                    continue;
-                }
-                if (typeof value === "function") {
-                    value = value.bind(app);
-                }
-                // @ts-ignore
-                app[key] = value;
-            }
-        }
-        this.setState = app.setState;
     }
-    static mixin(app) {
-        return new StateStore(app);
+    static mixin(obj) {
+        let store = new StateStore();
+        obj.state = store.state;
+        obj.addAccount = store.addAccount.bind(obj);
+        obj.replaceAccount = store.replaceAccount.bind(obj);
+        obj.removeAccount = store.removeAccount.bind(obj);
+        obj.toggleRepo = store.toggleRepo.bind(obj);
+        // Immediately load all the accounts in the URL hash
+        for (let accountName of hash_1.hash.accounts) {
+            obj.addAccount(accountName);
+        }
     }
     /**
      * Adds a new GitHub account with the specified name to the accounts list,
@@ -272,7 +356,8 @@ class StateStore {
         this.setState({ accounts });
         // Fetch the account info from GitHub and replace this temporary account
         // object with the real info
-        return fetch_github_account_1.fetchGitHubAccount(account, this.replaceAccount);
+        await fetch_github_account_1.fetchGitHubAccount(account, this.replaceAccount);
+        hash_1.hash.addAccount(name);
     }
     /**
      * Replaces the specified account in the accounts list with the given GitHub account object.
@@ -281,10 +366,10 @@ class StateStore {
         let accounts = this.state.accounts.slice();
         // Just to ensure we don't accidentally add duplicate accounts,
         // remove the new account if it already exists
-        removeByID(accounts, newAccount.id);
+        removeAccountByID(accounts, newAccount.id);
         // Remove the old account, and get its index,
         // so we can insert the new account at the same location
-        let index = removeByID(accounts, oldAccountID);
+        let { index } = removeAccountByID(accounts, oldAccountID);
         // If the old account didn't exist, then just add new account at index zero
         if (index === -1) {
             index = 0;
@@ -298,9 +383,10 @@ class StateStore {
      */
     removeAccount(id) {
         let accounts = this.state.accounts.slice();
-        let index = removeByID(accounts, id);
-        if (index >= 0) {
+        let { removed } = removeAccountByID(accounts, id);
+        if (removed) {
             this.setState({ accounts });
+            hash_1.hash.removeAccount(removed.name);
         }
     }
     /**
@@ -312,20 +398,20 @@ class StateStore {
         let repo = account.repos.find(byID(repoID));
         repo.hidden = hidden;
         this.setState({ accounts });
+        hash_1.hash.toggleRepo(repo.full_name, hidden);
     }
 }
 exports.StateStore = StateStore;
 /**
- * Removes the object with the specified "id" property from the array.
- *
- * @returns The index of the removed object
+ * Removes the account with the specified ID from the array.
  */
-function removeByID(array, id) {
-    let index = array.findIndex(byID(id));
+function removeAccountByID(accounts, id) {
+    let index = accounts.findIndex(byID(id));
+    let removed;
     if (index >= 0) {
-        array.splice(index, 1);
+        removed = accounts.splice(index, 1)[0];
     }
-    return index;
+    return { index, removed };
 }
 /**
  * Used to search an array for object with the specified "id" property
@@ -340,7 +426,7 @@ function byName(name) {
     name = name.trim().toLowerCase();
     return (obj) => obj.name.trim().toLowerCase() === name;
 }
-},{"./fetch-github-account":6}],8:[function(require,module,exports){
+},{"./fetch-github-account":6,"./hash":7}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const add_account_1 = require("../add-account/add-account");
@@ -359,16 +445,19 @@ function FirstTime(props) {
                 React.createElement(add_account_1.AddAccount, Object.assign({ submitButtonText: "Show My Repos" }, props))))));
 }
 exports.FirstTime = FirstTime;
-},{"../add-account/add-account":4}],9:[function(require,module,exports){
+},{"../add-account/add-account":4}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_client_1 = require("./api-client");
-exports.github = {
+class GitHub {
+    constructor() {
+        this._client = new api_client_1.ApiClient();
+    }
     /**
      * Fetches the specified GitHub account's info, NOT including its repos
      */
     async fetchAccount(name) {
-        let accountPOJO = await api_client_1.apiClient.fetchObject(`https://api.github.com/users/${name}`);
+        let accountPOJO = await this._client.fetchObject(`https://api.github.com/users/${name}`);
         if (isGitHubAccountPOJO(accountPOJO)) {
             return {
                 ...accountPOJO,
@@ -377,14 +466,14 @@ exports.github = {
             };
         }
         else {
-            throw api_client_1.apiClient.createError("Invalid GitHub account object:", accountPOJO);
+            throw this._client.createError("Invalid GitHub account object:", accountPOJO);
         }
-    },
+    }
     /**
      * Fetches the GitHub repos for the specified account
      */
     async fetchRepos(accountName) {
-        let repoPOJOs = await api_client_1.apiClient.fetchArray(`https://api.github.com/users/${accountName}/repos`);
+        let repoPOJOs = await this._client.fetchArray(`https://api.github.com/users/${accountName}/repos`);
         if (isArrayOfGitHubRepoPOJO(repoPOJOs)) {
             let repos = [];
             for (let repoPOJO of repoPOJOs) {
@@ -396,10 +485,15 @@ exports.github = {
             return repos;
         }
         else {
-            throw api_client_1.apiClient.createError("Invalid GitHub repos:", repoPOJOs);
+            throw this._client.createError("Invalid GitHub repos:", repoPOJOs);
         }
-    },
-};
+    }
+}
+exports.GitHub = GitHub;
+/**
+ * Singleton instance of the GitHub API client
+ */
+exports.github = new GitHub();
 // tslint:disable-next-line:no-any
 function isGitHubAccountPOJO(account) {
     return typeof account === "object" &&
@@ -414,10 +508,10 @@ function isArrayOfGitHubRepoPOJO(repos) {
         typeof repos[0] === "object" &&
         typeof repos[0].name === "string";
 }
-},{"./api-client":1}],10:[function(require,module,exports){
+},{"./api-client":1}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app/app");
 ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("react-app"));
-},{"./components/app/app":5}]},{},[10])
+},{"./components/app/app":5}]},{},[11])
 //# sourceMappingURL=repo-health.js.map

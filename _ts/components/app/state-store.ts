@@ -1,6 +1,6 @@
 import { GitHubAccount } from "../../github";
-import { POJO } from "../../util";
 import { fetchGitHubAccount } from "./fetch-github-account";
+import { hash } from "./hash";
 
 export type AddAccount = (name: string) => Promise<void>;
 
@@ -15,21 +15,26 @@ export interface AppState {
 }
 
 export class StateStore {
-  public static mixin(obj: POJO) {
+  public static mixin(obj: StateStore) {
     let store = new StateStore();
     obj.state = store.state;
     obj.addAccount = store.addAccount.bind(obj);
     obj.replaceAccount = store.replaceAccount.bind(obj);
     obj.removeAccount = store.removeAccount.bind(obj);
     obj.toggleRepo = store.toggleRepo.bind(obj);
+
+    // Immediately load all the accounts in the URL hash
+    for (let accountName of hash.accounts) {
+      obj.addAccount(accountName);
+    }
   }
 
-  public readonly state: AppState = {
+  public state: AppState = {
     accounts: [],
   };
 
   // Just here to satisfy TypeScript
-  public readonly setState!: SetState<AppState>;
+  public setState!: SetState<AppState>;
 
   /**
    * Adds a new GitHub account with the specified name to the accounts list,
@@ -64,7 +69,8 @@ export class StateStore {
 
     // Fetch the account info from GitHub and replace this temporary account
     // object with the real info
-    return fetchGitHubAccount(account, this.replaceAccount);
+    await fetchGitHubAccount(account, this.replaceAccount);
+    hash.addAccount(name);
   }
 
   /**
@@ -75,11 +81,11 @@ export class StateStore {
 
     // Just to ensure we don't accidentally add duplicate accounts,
     // remove the new account if it already exists
-    removeByID(accounts, newAccount.id);
+    removeAccountByID(accounts, newAccount.id);
 
     // Remove the old account, and get its index,
     // so we can insert the new account at the same location
-    let index = removeByID(accounts, oldAccountID);
+    let { index } = removeAccountByID(accounts, oldAccountID);
 
     // If the old account didn't exist, then just add new account at index zero
     if (index === -1) {
@@ -96,10 +102,11 @@ export class StateStore {
    */
   public removeAccount(id: number) {
     let accounts = this.state.accounts.slice();
-    let index = removeByID(accounts, id);
+    let { removed } = removeAccountByID(accounts, id);
 
-    if (index >= 0) {
+    if (removed) {
       this.setState({ accounts });
+      hash.removeAccount(removed.name);
     }
   }
 
@@ -112,22 +119,23 @@ export class StateStore {
     let repo = account.repos.find(byID(repoID))!;
     repo.hidden = hidden;
     this.setState({ accounts });
+    hash.toggleRepo(repo.full_name, hidden);
   }
 }
 
+
 /**
- * Removes the object with the specified "id" property from the array.
- *
- * @returns The index of the removed object
+ * Removes the account with the specified ID from the array.
  */
-function removeByID(array: Array<{ id: number }>, id: number): number {
-  let index = array.findIndex(byID(id));
+function removeAccountByID(accounts: GitHubAccount[], id: number) {
+  let index = accounts.findIndex(byID(id));
+  let removed: GitHubAccount | undefined;
 
   if (index >= 0) {
-    array.splice(index, 1);
+    removed = accounts.splice(index, 1)[0];
   }
 
-  return index;
+  return { index, removed };
 }
 
 /**
