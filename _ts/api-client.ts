@@ -7,69 +7,70 @@ export type ParsedResponseBody = string | JsonPojo | JsonPojo[] | undefined;
 /**
  * A wrapper around the Fetch API, with added error handling and automatic response parsing.
  */
-export const apiClient = {
+export class ApiClient {
   /**
    * Returns the parsed response, or throws an error if an error response is returned
    */
-  async fetch(input: RequestInfo, init?: RequestInit): Promise<ParsedResponseBody> {
+  public async fetch(input: RequestInfo, init?: RequestInit): Promise<ParsedResponseBody> {
     let response = await fetch(input, init);
     let parsedResponseBody = await parseResponseBody(response);
 
     if (!response.ok) {
-      throw apiClient.createError(
+      throw this.createError(
         `${getUrl(input)} returned an HTTP ${response.status} (${response.statusText || "Error"}) response`,
         parsedResponseBody
       );
     }
 
     return parsedResponseBody;
-  },
+  }
 
   /**
    * Returns the parsed response if it's a valid JSON array; otherwise, or throws an error.
    */
-  async fetchArray(input: RequestInfo, init?: RequestInit): Promise<JsonPojo[]> {
-    let parsedResponseBody = await apiClient.fetch(input, init);
+  public async fetchArray(input: RequestInfo, init?: RequestInit): Promise<JsonPojo[]> {
+    let parsedResponseBody = await this.fetch(input, init);
 
     if (!Array.isArray(parsedResponseBody)) {
-      throw apiClient.createError(
+      throw this.createError(
         `${getUrl(input)} did not return a JSON array as expected`,
         parsedResponseBody
       );
     }
 
     return parsedResponseBody;
-  },
+  }
 
   /**
    * Returns the parsed response if it's a valid JSON object; otherwise, or throws an error.
    */
-  async fetchObject(input: RequestInfo, init?: RequestInit): Promise<JsonPojo> {
-    let parsedResponseBody = await apiClient.fetch(input, init);
+  public async fetchObject(input: RequestInfo, init?: RequestInit): Promise<JsonPojo> {
+    let parsedResponseBody = await this.fetch(input, init);
 
     if (typeof parsedResponseBody !== "object") {
-      throw apiClient.createError(
+      throw this.createError(
         `${getUrl(input)} did not return a JSON object as expected`,
         parsedResponseBody
       );
     }
     else if (Array.isArray(parsedResponseBody)) {
-      throw apiClient.createError(
+      throw this.createError(
         `${getUrl(input)} returned a JSON array, but a JSON object was expected`,
         parsedResponseBody
       );
     }
 
     return parsedResponseBody;
-  },
+  }
 
   /**
    * Creates an Error with the specified message, including the parsed response body
    */
-  createError(message: string, parsedResponseBody: ParsedResponseBody): Error {
+  public createError(message: string, parsedResponseBody: ParsedResponseBody): Error {
     return new Error(message + "\n" + JSON.stringify(parsedResponseBody, undefined, 2));
-  },
-};
+  }
+}
+
 
 /**
  * Returns the URL from the given RequestInfo value

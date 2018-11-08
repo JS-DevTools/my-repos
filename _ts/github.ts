@@ -1,4 +1,4 @@
-import { apiClient } from "./api-client";
+import { ApiClient } from "./api-client";
 
 /**
  * A GitHub user or organization account, as returned from the GitHub REST API
@@ -53,12 +53,14 @@ export interface GitHubRepo extends GitHubRepoPOJO {
   hidden: boolean;
 }
 
-export const github = {
+export class GitHub {
+  private readonly _client: ApiClient = new ApiClient();
+
   /**
    * Fetches the specified GitHub account's info, NOT including its repos
    */
-  async fetchAccount(name: string): Promise<GitHubAccount> {
-    let accountPOJO = await apiClient.fetchObject(`https://api.github.com/users/${name}`);
+  public async fetchAccount(name: string): Promise<GitHubAccount> {
+    let accountPOJO = await this._client.fetchObject(`https://api.github.com/users/${name}`);
 
     if (isGitHubAccountPOJO(accountPOJO)) {
       return {
@@ -68,15 +70,15 @@ export const github = {
       };
     }
     else {
-      throw apiClient.createError("Invalid GitHub account object:", accountPOJO);
+      throw this._client.createError("Invalid GitHub account object:", accountPOJO);
     }
-  },
+  }
 
   /**
    * Fetches the GitHub repos for the specified account
    */
-  async fetchRepos(accountName: string): Promise<GitHubRepo[]> {
-    let repoPOJOs = await apiClient.fetchArray(`https://api.github.com/users/${accountName}/repos`);
+  public async fetchRepos(accountName: string): Promise<GitHubRepo[]> {
+    let repoPOJOs = await this._client.fetchArray(`https://api.github.com/users/${accountName}/repos`);
 
     if (isArrayOfGitHubRepoPOJO(repoPOJOs)) {
       let repos: GitHubRepo[] = [];
@@ -91,10 +93,16 @@ export const github = {
       return repos;
     }
     else {
-      throw apiClient.createError("Invalid GitHub repos:", repoPOJOs);
+      throw this._client.createError("Invalid GitHub repos:", repoPOJOs);
     }
-  },
-};
+  }
+}
+
+/**
+ * Singleton instance of the GitHub API client
+ */
+export const github = new GitHub();
+
 
 // tslint:disable-next-line:no-any
 function isGitHubAccountPOJO(account: any): account is GitHubAccountPOJO {
