@@ -1,6 +1,10 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const util_1 = require("./util");
+// When running on localhost, we introduce artificial delays
+// and use LocalStorage instead of Fetch, to avoid rate limits
+const LOCAL_DEV_MODE = location.hostname === "localhost";
 /**
  * A wrapper around the Fetch API, with added error handling and automatic response parsing.
  */
@@ -9,11 +13,16 @@ class ApiClient {
      * Returns the parsed response, or throws an error if an error response is returned
      */
     async fetch(input, init) {
-        let response = await fetch(input, init);
+        let [response] = await Promise.all([
+            await fetchWithFallback(input, init),
+            artificialDelay(),
+        ]);
+        // Parse the response, even if it's an error, since the body may contain error details
         let parsedResponseBody = await parseResponseBody(response);
         if (!response.ok) {
             throw this.createError(`${getUrl(input)} returned an HTTP ${response.status} (${response.statusText || "Error"}) response`, parsedResponseBody);
         }
+        cacheResponse(input, response);
         return parsedResponseBody;
     }
     /**
@@ -48,6 +57,71 @@ class ApiClient {
 }
 exports.ApiClient = ApiClient;
 /**
+ * Fetches the requested HTTP resource, but falls-back to a previously-cached copy
+ * from LocalStorage, if necessary.
+ */
+async function fetchWithFallback(input, init) {
+    let primary, secondary;
+    if (LOCAL_DEV_MODE) {
+        // For local development, default to LocalStorage to avoid hitting API rate limits
+        primary = fetchFromCache;
+        secondary = fetch;
+    }
+    else {
+        // In production, hit the API first, but fallback to LocalStorage if necessary
+        primary = fetch;
+        secondary = fetchFromCache;
+    }
+    let response = await primary(input, init);
+    if (response.ok) {
+        return response;
+    }
+    else {
+        return secondary(input, init);
+    }
+}
+/**
+ * Fetches the requested resource from LocalStorage cache
+ */
+async function fetchFromCache(input) {
+    // Default response (for a cache miss)
+    let responsePOJO = {
+        status: 503,
+        statusText: "Service Unavailable",
+        headers: {
+            "Content-Type": "text/plain",
+            "Content-Length": "0",
+        },
+        body: "",
+    };
+    // See if we have a cached response for this resource
+    let cache = localStorage.getItem(getUrl(input));
+    if (cache) {
+        try {
+            responsePOJO = JSON.parse(cache);
+        }
+        catch (error) {
+            responsePOJO.body = error.message;
+        }
+    }
+    // Convert the response POJO into a real Fetch Response
+    return new Response(responsePOJO.body, responsePOJO);
+}
+/**
+ * Caches the given response for the specified HTTP resource
+ */
+async function cacheResponse(input, response) {
+    // Convert the response to a POJO that can be cached
+    let responsePOJO = {
+        status: response.status,
+        statusText: response.statusText,
+        headers: util_1.mapToPOJO(response.headers),
+        body: await response.clone().text(),
+    };
+    // Cache the response POJO as JSON in LocalStorage
+    localStorage.setItem(getUrl(input), JSON.stringify(responsePOJO, undefined, 2));
+}
+/**
  * Returns the URL from the given RequestInfo value
  */
 function getUrl(input) {
@@ -59,7 +133,7 @@ function getUrl(input) {
 async function parseResponseBody(response) {
     let responseBody;
     try {
-        responseBody = await response.text();
+        responseBody = await response.clone().text();
     }
     catch (error) {
         // The response could not be read
@@ -82,7 +156,17 @@ async function parseResponseBody(response) {
         return responseBody;
     }
 }
-},{}],2:[function(require,module,exports){
+/**
+ * Introduces an artificial delay during local development.
+ */
+function artificialDelay() {
+    let milliseconds = 0;
+    if (LOCAL_DEV_MODE) {
+        milliseconds = 800;
+    }
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+},{"./util":12}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function AccountItem(props) {
@@ -157,13 +241,13 @@ class App extends React.Component {
     render() {
         let { accounts } = this.state;
         return [
-            React.createElement(first_time_1.FirstTime, { key: "first_time", accounts: accounts, addAccount: this.addAccount }),
+            React.createElement(first_time_1.FirstTime, { key: "first_time", addAccount: this.addAccount }),
             React.createElement(account_list_1.AccountList, Object.assign({ key: "account_list", addAccount: this.addAccount, removeAccount: this.removeAccount, toggleRepo: this.toggleRepo }, this.state)),
         ];
     }
 }
 exports.App = App;
-},{"../account-list/account-list":3,"../first-time/first-time":9,"./state-store":8}],6:[function(require,module,exports){
+},{"../account-list/account-list":3,"../first-time/first-time":8,"./state-store":7}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const github_1 = require("../../github");
@@ -176,7 +260,6 @@ async function fetchGitHubAccount(accountPOJO, replaceAccount) {
     let safeResults = await Promise.all([
         safeResolve(github_1.github.fetchAccount(accountPOJO.login)),
         safeResolve(github_1.github.fetchRepos(accountPOJO.login)),
-        artificialDelay(),
     ]);
     // @ts-ignore - This line totally confuses the TypeScript compiler
     let [{ result: account, error: accountError }, { result: repos, error: repoError }] = safeResults;
@@ -185,6 +268,7 @@ async function fetchGitHubAccount(accountPOJO, replaceAccount) {
         // with the error message
         account = {
             ...accountPOJO,
+            loading: false,
             repos: [],
             error: accountError.message,
         };
@@ -210,105 +294,11 @@ async function safeResolve(promise) {
     }
     return { result, error };
 }
-function artificialDelay() {
-    let milliseconds = 0;
-    if (location.hostname === "localhost") {
-        milliseconds = 800;
-    }
-    return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-},{"../../github":10}],7:[function(require,module,exports){
+},{"../../github":9}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * Reads and stores state in the URL hash
- */
-class Hash {
-    constructor() {
-        let params = new URLSearchParams(location.hash.substr(1));
-        this.accounts = parseStringSet(params.get("u"));
-        this.hide = parseStringSet(params.get("hide"));
-        this.options = {
-            forks: parseBoolean(params.get("forks"))
-        };
-    }
-    /**
-     * Updates the URL hash to include the specified GitHub account
-     */
-    addAccount(name) {
-        this.accounts.add(name);
-        this._updateHash();
-    }
-    /**
-     * Updates the URL hash to remove the specified GitHub account
-     */
-    removeAccount(name) {
-        this.accounts.delete(name);
-        this._updateHash();
-    }
-    /**
-     * Updates the URL hash to hide or show the specified GitHub repo
-     */
-    toggleRepo(full_name, hidden) {
-        if (hidden) {
-            this.hide.add(full_name);
-        }
-        else {
-            this.hide.delete(full_name);
-        }
-        this._updateHash();
-    }
-    /**
-     * Updates the URL hash to with the specified options
-     */
-    setOptions(options) {
-        Object.assign(this.options, options);
-        this._updateHash();
-    }
-    /**
-     * Updates the URL hash to match the properties of this object
-     */
-    _updateHash() {
-        let params = new URLSearchParams();
-        if (this.accounts.size > 0) {
-            params.append("u", [...this.accounts].join(","));
-        }
-        if (this.hide.size > 0) {
-            params.append("hide", [...this.hide].join(","));
-        }
-        if (this.options.forks) {
-            params.append("forks", "yes");
-        }
-        let hashString = params.toString();
-        location.hash = hashString;
-    }
-}
-exports.Hash = Hash;
-/**
- * The singleton instance of the Hash class.
- */
-exports.hash = new Hash();
-function parseStringSet(value) {
-    if (!value) {
-        return new Set();
-    }
-    else {
-        return new Set(value.split(","));
-    }
-}
-function parseBoolean(value) {
-    if (!value) {
-        return false;
-    }
-    else {
-        return ["yes", "true", "on", "ok"].includes(value.toLowerCase());
-    }
-}
-},{}],8:[function(require,module,exports){
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+const hash_1 = require("../../hash");
 const fetch_github_account_1 = require("./fetch-github-account");
-const hash_1 = require("./hash");
 class StateStore {
     constructor() {
         this.state = {
@@ -426,13 +416,13 @@ function byName(name) {
     name = name.trim().toLowerCase();
     return (obj) => obj.name.trim().toLowerCase() === name;
 }
-},{"./fetch-github-account":6,"./hash":7}],9:[function(require,module,exports){
+},{"../../hash":10,"./fetch-github-account":6}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const hash_1 = require("../../hash");
 const add_account_1 = require("../add-account/add-account");
 function FirstTime(props) {
-    let { accounts } = props;
-    let count = accounts.filter((acct) => !acct.loading).length === 0 ? "no-accounts" : "has-accounts";
+    let count = hash_1.hash.accounts.size === 0 ? "no-accounts" : "has-accounts";
     return (React.createElement("section", { id: "first_time", className: count },
         React.createElement("header", { key: "header" },
             React.createElement("div", { className: "responsive-container" },
@@ -445,7 +435,7 @@ function FirstTime(props) {
                 React.createElement(add_account_1.AddAccount, Object.assign({ submitButtonText: "Show My Repos" }, props))))));
 }
 exports.FirstTime = FirstTime;
-},{"../add-account/add-account":4}],10:[function(require,module,exports){
+},{"../../hash":10,"../add-account/add-account":4}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_client_1 = require("./api-client");
@@ -508,10 +498,108 @@ function isArrayOfGitHubRepoPOJO(repos) {
         typeof repos[0] === "object" &&
         typeof repos[0].name === "string";
 }
-},{"./api-client":1}],11:[function(require,module,exports){
+},{"./api-client":1}],10:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Reads and stores state in the URL hash
+ */
+class Hash {
+    constructor() {
+        let params = new URLSearchParams(location.hash.substr(1));
+        this.accounts = parseStringSet(params.get("u"));
+        this.hide = parseStringSet(params.get("hide"));
+        this.options = {
+            forks: parseBoolean(params.get("forks"))
+        };
+    }
+    /**
+     * Updates the URL hash to include the specified GitHub account
+     */
+    addAccount(name) {
+        this.accounts.add(name);
+        this._updateHash();
+    }
+    /**
+     * Updates the URL hash to remove the specified GitHub account
+     */
+    removeAccount(name) {
+        this.accounts.delete(name);
+        this._updateHash();
+    }
+    /**
+     * Updates the URL hash to hide or show the specified GitHub repo
+     */
+    toggleRepo(full_name, hidden) {
+        if (hidden) {
+            this.hide.add(full_name);
+        }
+        else {
+            this.hide.delete(full_name);
+        }
+        this._updateHash();
+    }
+    /**
+     * Updates the URL hash to with the specified options
+     */
+    setOptions(options) {
+        Object.assign(this.options, options);
+        this._updateHash();
+    }
+    /**
+     * Updates the URL hash to match the properties of this object
+     */
+    _updateHash() {
+        let params = new URLSearchParams();
+        if (this.accounts.size > 0) {
+            params.append("u", [...this.accounts].join(","));
+        }
+        if (this.hide.size > 0) {
+            params.append("hide", [...this.hide].join(","));
+        }
+        if (this.options.forks) {
+            params.append("forks", "yes");
+        }
+        let hashString = params.toString();
+        location.hash = hashString;
+    }
+}
+exports.Hash = Hash;
+/**
+ * The singleton instance of the Hash class.
+ */
+exports.hash = new Hash();
+function parseStringSet(value) {
+    if (!value) {
+        return new Set();
+    }
+    else {
+        return new Set(value.split(","));
+    }
+}
+function parseBoolean(value) {
+    if (!value) {
+        return false;
+    }
+    else {
+        return ["yes", "true", "on", "ok"].includes(value.toLowerCase());
+    }
+}
+},{}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app/app");
 ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("react-app"));
-},{"./components/app/app":5}]},{},[11])
+},{"./components/app/app":5}],12:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function mapToPOJO(map) {
+    let pojo = {};
+    for (let [key, value] of map.entries()) {
+        pojo[key.toString()] = value;
+    }
+    return pojo;
+}
+exports.mapToPOJO = mapToPOJO;
+},{}]},{},[11])
 //# sourceMappingURL=repo-health.js.map

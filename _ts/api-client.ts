@@ -1,6 +1,14 @@
+import { mapToPOJO } from "./util";
+
+// When running on localhost, we introduce artificial delays
+// and use LocalStorage instead of Fetch, to avoid rate limits
+const LOCAL_DEV_MODE = location.hostname === "localhost";
+
 interface JsonPojo {
   [key: string]: string | number | boolean | JsonPojo | JsonPojo[];
 }
+
+export type Fetch = (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 
 export type ParsedResponseBody = string | JsonPojo | JsonPojo[] | undefined;
 
@@ -12,7 +20,12 @@ export class ApiClient {
    * Returns the parsed response, or throws an error if an error response is returned
    */
   public async fetch(input: RequestInfo, init?: RequestInit): Promise<ParsedResponseBody> {
-    let response = await fetch(input, init);
+    let [response] = await Promise.all([
+      await fetchWithFallback(input, init),
+      artificialDelay(),
+    ]);
+
+    // Parse the response, even if it's an error, since the body may contain error details
     let parsedResponseBody = await parseResponseBody(response);
 
     if (!response.ok) {
@@ -22,6 +35,7 @@ export class ApiClient {
       );
     }
 
+    cacheResponse(input, response);
     return parsedResponseBody;
   }
 
@@ -73,6 +87,80 @@ export class ApiClient {
 
 
 /**
+ * Fetches the requested HTTP resource, but falls-back to a previously-cached copy
+ * from LocalStorage, if necessary.
+ */
+async function fetchWithFallback(input: RequestInfo, init?: RequestInit): Promise<Response> {
+  let primary: Fetch, secondary: Fetch;
+
+  if (LOCAL_DEV_MODE) {
+    // For local development, default to LocalStorage to avoid hitting API rate limits
+    primary = fetchFromCache;
+    secondary = fetch;
+  }
+  else {
+    // In production, hit the API first, but fallback to LocalStorage if necessary
+    primary = fetch;
+    secondary = fetchFromCache;
+  }
+
+  let response = await primary(input, init);
+
+  if (response.ok) {
+    return response;
+  }
+  else {
+    return secondary(input, init);
+  }
+}
+
+/**
+ * Fetches the requested resource from LocalStorage cache
+ */
+async function fetchFromCache(input: RequestInfo): Promise<Response> {
+  // Default response (for a cache miss)
+  let responsePOJO = {
+    status: 503,
+    statusText: "Service Unavailable",
+    headers: {
+      "Content-Type": "text/plain",
+      "Content-Length": "0",
+    },
+    body: "",
+  };
+
+  // See if we have a cached response for this resource
+  let cache = localStorage.getItem(getUrl(input));
+  if (cache) {
+    try {
+      responsePOJO = JSON.parse(cache);
+    }
+    catch (error) {
+      responsePOJO.body = error.message;
+    }
+  }
+
+  // Convert the response POJO into a real Fetch Response
+  return new Response(responsePOJO.body, responsePOJO);
+}
+
+/**
+ * Caches the given response for the specified HTTP resource
+ */
+async function cacheResponse(input: RequestInfo, response: Response) {
+  // Convert the response to a POJO that can be cached
+  let responsePOJO = {
+    status: response.status,
+    statusText: response.statusText,
+    headers: mapToPOJO(response.headers as any),   // tslint:disable-line:no-any
+    body: await response.clone().text(),
+  };
+
+  // Cache the response POJO as JSON in LocalStorage
+  localStorage.setItem(getUrl(input), JSON.stringify(responsePOJO, undefined, 2));
+}
+
+/**
  * Returns the URL from the given RequestInfo value
  */
 function getUrl(input: RequestInfo): string {
@@ -86,7 +174,7 @@ async function parseResponseBody(response: Response): Promise<ParsedResponseBody
   let responseBody: string;
 
   try {
-    responseBody = await response.text();
+    responseBody = await response.clone().text();
   }
   catch (error) {
     // The response could not be read
@@ -110,4 +198,17 @@ async function parseResponseBody(response: Response): Promise<ParsedResponseBody
     // The response couldn't be parsed as JSON, so just return it as a string
     return responseBody;
   }
+}
+
+/**
+ * Introduces an artificial delay during local development.
+ */
+function artificialDelay() {
+  let milliseconds: number = 0;
+
+  if (LOCAL_DEV_MODE) {
+    milliseconds = 800;
+  }
+
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
