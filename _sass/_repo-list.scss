@@ -1,9 +1,53 @@
 .repo-list {
+  display: flex;
+  flex-direction: column;
   list-style-type: none;
   margin: 0;
   padding: 0;
 
   .repo {
-    display: inline-block;
+    margin-bottom: $vertical-space-large;
+
+    h2 {
+      font-size: 1.2em;
+      border-bottom: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: .9em;
+      color: $dark-gray;
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+  }
+}
+
+
+@media (min-width: $tablet-min-width) {
+  .repo-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .repo {
+      display: inline-block;
+      min-width: 300px;
+      width: 33%;
+      overflow: hidden;
+      margin: 0;
+      padding: $horizontal-space-medium $vertical-space-medium;
+    }
+  }
+}
+
+
+@media (min-width: $monitor-min-width) {
+  .repo-list {
+    .repo {
+      width: 25%;
+    }
   }
 }
