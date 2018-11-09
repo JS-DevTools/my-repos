@@ -16,11 +16,13 @@ interface RepoItemProps extends RepoListProps {
 }
 
 function RepoItem(props: RepoItemProps) {
-  let { repo } = props;
+  let { account, repo } = props;
 
   return (
     <li key={repo.id} className="repo">
-      <h2>{repo.name}</h2>
+      <h2>
+        <a href={`https://github.com/${account.login}/${repo.name}`}>{repo.name}</a>
+      </h2>
       {repo.description && <h3>{repo.description}</h3>}
     </li>
   );
