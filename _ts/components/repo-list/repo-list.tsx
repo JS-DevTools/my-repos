@@ -1,71 +1,27 @@
-// import { GitHubAccount, GitHubRepo } from "../../github";
-// import { Props } from "../account-list/props";
+import { GitHubRepo } from "../../github";
+import { RepoListProps } from "./props";
 
-// interface RepoListProps extends Props {
-//   account: GitHubAccount;
-// }
+export function RepoList(props: RepoListProps) {
+  let { account, toggleRepo } = props;
 
-// export function RepoList(props: RepoListProps) {
-//   let { account, selectedAccount } = props;
+  return (
+    <ul className="repo-list">
+      {account.repos.map((repo) => <RepoItem repo={repo} {...props} />)}
+    </ul>
+  );
+}
 
-//   return (
-//     <section className={account === selectedAccount ? "repo-list-container selected" : "repo-list-container"}>
-//       <header>
-//         <h3 className="account-name">
-//           {account.avatar_url && <img src={account.avatar_url} className="avatar" />}
-//           {account.name}
-//         </h3>
-//       </header>
-//       <RepoListContents {...props} />
-//     </section>
-//   );
-// }
+interface RepoItemProps extends RepoListProps {
+  repo: GitHubRepo;
+}
 
-// function RepoListContents(props: RepoListProps) {
-//   let { account } = props;
+function RepoItem(props: RepoItemProps) {
+  let { repo } = props;
 
-//   if (account.repos.length > 0) {
-//     return (
-//       <ul className="repo-list">
-//         {account.repos.map((repo) => <RepoItem repo={repo} {...props} />)}
-//       </ul>
-//     );
-//   }
-//   else if (account.error) {
-//     return (
-//       <div className="repo-list error">
-//         <div className="error-message">{account.error}</div>
-//       </div>
-//     );
-//   }
-//   else if (account.loading) {
-//     return (
-//       <div className="repo-list loading">
-//         <div className="loading-message">Loading...</div>
-//       </div>
-//     );
-//   }
-//   else {
-//     return (
-//       <div className="repo-list">
-//         <div className="empty-message">There are no repos to show</div>
-//       </div>
-//     );
-//   }
-// }
-
-// interface RepoItemProps extends RepoListProps {
-//   repo: GitHubRepo;
-// }
-
-// class RepoItem extends React.Component<RepoItemProps, object> {
-//   public render() {
-//     let { repo } = this.props;
-
-//     return (
-//       <li key={repo.id} className="repo">
-//         {repo.name}
-//       </li>
-//     );
-//   }
-// }
+  return (
+    <li key={repo.id} className="repo">
+      <h2>{repo.name}</h2>
+      {repo.description && <h3>{repo.description}</h3>}
+    </li>
+  );
+}

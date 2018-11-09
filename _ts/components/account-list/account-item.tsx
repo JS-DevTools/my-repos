@@ -1,4 +1,5 @@
 import { GitHubAccount } from "../../github";
+import { RepoList } from "../repo-list/repo-list";
 import { AccountListProps } from "./props";
 
 interface AccountItemProps extends AccountListProps {
@@ -16,6 +17,36 @@ export function AccountItem(props: AccountItemProps) {
           {account.name}
         </h1>
       </header>
+      <AccountItemContents {...props} />
     </section>
   );
+}
+
+function AccountItemContents(props: AccountItemProps) {
+  let { account, toggleRepo } = props;
+
+  if (account.repos.length > 0) {
+    return <RepoList account={account} toggleRepo={toggleRepo} />;
+  }
+  else if (account.error) {
+    return (
+      <div className="error">
+        <div className="error-message">{account.error}</div>
+      </div>
+    );
+  }
+  else if (account.loading) {
+    return (
+      <div className="loading">
+        <div className="loading-message">Loading...</div>
+      </div>
+    );
+  }
+  else {
+    return (
+      <div className="no-repos">
+        <div className="empty-message">There are no repos to show</div>
+      </div>
+    );
+  }
 }
