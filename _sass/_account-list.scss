@@ -60,6 +60,28 @@
         margin-right: $horizontal-space-small;
       }
     }
+
+    .loading {
+      &:before {
+        content: "";
+        display: inline-block;
+        height: 50px;
+        width: 50px;
+        background: url("../img/loading-spinner.gif") no-repeat;
+        background-size: contain;
+        vertical-align: middle;
+        margin-right: $horizontal-space-small;
+      }
+
+      .loading-message {
+        display: inline-block;
+      }
+    }
+
+    .error {
+      color: red;
+      white-space: pre-wrap;
+    }
   }
 }
 

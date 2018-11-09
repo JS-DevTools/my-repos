@@ -87,7 +87,7 @@ export class GitHub {
       });
     }
     else {
-      throw this._client.createError("Invalid GitHub account object:", accountPOJO);
+      throw this._client.createError("Invalid GitHub account:", accountPOJO);
     }
   }
 
@@ -110,7 +110,7 @@ export class GitHub {
       return repos;
     }
     else {
-      throw this._client.createError("Invalid GitHub repos:", repoPOJOs);
+      throw this._client.createError("Invalid GitHub repo:", repoPOJOs);
     }
   }
 }
