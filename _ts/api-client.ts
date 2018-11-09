@@ -1,8 +1,5 @@
-import { mapToPOJO } from "./util";
-
-// When running on localhost, we introduce artificial delays
-// and use LocalStorage instead of Fetch, to avoid rate limits
-const LOCAL_DEV_MODE = location.hostname === "localhost";
+import { hash } from "./hash";
+import { LOCAL_DEV_MODE, mapToPOJO, random } from "./util";
 
 interface JsonPojo {
   [key: string]: string | number | boolean | JsonPojo | JsonPojo[];
@@ -204,12 +201,10 @@ async function parseResponseBody(response: Response): Promise<ParsedResponseBody
  * Introduces an artificial delay during local development.
  */
 function artificialDelay(): Promise<void> {
-  let milliseconds: number = 0;
+  let milliseconds = 0;
 
-  if (LOCAL_DEV_MODE) {
-    let min = 300;
-    let max = 1000;
-    milliseconds = Math.floor(Math.random() * (max - min + 1)) + min;
+  if (hash.options.delay) {
+    milliseconds = random(0, hash.options.delay);
   }
 
   return new Promise((resolve) => setTimeout(resolve, milliseconds));

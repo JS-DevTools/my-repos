@@ -1,19 +1,27 @@
+import { LOCAL_DEV_MODE } from "./util";
 
 export interface Options {
   /**
    * Whether to show forked repos on the dashboard
    */
   forks: boolean;
+
+  /**
+   * Delays AJAX responses by a number of milliseconds.
+   * This is mostly just used for local development, to simulate network latency.
+   */
+  delay: number;
 }
 
 /**
  * Reads and stores state in the URL hash
  */
 export class Hash extends EventTarget {
-  private readonly _accounts = new Set();
-  private readonly _hide = new Set();
-  private readonly _options = {
+  private readonly _accounts: Set<string> = new Set();
+  private readonly _hide: Set<string> = new Set();
+  private readonly _options: Options = {
     forks: false,
+    delay: LOCAL_DEV_MODE ? 1000 : 0,
   };
 
   /**
@@ -115,9 +123,12 @@ export class Hash extends EventTarget {
   private _handleHashChange() {
     if (location.hash !== this.toString()) {
       let params = new URLSearchParams(location.hash.substr(1));
+
       parseStringSet(params.get("u"), this._accounts);
       parseStringSet(params.get("hide"), this._hide);
-      this._options.forks = parseBoolean(params.get("forks"));
+      this._options.forks = parseBoolean(params.get("forks"), this._options.forks);
+      this._options.delay = parsePositiveInteger(params.get("delay"), this._options.delay);
+
       this.dispatchEvent(new Event("hashchange"));
     }
   }
@@ -146,11 +157,35 @@ function parseStringSet(value: string | null, set: Set<string>) {
 /**
  * Parses a boolean string
  */
-function parseBoolean(value: string | null): boolean {
+function parseBoolean(value: string | null, defaultValue = false): boolean {
   if (!value) {
-    return false;
+    return defaultValue;
   }
   else {
     return ["yes", "true", "on", "ok"].includes(value.toLowerCase());
   }
+}
+
+/**
+ * Parses a numeric string.  It can be a float or integer, positive or negative.
+ */
+function parseNumber(value: string | null, defaultValue = 0): number {
+  let number = parseFloat(value!);
+  return isNaN(number) ? defaultValue : number;
+}
+
+/**
+ * Parses an integer string.  It can be positive or negative.
+ */
+function parseInteger(value: string | null, defaultValue = 0): number {
+  let number = parseNumber(value, defaultValue);
+  return Number.isSafeInteger(number) ? number : Math.round(number);
+}
+
+/**
+ * Parses a positive integer string.  It can be positive or zero.
+ */
+function parsePositiveInteger(value: string | null, defaultValue = 0): number {
+  let number = parseInteger(value, defaultValue);
+  return number >= 0 ? number : defaultValue;
 }
