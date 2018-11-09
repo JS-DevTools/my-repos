@@ -71,7 +71,7 @@ export class StateStore {
    */
   public async addAccount(name: string) {
     // Does this account already exist
-    let account = this.state.accounts.find(byName(name));
+    let account = this.state.accounts.find(byLogin(name));
 
     if (account) {
       // The account already exists
@@ -102,22 +102,25 @@ export class StateStore {
   public replaceAccount(oldAccountID: number, newAccount: GitHubAccount) {
     let accounts = this.state.accounts.slice();
 
+    // Remove the old account
+    removeAccountByID(accounts, oldAccountID);
+
     // Just to ensure we don't accidentally add duplicate accounts,
     // remove the new account if it already exists
     removeAccountByID(accounts, newAccount.id);
 
-    // Remove the old account, and get its index,
-    // so we can insert the new account at the same location
-    let { index } = removeAccountByID(accounts, oldAccountID);
+    // Add the new account
+    accounts.push(newAccount);
 
-    // If the old account didn't exist, then just add new account at index zero
-    if (index === -1) {
-      index = 0;
+    // Sort the accounts so they're in the same order as the URL hash.
+    // This makes it easy for users to hack the URL.
+    let sortedAccounts: GitHubAccount[] = [];
+    for (let accountName of hash.accounts) {
+      let account = accounts.find(byLogin(accountName));
+      account && sortedAccounts.push(account);
     }
 
-    // Add the new account at the same index as the removed account
-    accounts.splice(index, 0, newAccount);
-    this.setState({ accounts });
+    this.setState({ accounts: sortedAccounts });
   }
 
   /**
@@ -169,9 +172,9 @@ function byID(id: number) {
 }
 
 /**
- * Used to search an array for object with the specified "name" property
+ * Used to search an array for object with the specified "login" property
  */
-function byName(name: string) {
-  name = name.trim().toLowerCase();
-  return (obj: { name: string }) => obj.name.trim().toLowerCase() === name;
+function byLogin(login: string) {
+  login = login.trim().toLowerCase();
+  return (obj: { login: string }) => obj.login.trim().toLowerCase() === login;
 }
