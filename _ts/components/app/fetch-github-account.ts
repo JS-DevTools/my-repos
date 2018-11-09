@@ -1,4 +1,4 @@
-import { github, GitHubAccount, GitHubAccountPOJO } from "../../github";
+import { github, GitHubAccount } from "../../github";
 
 type ReplaceAccountCallback = (oldAccountID: number, newAccount: GitHubAccount) => void;
 
@@ -6,7 +6,7 @@ type ReplaceAccountCallback = (oldAccountID: number, newAccount: GitHubAccount) 
  * Fetches the specified GitHub account and its repos, and then calls the given callback function
  * to update the app state.
  */
-export async function fetchGitHubAccount(accountPOJO: GitHubAccountPOJO, replaceAccount: ReplaceAccountCallback) {
+export async function fetchGitHubAccount(accountPOJO: GitHubAccount, replaceAccount: ReplaceAccountCallback) {
   // Fetch the GitHub account and repos at the same time
   let safeResults = await Promise.all([
     safeResolve(github.fetchAccount(accountPOJO.login)),

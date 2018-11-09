@@ -51,24 +51,18 @@ export class StateStore {
 
     // Create a temporary account object to populate the UI
     // while we fetch the account info from GitHub
-    account = {
-      id: Math.random(),
+    account = new GitHubAccount({
       name,
       login: name,
-      avatar_url: "",
-      bio: "",
-      loading: true,
-      repos: [],
-    };
+    });
 
-    // Add this account to the BEGINNING of the array.
-    // This makes sure it's visible on small mobile screens.
+    // Add this account
     let accounts = this.state.accounts.slice();
-    accounts.unshift(account);
+    accounts.push(account);
     this.setState({ accounts });
 
-    // Fetch the account info from GitHub and replace this temporary account
-    // object with the real info
+    // Fetch the account info from GitHub
+    // and replace this temporary account object with the real info
     await fetchGitHubAccount(account, this.replaceAccount);
     hash.addAccount(name);
   }

@@ -14,21 +14,38 @@ export interface GitHubAccountPOJO {
 /**
  * Additional GitHub account properties that we need for this app
  */
-export interface GitHubAccount extends GitHubAccountPOJO {
+export class GitHubAccount implements GitHubAccountPOJO {
+  public readonly id: number;
+  public login: string;
+  public name: string;
+  public avatar_url: string;
+  public bio: string;
+
   /**
    * This account's GitHub repos
    */
-  repos: GitHubRepo[];
+  public repos: GitHubRepo[];
 
   /**
    * Indicates whether we're currently fetching the account info from GitHub
    */
-  loading: boolean;
+  public loading: boolean;
 
   /**
    * If an error occurred while fetching account info, then this is the error message
    */
-  error?: string;
+  public error?: string;
+
+  public constructor(props: Partial<GitHubAccount> = {}) {
+    this.id = props.id || Math.random();
+    this.login = props.login || "";
+    this.name = props.name || "";
+    this.avatar_url = props.avatar_url || "";
+    this.bio = props.bio || "";
+    this.repos = props.repos || [];
+    this.loading = props.loading === undefined ? true : props.loading;
+    this.error = props.error;
+  }
 }
 
 /**
@@ -63,11 +80,11 @@ export class GitHub {
     let accountPOJO = await this._client.fetchObject(`https://api.github.com/users/${name}`);
 
     if (isGitHubAccountPOJO(accountPOJO)) {
-      return {
+      return new GitHubAccount({
         ...accountPOJO,
         loading: false,
         repos: [],
-      };
+      });
     }
     else {
       throw this._client.createError("Invalid GitHub account object:", accountPOJO);
