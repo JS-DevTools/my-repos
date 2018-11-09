@@ -101,6 +101,10 @@ export class Hash extends EventTarget {
       params.append("forks", "yes");
     }
 
+    if (this.options.delay) {
+      params.append("delay", String(this.options.delay));
+    }
+
     let hashString = params.toString();
 
     // Don't encode common characters that are valid in the hash
@@ -162,7 +166,7 @@ function parseBoolean(value: string | null, defaultValue = false): boolean {
     return defaultValue;
   }
   else {
-    return ["yes", "true", "on", "ok"].includes(value.toLowerCase());
+    return ["yes", "true", "on", "ok", "show"].includes(value.toLowerCase());
   }
 }
 
