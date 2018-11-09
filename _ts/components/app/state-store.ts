@@ -2,6 +2,8 @@ import { GitHubAccount } from "../../github";
 import { hash } from "../../hash";
 import { fetchGitHubAccount } from "./fetch-github-account";
 
+export type SyncWithHash = () => void;
+
 export type AddAccount = (name: string) => Promise<void>;
 
 export type ReplaceAccount = (oldAccountID: number, newAccount: GitHubAccount) => void;
@@ -18,15 +20,18 @@ export class StateStore {
   public static mixin(obj: StateStore) {
     let store = new StateStore();
     obj.state = store.state;
+    obj.syncWithHash = store.syncWithHash.bind(obj);
     obj.addAccount = store.addAccount.bind(obj);
     obj.replaceAccount = store.replaceAccount.bind(obj);
     obj.removeAccount = store.removeAccount.bind(obj);
     obj.toggleRepo = store.toggleRepo.bind(obj);
 
-    // Immediately load all the accounts in the URL hash
-    for (let accountName of hash.accounts) {
-      obj.addAccount(accountName);
-    }
+    // Immediately sync with the URL hash
+    // HACK: Without setTimeout, the state doesn't update until AJAX fetches complete
+    setTimeout(obj.syncWithHash, 0);
+
+    // Re-sync with the hash anytime it changes
+    hash.addEventListener("hashchange", obj.syncWithHash);
   }
 
   public state: AppState = {
@@ -35,6 +40,30 @@ export class StateStore {
 
   // Just here to satisfy TypeScript
   public setState!: SetState<AppState>;
+
+  /**
+   * Syncs the app state with the URL hash
+   */
+  public syncWithHash() {
+    let accounts: GitHubAccount[] = [];
+
+    for (let accountName of hash.accounts) {
+      // Create a temporary account object to populate the UI
+      // while we fetch the account info from GitHub
+      let account = new GitHubAccount({
+        name: accountName,
+        login: accountName,
+      });
+
+      // Asynchronously fetch the account info from GitHub
+      // and replace this temporary account object with the real info
+      fetchGitHubAccount(account, this.replaceAccount);
+
+      accounts.push(account);
+    }
+
+    this.setState({ accounts });
+  }
 
   /**
    * Adds a new GitHub account with the specified name to the accounts list,

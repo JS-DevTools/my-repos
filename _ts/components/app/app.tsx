@@ -1,9 +1,10 @@
 import { AccountList } from "../account-list/account-list";
 import { FirstTime } from "../first-time/first-time";
-import { AddAccount, AppState, RemoveAccount, ReplaceAccount, StateStore, ToggleRepo } from "./state-store";
+import { AddAccount, AppState, RemoveAccount, ReplaceAccount, StateStore, SyncWithHash, ToggleRepo } from "./state-store";
 
 export class App extends React.Component<{}, AppState> implements StateStore {
   public readonly state!: AppState;
+  public readonly syncWithHash!: SyncWithHash;
   public readonly addAccount!: AddAccount;
   public readonly replaceAccount!: ReplaceAccount;
   public readonly removeAccount!: RemoveAccount;
@@ -15,8 +16,6 @@ export class App extends React.Component<{}, AppState> implements StateStore {
   }
 
   public render() {
-    let { accounts } = this.state;
-
     return [
       <FirstTime key="first_time" addAccount={this.addAccount} />,
       <AccountList key="account_list"

@@ -9,33 +9,39 @@ export interface Options {
 /**
  * Reads and stores state in the URL hash
  */
-export class Hash {
+export class Hash extends EventTarget {
+  private readonly _accounts = new Set();
+  private readonly _hide = new Set();
+  private readonly _options = {
+    forks: false,
+  };
+
   /**
    * The accounts to show on the dashboard
    */
-  public accounts: Set<string>;
+  public readonly accounts: ReadonlySet<string> = this._accounts;
 
   /**
    * Specific repos to hide
    */
-  public hide: Set<string>;
+  public readonly hide: ReadonlySet<string> = this._hide;
 
-  public options: Options;
+  /**
+   * Options for how the dashboard should be displayed
+   */
+  public readonly options: Readonly<Options> = this._options;
 
   public constructor() {
-    let params = new URLSearchParams(location.hash.substr(1));
-    this.accounts = parseStringSet(params.get("u"));
-    this.hide = parseStringSet(params.get("hide"));
-    this.options = {
-      forks: parseBoolean(params.get("forks"))
-    };
+    super();
+    this._handleHashChange();
+    window.addEventListener("hashchange", () => this._handleHashChange());
   }
 
   /**
    * Updates the URL hash to include the specified GitHub account
    */
   public addAccount(name: string) {
-    this.accounts.add(name);
+    this._accounts.add(name);
     this._updateHash();
   }
 
@@ -43,7 +49,7 @@ export class Hash {
    * Updates the URL hash to remove the specified GitHub account
    */
   public removeAccount(name: string) {
-    this.accounts.delete(name);
+    this._accounts.delete(name);
     this._updateHash();
   }
 
@@ -52,11 +58,12 @@ export class Hash {
    */
   public toggleRepo(full_name: string, hidden: boolean) {
     if (hidden) {
-      this.hide.add(full_name);
+      this._hide.add(full_name);
     }
     else {
-      this.hide.delete(full_name);
+      this._hide.delete(full_name);
     }
+
     this._updateHash();
   }
 
@@ -69,9 +76,9 @@ export class Hash {
   }
 
   /**
-   * Updates the URL hash to match the properties of this object
+   * Returns a URL hash string that matches the Hash object
    */
-  private _updateHash() {
+  public toString() {
     let params = new URLSearchParams();
 
     if (this.accounts.size > 0) {
@@ -92,7 +99,27 @@ export class Hash {
     hashString = hashString.replace(/%2C/g, ",");
     hashString = hashString.replace(/%2F/g, "/");
 
-    location.hash = hashString;
+    return hashString;
+  }
+
+  /**
+   * Updates the URL hash to match the Hash object
+   */
+  private _updateHash() {
+    location.hash = this.toString();
+  }
+
+  /**
+   * Updates the Hash object to match the URL hash
+   */
+  private _handleHashChange() {
+    if (location.hash !== this.toString()) {
+      let params = new URLSearchParams(location.hash.substr(1));
+      parseStringSet(params.get("u"), this._accounts);
+      parseStringSet(params.get("hide"), this._hide);
+      this._options.forks = parseBoolean(params.get("forks"));
+      this.dispatchEvent(new Event("hashchange"));
+    }
   }
 }
 
@@ -101,15 +128,24 @@ export class Hash {
  */
 export const hash = new Hash();
 
-function parseStringSet(value: string | null): Set<string> {
-  if (!value) {
-    return new Set();
-  }
-  else {
-    return new Set(value.split(","));
+/**
+ * Updates the contents of the given Set object to match the contents of
+ * the specified comma-delimited string
+ */
+function parseStringSet(value: string | null, set: Set<string>) {
+  set.clear();
+
+  if (value) {
+    let strings = value.split(",");
+    for (let string of strings) {
+      set.add(string);
+    }
   }
 }
 
+/**
+ * Parses a boolean string
+ */
 function parseBoolean(value: string | null): boolean {
   if (!value) {
     return false;
