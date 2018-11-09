@@ -9,7 +9,12 @@ export function AccountList(props: AccountListProps) {
   return (
     <main id="account_list" className={count}>
       <div className="responsive-container">
-        <AddAccount submitButtonText="Add" {...props} />
+        <div className="add-account-toggle">
+          <input id="add_account_toggle" type="checkbox" className="toggle" />
+          <label htmlFor="add_account_toggle" className="toggle-label"></label>
+
+          <AddAccount submitButtonText="Add" {...props} />
+        </div>
         {accounts.map((account) => <AccountItem account={account} {...props} />)}
       </div>
     </main>

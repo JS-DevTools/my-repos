@@ -1,11 +1,80 @@
 #account_list {
-  .add-account {
-    float: right;
-    margin-right: $horizontal-space-medium;
+  .add-account-toggle {
+    display: flex;
+    flex-direction: row-reverse;
+    position: absolute;
+    top: 0;
+    right: $horizontal-space-medium;
+
+    .toggle-label {
+      @extend .btn;
+      max-height: 34px;
+      margin: $vertical-space-medium 0;
+    }
+
+    .add-account {
+      display: inline-block;
+      padding: 0 $horizontal-space-tiny;
+      background-color: white;
+    }
+
+    .toggle {
+      display: none;
+
+      &:not(:checked) {
+        & + .toggle-label {
+          @extend .btn-primary;
+
+          &:before {
+            content: "Add"
+          }
+        }
+
+        & ~ .add-account {
+          width: 0;
+          height: 0;
+          overflow: hidden;
+        }
+      }
+
+      &:checked {
+        & + .toggle-label {
+          &:before {
+            content: "Close"
+          }
+        }
+      }
+    }
+  }
+
+  .account {
+    margin-bottom: $vertical-space-large;
+
+    header {
+      .avatar {
+        height: 50px;
+        width: 50px;
+        border: solid 3px white;
+        border-radius: 10px;
+        vertical-align: middle;
+        margin-right: $horizontal-space-small;
+      }
+    }
   }
 }
 
 @media (min-width: $tablet-min-width) {
   #account_list {
+    .add-account-toggle {
+      .toggle-label {
+        display: none !important;
+      }
+
+      .add-account {
+        width: unset !important;
+        height: unset !important;
+        overflow: visible !important;
+      }
+    }
   }
 }
