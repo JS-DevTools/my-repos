@@ -203,11 +203,13 @@ async function parseResponseBody(response: Response): Promise<ParsedResponseBody
 /**
  * Introduces an artificial delay during local development.
  */
-function artificialDelay() {
+function artificialDelay(): Promise<void> {
   let milliseconds: number = 0;
 
   if (LOCAL_DEV_MODE) {
-    milliseconds = 800;
+    let min = 300;
+    let max = 1000;
+    milliseconds = Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
