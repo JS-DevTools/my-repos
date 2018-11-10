@@ -1,10 +1,27 @@
 ---
-layout: default
+layout: home
 ---
 
-<div id="react-app"></div>
-
-
-<script defer crossorigin src="https://unpkg.com/react@16.5.2/umd/react.production.min.js"></script>
-<script defer crossorigin src="https://unpkg.com/react-dom@16.5.2/umd/react-dom.production.min.js"></script>
-<script defer src="js/repo-health.js"></script>
+<header id="page_header">
+  <div class="responsive-container">
+    <img class="logo" src="img/logo.png" alt="logo image">
+    <h1>GitHub Repo Health</h1>
+    <h2>See the health of all your GitHub repos on one page</h2>
+  </div>
+</header>
+<main id="account_list" class="has-one-account">
+  <div class="responsive-container">
+    <section class="account">
+      <header>
+        <h1>
+          <a href="https://github.com">Your GitHub Account Here</a>
+        </h1>
+      </header>
+      <div class="no-repos">
+        <div class="empty-message">
+          Enable JavaScript to see your GitHub repos here
+        </div>
+      </div>
+    </section>
+  </div>
+</main>

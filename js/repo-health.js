@@ -1,3 +1,19 @@
+/*!
+ * Github Repo Health v0.1.0 (November 10th 2018)
+ * 
+ * https://repohealth.github.io/
+ * 
+ * @author  James Messinger (https://jamesmessinger.com)
+ * @license MIT
+ */
+/*!
+ * Github Repo Health v0.1.0 (November 10th 2018)
+ * 
+ * https://repohealth.github.io/
+ * 
+ * @author  James Messinger (https://jamesmessinger.com)
+ * @license MIT
+ */
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -262,8 +278,13 @@ class App extends React.Component {
     }
     render() {
         return [
-            React.createElement(first_time_1.FirstTime, { key: "first_time", addAccount: this.addAccount }),
+            React.createElement("header", { key: "page_header", id: "page_header" },
+                React.createElement("div", { className: "responsive-container" },
+                    React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
+                    React.createElement("h1", null, "GitHub Repo Health"),
+                    React.createElement("h2", null, "See the health of all your GitHub repos on one page"))),
             React.createElement(account_list_1.AccountList, Object.assign({ key: "account_list", addAccount: this.addAccount, removeAccount: this.removeAccount, toggleRepo: this.toggleRepo }, this.state)),
+            React.createElement(first_time_1.FirstTime, { key: "first_time", addAccount: this.addAccount }),
         ];
     }
 }
@@ -462,12 +483,7 @@ const hash_1 = require("../../hash");
 const add_account_1 = require("../add-account/add-account");
 function FirstTime(props) {
     let count = hash_1.hash.accounts.size === 0 ? "no-accounts" : "has-accounts";
-    return (React.createElement("section", { id: "first_time", className: count },
-        React.createElement("header", { key: "header" },
-            React.createElement("div", { className: "responsive-container" },
-                React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
-                React.createElement("h1", null, "GitHub Repo Health"),
-                React.createElement("h2", null, "See the health of all your GitHub repos on one page"))),
+    return (React.createElement("aside", { id: "first_time", className: count },
         React.createElement("div", { className: "responsive-container" },
             React.createElement("div", { className: "welcome-message" },
                 React.createElement("h3", null, "Hi! \uD83D\uDC4B Enter your GitHub username to get started"),
@@ -743,7 +759,7 @@ function parsePositiveInteger(value, defaultValue = 0) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app/app");
-ReactDOM.render(React.createElement(app_1.App, null), document.getElementById("react-app"));
+ReactDOM.render(React.createElement(app_1.App, null), document.body);
 },{"./components/app/app":5}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
