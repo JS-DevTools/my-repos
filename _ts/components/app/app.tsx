@@ -1,5 +1,6 @@
 import { AccountList } from "../account-list/account-list";
 import { FirstTime } from "../first-time/first-time";
+import { PageHeader } from "../page-header/page-header";
 import { AddAccount, AppState, RemoveAccount, ReplaceAccount, StateStore, SyncWithHash, ToggleRepo } from "./state-store";
 
 export class App extends React.Component<{}, AppState> implements StateStore {
@@ -17,13 +18,13 @@ export class App extends React.Component<{}, AppState> implements StateStore {
 
   public render() {
     return [
-      <FirstTime key="first_time" addAccount={this.addAccount} />,
+      <PageHeader key="page_header" addAccount={this.addAccount} />,
       <AccountList key="account_list"
-        addAccount={this.addAccount}
         removeAccount={this.removeAccount}
         toggleRepo={this.toggleRepo}
         {...this.state}
       />,
+      <FirstTime key="first_time" addAccount={this.addAccount} />,
     ];
   }
 }

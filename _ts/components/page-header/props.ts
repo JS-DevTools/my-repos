@@ -1,6 +1,5 @@
 import { AddAccount } from "../app/state-store";
 
-export interface AddAccountProps {
+export interface PageHeaderProps {
   addAccount: AddAccount;
-  submitButtonText?: string;
 }

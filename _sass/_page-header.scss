@@ -1,0 +1,61 @@
+#page_header {
+  display: block;
+  background-color: black;
+
+  .responsive-container {
+    padding-left: (50px + ($horizontal-space-small * 2));   // space for the logo image
+    padding-bottom: (34px + ($vertical-space-small * 2));   // space for the "add account" form
+  }
+
+  .add-account {
+    position: absolute;
+    bottom: $vertical-space-small;
+    right: $horizontal-space-small;
+  }
+
+  &.no-accounts .add-account {
+    display: none;
+  }
+
+  .logo {
+    position: absolute;
+    top: $vertical-space-small;
+    left: $horizontal-space-small;
+    height: 50px;
+    width: 50px;
+  }
+
+  h1 {
+    color: white;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  h2 {
+    font-size: 1em;
+    color: $dark-gray;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+@media (min-width: $tablet-min-width) {
+  #page_header {
+    .responsive-container {
+      padding-left: (50px + $horizontal-space-small);   // space for the logo image
+      padding-bottom: $vertical-space-medium;
+    }
+
+    .add-account {
+      top: $vertical-space-medium;
+      right: 0;
+      bottom: unset;
+    }
+
+    .logo {
+      left: 0;
+    }
+  }
+}
