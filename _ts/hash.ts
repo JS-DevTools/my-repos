@@ -1,5 +1,8 @@
 import { LOCAL_DEV_MODE } from "./util";
 
+// Artificially delay AJAX calls for local development, to simulate network latency
+const defaultDelay = LOCAL_DEV_MODE ? 1000 : 0;
+
 export interface Options {
   /**
    * Whether to show forked repos on the dashboard
@@ -21,7 +24,7 @@ export class Hash extends EventTarget {
   private readonly _hide: Set<string> = new Set();
   private readonly _options: Options = {
     forks: false,
-    delay: LOCAL_DEV_MODE ? 1000 : 0,
+    delay: defaultDelay,
   };
 
   /**
@@ -101,7 +104,7 @@ export class Hash extends EventTarget {
       params.append("forks", "yes");
     }
 
-    if (this.options.delay) {
+    if (this.options.delay && this.options.delay !== defaultDelay) {
       params.append("delay", String(this.options.delay));
     }
 
