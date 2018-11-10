@@ -6,36 +6,41 @@ type ReplaceAccountCallback = (oldAccountID: number, newAccount: GitHubAccount) 
  * Fetches the specified GitHub account and its repos, and then calls the given callback function
  * to update the app state.
  */
-export async function fetchGitHubAccount(accountPOJO: GitHubAccount, replaceAccount: ReplaceAccountCallback) {
+export async function fetchGitHubAccount(account: GitHubAccount, replaceAccount: ReplaceAccountCallback) {
   // Fetch the GitHub account and repos at the same time
   let safeResults = await Promise.all([
-    safeResolve(github.fetchAccount(accountPOJO.login)),
-    safeResolve(github.fetchRepos(accountPOJO.login)),
+    safeResolve(github.fetchAccount(account)),
+    safeResolve(github.fetchRepos(account)),
   ]);
 
   // @ts-ignore - This line totally confuses the TypeScript compiler
-  let [{ result: account, error: accountError }, { result: repos, error: repoError }] = safeResults;
+  let [{ result: accountPOJO, error: accountError }, { result: repos, error: repoError }] = safeResults;
+  let newAccount: GitHubAccount;
 
   if (accountError) {
     // An error occurred while fetching the account, so create a dummy account
     // with the error message
-    account = {
-      ...accountPOJO,
-      loading: false,
-      repos: [],
+    newAccount = new GitHubAccount({
+      ...account,
       error: accountError.message,
-    };
+    });
   }
-  else if (account && repoError) {
+  else if (accountPOJO && repoError) {
     // An error occurred while fetching the repos, so add the error message to the account
-    account.error = repoError.message;
+    newAccount = new GitHubAccount({
+      ...accountPOJO,
+      error: repoError.message,
+    });
   }
-  else if (account && repos) {
+  else if (accountPOJO && repos) {
     // Everything succeeded, so add the repos to the account
-    account.repos = repos;
+    newAccount = new GitHubAccount({
+      ...accountPOJO,
+      repos,
+    });
   }
 
-  replaceAccount(accountPOJO.id, account!);
+  replaceAccount(account.id, newAccount!);
 }
 
 

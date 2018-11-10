@@ -2,19 +2,19 @@ import { ChangeEvent, FormEvent } from "react";
 import { AddAccountProps } from "./props";
 
 interface State {
-  accountName: string;
+  login: string;
   busy: boolean;
 }
 
 export class AddAccount extends React.Component<AddAccountProps, State> {
   public readonly state: State = {
-    accountName: "",
+    login: "",
     busy: false,
   };
 
   public render() {
     let { submitButtonText } = this.props;
-    let { accountName, busy } = this.state;
+    let { login, busy } = this.state;
 
     return (
       <form className={`add-account form ${busy ? "busy" : ""}`} onSubmit={this.handleSubmit}>
@@ -26,28 +26,28 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
             <input type="text" name="account_name" className="form-control short"
               maxLength={100} autoFocus autoCapitalize="off" autoComplete="on" spellCheck={false}
               placeholder="GitHub Username" disabled={busy}
-              value={accountName} onChange={this.handleChange} />
+              value={login} onChange={this.handleChange} />
           </dd>
         </dl>
 
         <button type="submit" className="btn btn-primary" disabled={busy}>
-          {submitButtonText}
+          {submitButtonText || "Add"}
         </button>
       </form>
     );
   }
 
   private handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ accountName: event.target.value });
+    this.setState({ login: event.target.value });
   }
 
   private handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (this.state.accountName) {
+    if (this.state.login) {
       this.setState({ busy: true });
-      await this.props.addAccount(this.state.accountName.trim());
-      this.setState({ accountName: "", busy: false });
+      await this.props.addAccount(this.state.login.trim());
+      this.setState({ login: "", busy: false });
     }
   }
 }

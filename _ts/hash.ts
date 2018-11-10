@@ -1,3 +1,4 @@
+import { GitHubAccount, GitHubRepo } from "./github";
 import { LOCAL_DEV_MODE } from "./util";
 
 // Artificially delay AJAX calls for local development, to simulate network latency
@@ -51,28 +52,28 @@ export class Hash extends EventTarget {
   /**
    * Updates the URL hash to include the specified GitHub account
    */
-  public addAccount(name: string) {
-    this._accounts.add(name);
+  public addAccount(account: GitHubAccount) {
+    this._accounts.add(account.login);
     this._updateHash();
   }
 
   /**
    * Updates the URL hash to remove the specified GitHub account
    */
-  public removeAccount(name: string) {
-    this._accounts.delete(name);
+  public removeAccount(account: GitHubAccount) {
+    this._accounts.delete(account.login);
     this._updateHash();
   }
 
   /**
    * Updates the URL hash to hide or show the specified GitHub repo
    */
-  public toggleRepo(full_name: string, hidden: boolean) {
+  public toggleRepo(account: GitHubAccount, repo: GitHubRepo, hidden: boolean) {
     if (hidden) {
-      this._hide.add(full_name);
+      this._hide.add(repo.full_name);
     }
     else {
-      this._hide.delete(full_name);
+      this._hide.delete(repo.full_name);
     }
 
     this._updateHash();

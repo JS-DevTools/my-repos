@@ -180,7 +180,7 @@ function artificialDelay() {
     }
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
-},{"./hash":11,"./util":13}],2:[function(require,module,exports){
+},{"./hash":12,"./util":14}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const repo_list_1 = require("../repo-list/repo-list");
@@ -213,55 +213,50 @@ function AccountItemContents(props) {
             React.createElement("div", { className: "empty-message" }, "There are no repos to show")));
     }
 }
-},{"../repo-list/repo-list":9}],3:[function(require,module,exports){
+},{"../repo-list/repo-list":10}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const add_account_1 = require("../add-account/add-account");
+const hash_1 = require("../../hash");
+const util_1 = require("../../util");
 const account_item_1 = require("./account-item");
 function AccountList(props) {
     let { accounts } = props;
-    let count = accounts.length === 0 ? "no-accounts" : accounts.length === 1 ? "has-one-account" : "has-accounts";
-    return (React.createElement("main", { id: "account_list", className: count },
-        React.createElement("div", { className: "responsive-container" },
-            React.createElement("div", { className: "add-account-toggle" },
-                React.createElement("input", { id: "add_account_toggle", type: "checkbox", className: "toggle" }),
-                React.createElement("label", { htmlFor: "add_account_toggle", className: "toggle-label" }),
-                React.createElement(add_account_1.AddAccount, Object.assign({ submitButtonText: "Add" }, props))),
-            accounts.map((account) => React.createElement(account_item_1.AccountItem, Object.assign({ account: account }, props))))));
+    return (React.createElement("main", { id: "account_list", className: util_1.accountCountCssClass(hash_1.hash.accounts) },
+        React.createElement("div", { className: "responsive-container" }, accounts.map((account) => React.createElement(account_item_1.AccountItem, Object.assign({ account: account }, props))))));
 }
 exports.AccountList = AccountList;
-},{"../add-account/add-account":4,"./account-item":2}],4:[function(require,module,exports){
+},{"../../hash":12,"../../util":14,"./account-item":2}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class AddAccount extends React.Component {
     constructor() {
         super(...arguments);
         this.state = {
-            accountName: "",
+            login: "",
             busy: false,
         };
         this.handleChange = (event) => {
-            this.setState({ accountName: event.target.value });
+            this.setState({ login: event.target.value });
         };
         this.handleSubmit = async (event) => {
             event.preventDefault();
-            if (this.state.accountName) {
+            if (this.state.login) {
                 this.setState({ busy: true });
-                await this.props.addAccount(this.state.accountName.trim());
-                this.setState({ accountName: "", busy: false });
+                await this.props.addAccount(this.state.login.trim());
+                this.setState({ login: "", busy: false });
             }
         };
     }
     render() {
         let { submitButtonText } = this.props;
-        let { accountName, busy } = this.state;
+        let { login, busy } = this.state;
         return (React.createElement("form", { className: `add-account form ${busy ? "busy" : ""}`, onSubmit: this.handleSubmit },
             React.createElement("dl", { className: "form-group" },
                 React.createElement("dt", { className: "input-label" },
                     React.createElement("label", { htmlFor: "repo_owner" }, "GitHub Username")),
                 React.createElement("dd", { className: "input-field" },
-                    React.createElement("input", { type: "text", name: "account_name", className: "form-control short", maxLength: 100, autoFocus: true, autoCapitalize: "off", autoComplete: "on", spellCheck: false, placeholder: "GitHub Username", disabled: busy, value: accountName, onChange: this.handleChange }))),
-            React.createElement("button", { type: "submit", className: "btn btn-primary", disabled: busy }, submitButtonText)));
+                    React.createElement("input", { type: "text", name: "account_name", className: "form-control short", maxLength: 100, autoFocus: true, autoCapitalize: "off", autoComplete: "on", spellCheck: false, placeholder: "GitHub Username", disabled: busy, value: login, onChange: this.handleChange }))),
+            React.createElement("button", { type: "submit", className: "btn btn-primary", disabled: busy }, submitButtonText || "Add")));
     }
 }
 exports.AddAccount = AddAccount;
@@ -270,6 +265,7 @@ exports.AddAccount = AddAccount;
 Object.defineProperty(exports, "__esModule", { value: true });
 const account_list_1 = require("../account-list/account-list");
 const first_time_1 = require("../first-time/first-time");
+const page_header_1 = require("../page-header/page-header");
 const state_store_1 = require("./state-store");
 class App extends React.Component {
     constructor(props) {
@@ -278,18 +274,14 @@ class App extends React.Component {
     }
     render() {
         return [
-            React.createElement("header", { key: "page_header", id: "page_header" },
-                React.createElement("div", { className: "responsive-container" },
-                    React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
-                    React.createElement("h1", null, "GitHub Repo Health"),
-                    React.createElement("h2", null, "See the health of all your GitHub repos on one page"))),
-            React.createElement(account_list_1.AccountList, Object.assign({ key: "account_list", addAccount: this.addAccount, removeAccount: this.removeAccount, toggleRepo: this.toggleRepo }, this.state)),
+            React.createElement(page_header_1.PageHeader, { key: "page_header", addAccount: this.addAccount }),
+            React.createElement(account_list_1.AccountList, Object.assign({ key: "account_list", removeAccount: this.removeAccount, toggleRepo: this.toggleRepo }, this.state)),
             React.createElement(first_time_1.FirstTime, { key: "first_time", addAccount: this.addAccount }),
         ];
     }
 }
 exports.App = App;
-},{"../account-list/account-list":3,"../first-time/first-time":8,"./state-store":7}],6:[function(require,module,exports){
+},{"../account-list/account-list":3,"../first-time/first-time":8,"../page-header/page-header":9,"./state-store":7}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const github_1 = require("../../github");
@@ -297,33 +289,38 @@ const github_1 = require("../../github");
  * Fetches the specified GitHub account and its repos, and then calls the given callback function
  * to update the app state.
  */
-async function fetchGitHubAccount(accountPOJO, replaceAccount) {
+async function fetchGitHubAccount(account, replaceAccount) {
     // Fetch the GitHub account and repos at the same time
     let safeResults = await Promise.all([
-        safeResolve(github_1.github.fetchAccount(accountPOJO.login)),
-        safeResolve(github_1.github.fetchRepos(accountPOJO.login)),
+        safeResolve(github_1.github.fetchAccount(account)),
+        safeResolve(github_1.github.fetchRepos(account)),
     ]);
     // @ts-ignore - This line totally confuses the TypeScript compiler
-    let [{ result: account, error: accountError }, { result: repos, error: repoError }] = safeResults;
+    let [{ result: accountPOJO, error: accountError }, { result: repos, error: repoError }] = safeResults;
+    let newAccount;
     if (accountError) {
         // An error occurred while fetching the account, so create a dummy account
         // with the error message
-        account = {
-            ...accountPOJO,
-            loading: false,
-            repos: [],
+        newAccount = new github_1.GitHubAccount({
+            ...account,
             error: accountError.message,
-        };
+        });
     }
-    else if (account && repoError) {
+    else if (accountPOJO && repoError) {
         // An error occurred while fetching the repos, so add the error message to the account
-        account.error = repoError.message;
+        newAccount = new github_1.GitHubAccount({
+            ...accountPOJO,
+            error: repoError.message,
+        });
     }
-    else if (account && repos) {
+    else if (accountPOJO && repos) {
         // Everything succeeded, so add the repos to the account
-        account.repos = repos;
+        newAccount = new github_1.GitHubAccount({
+            ...accountPOJO,
+            repos,
+        });
     }
-    replaceAccount(accountPOJO.id, account);
+    replaceAccount(account.id, newAccount);
 }
 exports.fetchGitHubAccount = fetchGitHubAccount;
 async function safeResolve(promise) {
@@ -336,7 +333,7 @@ async function safeResolve(promise) {
     }
     return { result, error };
 }
-},{"../../github":10}],7:[function(require,module,exports){
+},{"../../github":11}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const github_1 = require("../../github");
@@ -367,12 +364,13 @@ class StateStore {
      */
     syncWithHash() {
         let accounts = [];
-        for (let accountName of hash_1.hash.accounts) {
+        for (let login of hash_1.hash.accounts) {
             // Create a temporary account object to populate the UI
             // while we fetch the account info from GitHub
             let account = new github_1.GitHubAccount({
-                name: accountName,
-                login: accountName,
+                login,
+                name: login,
+                loading: true,
             });
             // Asynchronously fetch the account info from GitHub
             // and replace this temporary account object with the real info
@@ -382,12 +380,12 @@ class StateStore {
         this.setState({ accounts });
     }
     /**
-     * Adds a new GitHub account with the specified name to the accounts list,
+     * Adds a new GitHub account with the specified login to the accounts list,
      * and asynchronously fetches the account info from GitHub
      */
-    async addAccount(name) {
+    async addAccount(login) {
         // Does this account already exist
-        let account = this.state.accounts.find(byLogin(name));
+        let account = this.state.accounts.find(byLogin(login));
         if (account) {
             // The account already exists
             return;
@@ -395,8 +393,9 @@ class StateStore {
         // Create a temporary account object to populate the UI
         // while we fetch the account info from GitHub
         account = new github_1.GitHubAccount({
-            name,
-            login: name,
+            login,
+            name: login,
+            loading: true,
         });
         // Add this account
         let accounts = this.state.accounts.slice();
@@ -405,7 +404,6 @@ class StateStore {
         // Fetch the account info from GitHub
         // and replace this temporary account object with the real info
         await fetch_github_account_1.fetchGitHubAccount(account, this.replaceAccount);
-        hash_1.hash.addAccount(name);
     }
     /**
      * Replaces the specified account in the accounts list with the given GitHub account object.
@@ -422,9 +420,17 @@ class StateStore {
         // Sort the accounts so they're in the same order as the URL hash.
         // This makes it easy for users to hack the URL.
         let sortedAccounts = [];
-        for (let accountName of hash_1.hash.accounts) {
-            let account = accounts.find(byLogin(accountName));
-            account && sortedAccounts.push(account);
+        for (let login of hash_1.hash.accounts) {
+            let index = accounts.findIndex(byLogin(login));
+            if (index >= 0) {
+                let [account] = accounts.splice(index, 1);
+                sortedAccounts.push(account);
+            }
+        }
+        // Append any additional accounts that aren't in the hash yet
+        for (let account of accounts) {
+            sortedAccounts.push(account);
+            hash_1.hash.addAccount(account);
         }
         this.setState({ accounts: sortedAccounts });
     }
@@ -436,7 +442,7 @@ class StateStore {
         let { removed } = removeAccountByID(accounts, id);
         if (removed) {
             this.setState({ accounts });
-            hash_1.hash.removeAccount(removed.name);
+            hash_1.hash.removeAccount(removed);
         }
     }
     /**
@@ -448,7 +454,7 @@ class StateStore {
         let repo = account.repos.find(byID(repoID));
         repo.hidden = hidden;
         this.setState({ accounts });
-        hash_1.hash.toggleRepo(repo.full_name, hidden);
+        hash_1.hash.toggleRepo(account, repo, hidden);
     }
 }
 exports.StateStore = StateStore;
@@ -476,21 +482,36 @@ function byLogin(login) {
     login = login.trim().toLowerCase();
     return (obj) => obj.login.trim().toLowerCase() === login;
 }
-},{"../../github":10,"../../hash":11,"./fetch-github-account":6}],8:[function(require,module,exports){
+},{"../../github":11,"../../hash":12,"./fetch-github-account":6}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const hash_1 = require("../../hash");
+const util_1 = require("../../util");
 const add_account_1 = require("../add-account/add-account");
 function FirstTime(props) {
-    let count = hash_1.hash.accounts.size === 0 ? "no-accounts" : "has-accounts";
-    return (React.createElement("aside", { id: "first_time", className: count },
+    return (React.createElement("aside", { id: "first_time", className: util_1.accountCountCssClass(hash_1.hash.accounts) },
         React.createElement("div", { className: "responsive-container" },
             React.createElement("div", { className: "welcome-message" },
                 React.createElement("h3", null, "Hi! \uD83D\uDC4B Enter your GitHub username to get started"),
                 React.createElement(add_account_1.AddAccount, Object.assign({ submitButtonText: "Show My Repos" }, props))))));
 }
 exports.FirstTime = FirstTime;
-},{"../../hash":11,"../add-account/add-account":4}],9:[function(require,module,exports){
+},{"../../hash":12,"../../util":14,"../add-account/add-account":4}],9:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const hash_1 = require("../../hash");
+const util_1 = require("../../util");
+const add_account_1 = require("../add-account/add-account");
+function PageHeader(props) {
+    return (React.createElement("header", { id: "page_header", className: util_1.accountCountCssClass(hash_1.hash.accounts) },
+        React.createElement("div", { className: "responsive-container" },
+            React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
+            React.createElement("h1", null, "GitHub Repo Health"),
+            React.createElement("h2", null, "See the health of all your GitHub repos on one page"),
+            React.createElement(add_account_1.AddAccount, Object.assign({}, props)))));
+}
+exports.PageHeader = PageHeader;
+},{"../../hash":12,"../../util":14,"../add-account/add-account":4}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const hash_1 = require("../../hash");
@@ -519,7 +540,7 @@ function byOptions(repo) {
         return true;
     }
 }
-},{"../../hash":11}],10:[function(require,module,exports){
+},{"../../hash":12}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_client_1 = require("./api-client");
@@ -534,7 +555,7 @@ class GitHubAccount {
         this.avatar_url = props.avatar_url || "";
         this.bio = props.bio || "";
         this.repos = props.repos || [];
-        this.loading = props.loading === undefined ? true : props.loading;
+        this.loading = Boolean(props.loading);
         this.error = props.error;
     }
 }
@@ -546,8 +567,8 @@ class GitHub {
     /**
      * Fetches the specified GitHub account's info, NOT including its repos
      */
-    async fetchAccount(name) {
-        let accountPOJO = await this._client.fetchObject(`https://api.github.com/users/${name}`);
+    async fetchAccount(account) {
+        let accountPOJO = await this._client.fetchObject(`https://api.github.com/users/${account.login}`);
         if (isGitHubAccountPOJO(accountPOJO)) {
             return new GitHubAccount({
                 ...accountPOJO,
@@ -562,8 +583,8 @@ class GitHub {
     /**
      * Fetches the GitHub repos for the specified account
      */
-    async fetchRepos(accountName) {
-        let repoPOJOs = await this._client.fetchArray(`https://api.github.com/users/${accountName}/repos`);
+    async fetchRepos(account) {
+        let repoPOJOs = await this._client.fetchArray(`https://api.github.com/users/${account.login}/repos`);
         if (isArrayOfGitHubRepoPOJO(repoPOJOs)) {
             let repos = [];
             for (let repoPOJO of repoPOJOs) {
@@ -598,10 +619,12 @@ function isArrayOfGitHubRepoPOJO(repos) {
         typeof repos[0] === "object" &&
         typeof repos[0].name === "string";
 }
-},{"./api-client":1}],11:[function(require,module,exports){
+},{"./api-client":1}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("./util");
+// Artificially delay AJAX calls for local development, to simulate network latency
+const defaultDelay = util_1.LOCAL_DEV_MODE ? 1000 : 0;
 /**
  * Reads and stores state in the URL hash
  */
@@ -612,7 +635,7 @@ class Hash extends EventTarget {
         this._hide = new Set();
         this._options = {
             forks: false,
-            delay: util_1.LOCAL_DEV_MODE ? 1000 : 0,
+            delay: defaultDelay,
         };
         /**
          * The accounts to show on the dashboard
@@ -632,26 +655,26 @@ class Hash extends EventTarget {
     /**
      * Updates the URL hash to include the specified GitHub account
      */
-    addAccount(name) {
-        this._accounts.add(name);
+    addAccount(account) {
+        this._accounts.add(account.login);
         this._updateHash();
     }
     /**
      * Updates the URL hash to remove the specified GitHub account
      */
-    removeAccount(name) {
-        this._accounts.delete(name);
+    removeAccount(account) {
+        this._accounts.delete(account.login);
         this._updateHash();
     }
     /**
      * Updates the URL hash to hide or show the specified GitHub repo
      */
-    toggleRepo(full_name, hidden) {
+    toggleRepo(account, repo, hidden) {
         if (hidden) {
-            this._hide.add(full_name);
+            this._hide.add(repo.full_name);
         }
         else {
-            this._hide.delete(full_name);
+            this._hide.delete(repo.full_name);
         }
         this._updateHash();
     }
@@ -676,7 +699,7 @@ class Hash extends EventTarget {
         if (this.options.forks) {
             params.append("forks", "yes");
         }
-        if (this.options.delay) {
+        if (this.options.delay && this.options.delay !== defaultDelay) {
             params.append("delay", String(this.options.delay));
         }
         let hashString = params.toString();
@@ -695,7 +718,9 @@ class Hash extends EventTarget {
      * Updates the Hash object to match the URL hash
      */
     _handleHashChange() {
-        if (location.hash !== this.toString()) {
+        let actualHash = location.hash.substr(1);
+        let expectedHash = this.toString();
+        if (actualHash !== expectedHash) {
             let params = new URLSearchParams(location.hash.substr(1));
             parseStringSet(params.get("u"), this._accounts);
             parseStringSet(params.get("hide"), this._hide);
@@ -719,7 +744,10 @@ function parseStringSet(value, set) {
     if (value) {
         let strings = value.split(",");
         for (let string of strings) {
-            set.add(string);
+            string = string.trim();
+            if (string.length > 0) {
+                set.add(string);
+            }
         }
     }
 }
@@ -755,12 +783,12 @@ function parsePositiveInteger(value, defaultValue = 0) {
     let number = parseInteger(value, defaultValue);
     return number >= 0 ? number : defaultValue;
 }
-},{"./util":13}],12:[function(require,module,exports){
+},{"./util":14}],13:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app/app");
 ReactDOM.render(React.createElement(app_1.App, null), document.body);
-},{"./components/app/app":5}],13:[function(require,module,exports){
+},{"./components/app/app":5}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // When running on localhost, we introduce artificial delays
@@ -786,5 +814,19 @@ function random(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 exports.random = random;
-},{}]},{},[12])
+/**
+ * Returns a CSS class string that indicates the number of accounts.
+ */
+function accountCountCssClass(accounts) {
+    switch (accounts.size) {
+        case 0:
+            return "no-accounts";
+        case 1:
+            return "has-accounts has-one-account";
+        default:
+            return "has-accounts has-multiple-accounts";
+    }
+}
+exports.accountCountCssClass = accountCountCssClass;
+},{}]},{},[13])
 //# sourceMappingURL=repo-health.js.map

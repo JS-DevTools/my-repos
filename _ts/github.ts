@@ -43,7 +43,7 @@ export class GitHubAccount implements GitHubAccountPOJO {
     this.avatar_url = props.avatar_url || "";
     this.bio = props.bio || "";
     this.repos = props.repos || [];
-    this.loading = props.loading === undefined ? true : props.loading;
+    this.loading = Boolean(props.loading);
     this.error = props.error;
   }
 }
@@ -76,8 +76,8 @@ export class GitHub {
   /**
    * Fetches the specified GitHub account's info, NOT including its repos
    */
-  public async fetchAccount(name: string): Promise<GitHubAccount> {
-    let accountPOJO = await this._client.fetchObject(`https://api.github.com/users/${name}`);
+  public async fetchAccount(account: GitHubAccount): Promise<GitHubAccount> {
+    let accountPOJO = await this._client.fetchObject(`https://api.github.com/users/${account.login}`);
 
     if (isGitHubAccountPOJO(accountPOJO)) {
       return new GitHubAccount({
@@ -94,8 +94,8 @@ export class GitHub {
   /**
    * Fetches the GitHub repos for the specified account
    */
-  public async fetchRepos(accountName: string): Promise<GitHubRepo[]> {
-    let repoPOJOs = await this._client.fetchArray(`https://api.github.com/users/${accountName}/repos`);
+  public async fetchRepos(account: GitHubAccount): Promise<GitHubRepo[]> {
+    let repoPOJOs = await this._client.fetchArray(`https://api.github.com/users/${account.login}/repos`);
 
     if (isArrayOfGitHubRepoPOJO(repoPOJOs)) {
       let repos: GitHubRepo[] = [];

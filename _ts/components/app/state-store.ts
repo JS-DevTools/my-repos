@@ -4,7 +4,7 @@ import { fetchGitHubAccount } from "./fetch-github-account";
 
 export type SyncWithHash = () => void;
 
-export type AddAccount = (name: string) => Promise<void>;
+export type AddAccount = (login: string) => Promise<void>;
 
 export type ReplaceAccount = (oldAccountID: number, newAccount: GitHubAccount) => void;
 
@@ -47,12 +47,13 @@ export class StateStore {
   public syncWithHash() {
     let accounts: GitHubAccount[] = [];
 
-    for (let accountName of hash.accounts) {
+    for (let login of hash.accounts) {
       // Create a temporary account object to populate the UI
       // while we fetch the account info from GitHub
       let account = new GitHubAccount({
-        name: accountName,
-        login: accountName,
+        login,
+        name: login,
+        loading: true,
       });
 
       // Asynchronously fetch the account info from GitHub
@@ -66,12 +67,12 @@ export class StateStore {
   }
 
   /**
-   * Adds a new GitHub account with the specified name to the accounts list,
+   * Adds a new GitHub account with the specified login to the accounts list,
    * and asynchronously fetches the account info from GitHub
    */
-  public async addAccount(name: string) {
+  public async addAccount(login: string) {
     // Does this account already exist
-    let account = this.state.accounts.find(byLogin(name));
+    let account = this.state.accounts.find(byLogin(login));
 
     if (account) {
       // The account already exists
@@ -81,8 +82,9 @@ export class StateStore {
     // Create a temporary account object to populate the UI
     // while we fetch the account info from GitHub
     account = new GitHubAccount({
-      name,
-      login: name,
+      login,
+      name: login,
+      loading: true,
     });
 
     // Add this account
@@ -93,7 +95,6 @@ export class StateStore {
     // Fetch the account info from GitHub
     // and replace this temporary account object with the real info
     await fetchGitHubAccount(account, this.replaceAccount);
-    hash.addAccount(name);
   }
 
   /**
@@ -126,7 +127,7 @@ export class StateStore {
     // Append any additional accounts that aren't in the hash yet
     for (let account of accounts) {
       sortedAccounts.push(account);
-      hash.addAccount(account.login);
+      hash.addAccount(account);
     }
 
     this.setState({ accounts: sortedAccounts });
@@ -141,7 +142,7 @@ export class StateStore {
 
     if (removed) {
       this.setState({ accounts });
-      hash.removeAccount(removed.name);
+      hash.removeAccount(removed);
     }
   }
 
@@ -154,7 +155,7 @@ export class StateStore {
     let repo = account.repos.find(byID(repoID))!;
     repo.hidden = hidden;
     this.setState({ accounts });
-    hash.toggleRepo(repo.full_name, hidden);
+    hash.toggleRepo(account, repo, hidden);
   }
 }
 
