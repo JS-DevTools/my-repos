@@ -11,6 +11,9 @@ rules:
   # Allow any comments. Don't require specific formatting.
   comment-format: false
 
+  # Don't require JSDoc comments for every damn thing
+  completed-docs: false
+
   # Don't enforce cyclomatic complexity limits
   cyclomatic-complexity: false
 
@@ -95,6 +98,11 @@ rules:
     - true
     - source-map-support/register
 
+  # Allow static methods to be passed as function parameters
+  no-unbound-method:
+    - true
+    - "ignore-static"
+
   # This rule causes false positives for cases where a callback wrapper is used
   # to prevent callback arguments from being passed to the called function
   no-unnecessary-callback-wrapper: false
@@ -103,6 +111,14 @@ rules:
   no-unused-expression:
     - true
     - allow-fast-null-checks
+
+  # This rule has been deprecated
+  no-unused-variable: false
+
+  # Allow shorthand arrow function syntax when calling functions that return void
+  no-void-expression:
+    - true
+    - "ignore-arrow-function-shorthand"
 
   # Don't require object literal members to be sorted alphabetically.
   # This allows related members to be grouped together.
@@ -142,6 +158,9 @@ rules:
     - double
     - avoid-escape
     - jsx-double
+
+  # Allow boolean expressions to use any truthy/falsy value, not just boolean
+  strict-boolean-expressions: false
 
   # Don't require a default for every switch statement
   switch-default: false
