@@ -128,7 +128,10 @@ export class Hash extends EventTarget {
    * Updates the Hash object to match the URL hash
    */
   private _handleHashChange() {
-    if (location.hash !== this.toString()) {
+    let actualHash = location.hash.substr(1);
+    let expectedHash = this.toString();
+
+    if (actualHash !== expectedHash) {
       let params = new URLSearchParams(location.hash.substr(1));
 
       parseStringSet(params.get("u"), this._accounts);
