@@ -8,8 +8,8 @@ export function PageHeader(props: PageHeaderProps) {
     <header id="page_header" className={accountCountCssClass(hash.accounts)}>
       <div className="responsive-container">
         <img className="logo" src="img/logo.png" alt="logo image" />
-        <h1>GitHub Repo Health</h1>
-        <h2>See the health of all your GitHub repos on one page</h2>
+        <h1>My GitHub Repos</h1>
+        <h2>All your GitHub repos on one page</h2>
 
         <AddAccount {...props} />
       </div>

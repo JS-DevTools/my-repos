@@ -1,16 +1,16 @@
-repository: RepoHealth/repohealth.github.io
+repository: JS-DevTools/my-repos
 
-title: GitHub Repo Health
-description: See the health of all your GitHub repos on one page
+title: My GitHub Repos
+description: All your GitHub repos on one page
 logo: img/logo.png
 
 author:
-  twitter: JamesMessinger
+  twitter: JS_DevTools
 
 # google_analytics: UA-68102273-2
 
 twitter:
-  username: JamesMessinger
+  username: JS_DevTools
   card: summary
 
 defaults:

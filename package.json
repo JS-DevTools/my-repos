@@ -1,22 +1,22 @@
 {
-  "name": "github-repo-health",
+  "name": "my-repos",
   "version": "0.1.0",
-  "description": "See the health of all your GitHub repos on one page",
+  "description": "All your GitHub repos on one page",
   "private": true,
   "author": {
     "name": "James Messinger",
     "url": "https://jamesmessinger.com"
   },
-  "homepage": "https://repohealth.github.io/",
+  "homepage": "https://myrepos.io/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RepoHealth/repohealth.github.io.git"
+    "url": "https://github.com/JS-DevTools/my-repos.git"
   },
   "license": "MIT",
   "scripts": {
     "lint": "tslint -p tsconfig.json",
-    "build": "simplifyify _ts/index.tsx --outfile js/repo-health.js --minify --debug",
-    "build:dev": "simplifyify _ts/index.tsx --outfile js/repo-health.js --bundle --debug",
+    "build": "simplifyify _ts/index.tsx --outfile js/my-repos.js --minify --debug",
+    "build:dev": "simplifyify _ts/index.tsx --outfile js/my-repos.js --bundle --debug",
     "watch": "npm-run-all --parallel watch:*",
     "watch:typescript": "npm run build:dev -- --watch",
     "watch:jekyll": "jekyll serve --livereload",

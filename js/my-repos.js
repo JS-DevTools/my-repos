@@ -1,15 +1,15 @@
 /*!
- * Github Repo Health v0.1.0 (November 10th 2018)
+ * My Repos v0.1.0 (November 10th 2018)
  * 
- * https://repohealth.github.io/
+ * https://myrepos.io/
  * 
  * @author  James Messinger (https://jamesmessinger.com)
  * @license MIT
  */
 /*!
- * Github Repo Health v0.1.0 (November 10th 2018)
+ * My Repos v0.1.0 (November 10th 2018)
  * 
- * https://repohealth.github.io/
+ * https://myrepos.io/
  * 
  * @author  James Messinger (https://jamesmessinger.com)
  * @license MIT
@@ -506,8 +506,8 @@ function PageHeader(props) {
     return (React.createElement("header", { id: "page_header", className: util_1.accountCountCssClass(hash_1.hash.accounts) },
         React.createElement("div", { className: "responsive-container" },
             React.createElement("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
-            React.createElement("h1", null, "GitHub Repo Health"),
-            React.createElement("h2", null, "See the health of all your GitHub repos on one page"),
+            React.createElement("h1", null, "My GitHub Repos"),
+            React.createElement("h2", null, "All your GitHub repos on one page"),
             React.createElement(add_account_1.AddAccount, Object.assign({}, props)))));
 }
 exports.PageHeader = PageHeader;
@@ -829,4 +829,4 @@ function accountCountCssClass(accounts) {
 }
 exports.accountCountCssClass = accountCountCssClass;
 },{}]},{},[13])
-//# sourceMappingURL=repo-health.js.map
+//# sourceMappingURL=my-repos.js.map
