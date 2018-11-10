@@ -115,9 +115,18 @@ export class StateStore {
     // Sort the accounts so they're in the same order as the URL hash.
     // This makes it easy for users to hack the URL.
     let sortedAccounts: GitHubAccount[] = [];
-    for (let accountName of hash.accounts) {
-      let account = accounts.find(byLogin(accountName));
-      account && sortedAccounts.push(account);
+    for (let login of hash.accounts) {
+      let index = accounts.findIndex(byLogin(login));
+      if (index >= 0) {
+        let [account] = accounts.splice(index, 1);
+        sortedAccounts.push(account);
+      }
+    }
+
+    // Append any additional accounts that aren't in the hash yet
+    for (let account of accounts) {
+      sortedAccounts.push(account);
+      hash.addAccount(account.login);
     }
 
     this.setState({ accounts: sortedAccounts });
