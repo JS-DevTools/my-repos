@@ -156,7 +156,10 @@ function parseStringSet(value: string | null, set: Set<string>) {
   if (value) {
     let strings = value.split(",");
     for (let string of strings) {
-      set.add(string);
+      string = string.trim();
+      if (string.length > 0) {
+        set.add(string);
+      }
     }
   }
 }
