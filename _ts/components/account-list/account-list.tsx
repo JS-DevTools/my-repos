@@ -1,13 +1,13 @@
-import { AddAccount } from "../add-account/add-account";
+import { hash } from "../../hash";
+import { accountCountCssClass } from "../../util";
 import { AccountItem } from "./account-item";
 import { AccountListProps } from "./props";
 
 export function AccountList(props: AccountListProps) {
   let { accounts } = props;
-  let count = accounts.length === 0 ? "no-accounts" : accounts.length === 1 ? "has-one-account" : "has-accounts";
 
   return (
-    <main id="account_list" className={count}>
+    <main id="account_list" className={accountCountCssClass(hash.accounts)}>
       <div className="responsive-container">
         <div className="add-account-toggle">
           <input id="add_account_toggle" type="checkbox" className="toggle" />

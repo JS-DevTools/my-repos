@@ -29,3 +29,17 @@ export function random(min: number, max: number): number {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+/**
+ * Returns a CSS class string that indicates the number of accounts.
+ */
+export function accountCountCssClass(accounts: ReadonlySet<string>): string {
+  switch (accounts.size) {
+    case 0:
+      return "no-accounts";
+    case 1:
+      return "has-accounts has-one-account";
+    default:
+      return "has-accounts has-multiple-accounts";
+  }
+}
