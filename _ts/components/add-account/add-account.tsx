@@ -37,11 +37,11 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
     );
   }
 
-  private handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  private readonly handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.setState({ login: event.target.value });
   }
 
-  private handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  private readonly handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (this.state.login) {

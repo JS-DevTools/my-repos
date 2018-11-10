@@ -121,7 +121,7 @@ export class GitHub {
 export const github = new GitHub();
 
 
-// tslint:disable-next-line:no-any
+// tslint:disable:no-any no-unsafe-any
 function isGitHubAccountPOJO(account: any): account is GitHubAccountPOJO {
   return typeof account === "object" &&
     "login" in account && typeof account.login === "string" &&
@@ -130,7 +130,6 @@ function isGitHubAccountPOJO(account: any): account is GitHubAccountPOJO {
     "avatar_url" in account && typeof account.avatar_url === "string";
 }
 
-// tslint:disable-next-line:no-any
 function isArrayOfGitHubRepoPOJO(repos: any[]): repos is GitHubRepoPOJO[] {
   return repos.length > 0 &&
     typeof repos[0] === "object" &&

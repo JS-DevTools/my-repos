@@ -39,19 +39,23 @@ export async function fetchGitHubAccount(account: GitHubAccount, replaceAccount:
       repos,
     });
   }
+  else {
+    newAccount = account;
+  }
 
-  replaceAccount(account.id, newAccount!);
+  replaceAccount(account.id, newAccount);
 }
 
 
 async function safeResolve<T>(promise: Promise<T>): Promise<{ result?: T; error?: Error }> {
-  let result, error;
+  let result: T | undefined;
+  let error: Error | undefined;
 
   try {
     result = await promise;
   }
   catch (err) {
-    error = err;
+    error = err as Error;
   }
 
   return { result, error };

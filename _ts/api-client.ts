@@ -9,6 +9,8 @@ export type Fetch = (input: RequestInfo, init?: RequestInit) => Promise<Response
 
 export type ParsedResponseBody = string | JsonPojo | JsonPojo[] | undefined;
 
+export type CachedResponse = ResponseInit & { body: string };
+
 /**
  * A wrapper around the Fetch API, with added error handling and automatic response parsing.
  */
@@ -32,7 +34,7 @@ export class ApiClient {
       );
     }
 
-    cacheResponse(input, response);
+    await cacheResponse(input, response);
     return parsedResponseBody;
   }
 
@@ -116,7 +118,7 @@ async function fetchWithFallback(input: RequestInfo, init?: RequestInit): Promis
  */
 async function fetchFromCache(input: RequestInfo): Promise<Response> {
   // Default response (for a cache miss)
-  let responsePOJO = {
+  let responsePOJO: CachedResponse = {
     status: 503,
     statusText: "Service Unavailable",
     headers: {
@@ -130,10 +132,10 @@ async function fetchFromCache(input: RequestInfo): Promise<Response> {
   let cache = localStorage.getItem(getUrl(input));
   if (cache) {
     try {
-      responsePOJO = JSON.parse(cache);
+      responsePOJO = JSON.parse(cache) as CachedResponse;
     }
     catch (error) {
-      responsePOJO.body = error.message;
+      responsePOJO.body = (error as Error).message;
     }
   }
 
@@ -146,7 +148,7 @@ async function fetchFromCache(input: RequestInfo): Promise<Response> {
  */
 async function cacheResponse(input: RequestInfo, response: Response) {
   // Convert the response to a POJO that can be cached
-  let responsePOJO = {
+  let responsePOJO: CachedResponse = {
     status: response.status,
     statusText: response.statusText,
     headers: mapToPOJO(response.headers as any),   // tslint:disable-line:no-any
@@ -180,7 +182,7 @@ async function parseResponseBody(response: Response): Promise<ParsedResponseBody
 
   try {
     // Try to parse the response as JSON
-    let parsedResponseBody = JSON.parse(responseBody);
+    let parsedResponseBody = JSON.parse(responseBody) as ParsedResponseBody;
 
     if (typeof parsedResponseBody === "object") {
       // Return the parsed object or array
@@ -200,12 +202,12 @@ async function parseResponseBody(response: Response): Promise<ParsedResponseBody
 /**
  * Introduces an artificial delay during local development.
  */
-function artificialDelay(): Promise<void> {
+async function artificialDelay(): Promise<void> {
   let milliseconds = 0;
 
   if (hash.options.delay) {
     milliseconds = random(0, hash.options.delay);
   }
 
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+  await new Promise<unknown>((resolve) => setTimeout(resolve, milliseconds));
 }

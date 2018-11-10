@@ -20,18 +20,18 @@ export class StateStore {
   public static mixin(obj: StateStore) {
     let store = new StateStore();
     obj.state = store.state;
-    obj.syncWithHash = store.syncWithHash.bind(obj);
-    obj.addAccount = store.addAccount.bind(obj);
-    obj.replaceAccount = store.replaceAccount.bind(obj);
-    obj.removeAccount = store.removeAccount.bind(obj);
-    obj.toggleRepo = store.toggleRepo.bind(obj);
+    obj.syncWithHash = store.syncWithHash.bind(obj) as SyncWithHash;
+    obj.addAccount = store.addAccount.bind(obj) as AddAccount;
+    obj.replaceAccount = store.replaceAccount.bind(obj) as ReplaceAccount;
+    obj.removeAccount = store.removeAccount.bind(obj) as RemoveAccount;
+    obj.toggleRepo = store.toggleRepo.bind(obj) as ToggleRepo;
 
     // Immediately sync with the URL hash
     // HACK: Without setTimeout, the state doesn't update until AJAX fetches complete
-    setTimeout(obj.syncWithHash, 0);
+    setTimeout(obj.syncWithHash, 0);   // tslint:disable-line:no-unbound-method
 
     // Re-sync with the hash anytime it changes
-    hash.addEventListener("hashchange", obj.syncWithHash);
+    hash.addEventListener("hashchange", obj.syncWithHash);   // tslint:disable-line:no-unbound-method
   }
 
   public state: AppState = {
@@ -58,6 +58,7 @@ export class StateStore {
 
       // Asynchronously fetch the account info from GitHub
       // and replace this temporary account object with the real info
+      // tslint:disable-next-line:no-floating-promises no-unbound-method
       fetchGitHubAccount(account, this.replaceAccount);
 
       accounts.push(account);
@@ -94,6 +95,7 @@ export class StateStore {
 
     // Fetch the account info from GitHub
     // and replace this temporary account object with the real info
+    // tslint:disable-next-line:no-unbound-method
     await fetchGitHubAccount(account, this.replaceAccount);
   }
 

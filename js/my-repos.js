@@ -36,7 +36,7 @@ class ApiClient {
         if (!response.ok) {
             throw this.createError(`${getUrl(input)} returned an HTTP ${response.status} (${response.statusText || "Error"}) response`, parsedResponseBody);
         }
-        cacheResponse(input, response);
+        await cacheResponse(input, response);
         return parsedResponseBody;
     }
     /**
@@ -173,12 +173,12 @@ async function parseResponseBody(response) {
 /**
  * Introduces an artificial delay during local development.
  */
-function artificialDelay() {
+async function artificialDelay() {
     let milliseconds = 0;
     if (hash_1.hash.options.delay) {
         milliseconds = util_1.random(0, hash_1.hash.options.delay);
     }
-    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+    await new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 },{"./hash":12,"./util":14}],2:[function(require,module,exports){
 "use strict";
@@ -320,11 +320,15 @@ async function fetchGitHubAccount(account, replaceAccount) {
             repos,
         });
     }
+    else {
+        newAccount = account;
+    }
     replaceAccount(account.id, newAccount);
 }
 exports.fetchGitHubAccount = fetchGitHubAccount;
 async function safeResolve(promise) {
-    let result, error;
+    let result;
+    let error;
     try {
         result = await promise;
     }
@@ -355,9 +359,9 @@ class StateStore {
         obj.toggleRepo = store.toggleRepo.bind(obj);
         // Immediately sync with the URL hash
         // HACK: Without setTimeout, the state doesn't update until AJAX fetches complete
-        setTimeout(obj.syncWithHash, 0);
+        setTimeout(obj.syncWithHash, 0); // tslint:disable-line:no-unbound-method
         // Re-sync with the hash anytime it changes
-        hash_1.hash.addEventListener("hashchange", obj.syncWithHash);
+        hash_1.hash.addEventListener("hashchange", obj.syncWithHash); // tslint:disable-line:no-unbound-method
     }
     /**
      * Syncs the app state with the URL hash
@@ -374,6 +378,7 @@ class StateStore {
             });
             // Asynchronously fetch the account info from GitHub
             // and replace this temporary account object with the real info
+            // tslint:disable-next-line:no-floating-promises,no-unbound-method
             fetch_github_account_1.fetchGitHubAccount(account, this.replaceAccount);
             accounts.push(account);
         }
