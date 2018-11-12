@@ -1,4 +1,5 @@
-import { GitHubAccount, GitHubRepo } from "./github";
+import { GitHubAccount } from "./github/github-account";
+import { GitHubRepo } from "./github/github-repo";
 
 export class Config {
   /**
@@ -53,6 +54,13 @@ export class Config {
     else {
       this.hide.delete(repo.full_name);
     }
+  }
+
+  /**
+   * Returns only the GitHub repos that should be shown, based on the current config
+   */
+  public filterRepos(repos: GitHubRepo[]): GitHubRepo[] {
+    return repos.filter((repo) => !repo.isHidden(this));
   }
 }
 

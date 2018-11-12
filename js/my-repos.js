@@ -180,7 +180,7 @@ async function artificialDelay() {
     }
     await new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
-},{"./config":11,"./util":15}],2:[function(require,module,exports){
+},{"./config":11,"./util":17}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const repo_list_1 = require("../repo-list/repo-list");
@@ -225,7 +225,7 @@ function AccountList(props) {
         React.createElement("div", { className: "responsive-container" }, accounts.map((account) => React.createElement(account_item_1.AccountItem, Object.assign({ account: account }, props))))));
 }
 exports.AccountList = AccountList;
-},{"../../config":11,"../../util":15,"./account-item":2}],4:[function(require,module,exports){
+},{"../../config":11,"../../util":17,"./account-item":2}],4:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class AddAccount extends React.Component {
@@ -284,7 +284,8 @@ exports.App = App;
 },{"../account-list/account-list":3,"../first-time/first-time":8,"../page-header/page-header":9,"./state-store":7}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const github_1 = require("../../github");
+const github_1 = require("../../github/github");
+const github_account_1 = require("../../github/github-account");
 /**
  * Fetches the specified GitHub account and its repos, and then calls the given callback function
  * to update the app state.
@@ -301,21 +302,21 @@ async function fetchGitHubAccount(account, replaceAccount) {
     if (accountError) {
         // An error occurred while fetching the account, so create a dummy account
         // with the error message
-        newAccount = new github_1.GitHubAccount({
+        newAccount = new github_account_1.GitHubAccount({
             ...account,
             error: accountError.message,
         });
     }
     else if (accountPOJO && repoError) {
         // An error occurred while fetching the repos, so add the error message to the account
-        newAccount = new github_1.GitHubAccount({
+        newAccount = new github_account_1.GitHubAccount({
             ...accountPOJO,
             error: repoError.message,
         });
     }
     else if (accountPOJO && repos) {
         // Everything succeeded, so add the repos to the account
-        newAccount = new github_1.GitHubAccount({
+        newAccount = new github_account_1.GitHubAccount({
             ...accountPOJO,
             repos,
         });
@@ -337,11 +338,11 @@ async function safeResolve(promise) {
     }
     return { result, error };
 }
-},{"../../github":12}],7:[function(require,module,exports){
+},{"../../github/github":14,"../../github/github-account":12}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("../../config");
-const github_1 = require("../../github");
+const github_account_1 = require("../../github/github-account");
 const hash_1 = require("../../hash");
 const fetch_github_account_1 = require("./fetch-github-account");
 class StateStore {
@@ -372,7 +373,7 @@ class StateStore {
         for (let login of config_1.config.accounts) {
             // Create a temporary account object to populate the UI
             // while we fetch the account info from GitHub
-            let account = new github_1.GitHubAccount({
+            let account = new github_account_1.GitHubAccount({
                 login,
                 name: login,
                 loading: true,
@@ -398,7 +399,7 @@ class StateStore {
         }
         // Create a temporary account object to populate the UI
         // while we fetch the account info from GitHub
-        account = new github_1.GitHubAccount({
+        account = new github_account_1.GitHubAccount({
             login,
             name: login,
             loading: true,
@@ -490,7 +491,7 @@ function byLogin(login) {
     login = login.trim().toLowerCase();
     return (obj) => obj.login.trim().toLowerCase() === login;
 }
-},{"../../config":11,"../../github":12,"../../hash":13,"./fetch-github-account":6}],8:[function(require,module,exports){
+},{"../../config":11,"../../github/github-account":12,"../../hash":15,"./fetch-github-account":6}],8:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("../../config");
@@ -504,7 +505,7 @@ function FirstTime(props) {
                 React.createElement(add_account_1.AddAccount, Object.assign({ submitButtonText: "Show My Repos" }, props))))));
 }
 exports.FirstTime = FirstTime;
-},{"../../config":11,"../../util":15,"../add-account/add-account":4}],9:[function(require,module,exports){
+},{"../../config":11,"../../util":17,"../add-account/add-account":4}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("../../config");
@@ -519,13 +520,13 @@ function PageHeader(props) {
             React.createElement(add_account_1.AddAccount, Object.assign({}, props)))));
 }
 exports.PageHeader = PageHeader;
-},{"../../config":11,"../../util":15,"../add-account/add-account":4}],10:[function(require,module,exports){
+},{"../../config":11,"../../util":17,"../add-account/add-account":4}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("../../config");
 function RepoList(props) {
     let { account, toggleRepo } = props;
-    let repos = account.repos.filter(byOptions);
+    let repos = config_1.config.filterRepos(account.repos);
     return (React.createElement("ul", { className: "repo-list" }, repos.map((repo) => React.createElement(RepoItem, Object.assign({ repo: repo }, props)))));
 }
 exports.RepoList = RepoList;
@@ -535,20 +536,6 @@ function RepoItem(props) {
         React.createElement("h2", null,
             React.createElement("a", { href: `https://github.com/${account.login}/${repo.name}` }, repo.name)),
         repo.description && React.createElement("h3", null, repo.description)));
-}
-/**
- * Returns true if the GitHub Repo should be shown, based on the current options
- */
-function byOptions(repo) {
-    if (config_1.config.hide.has(repo.full_name)) {
-        // This repo has been explicitly hidden
-        return false;
-    }
-    if (repo.fork && !config_1.config.forks) {
-        // Don't show forked repos
-        return false;
-    }
-    return true;
 }
 },{"../../config":11}],11:[function(require,module,exports){
 "use strict";
@@ -583,6 +570,12 @@ class Config {
             this.hide.delete(repo.full_name);
         }
     }
+    /**
+     * Returns only the GitHub repos that should be shown, based on the current config
+     */
+    filterRepos(repos) {
+        return repos.filter((repo) => !repo.isHidden(this));
+    }
 }
 exports.Config = Config;
 /**
@@ -592,7 +585,6 @@ exports.config = new Config();
 },{}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const api_client_1 = require("./api-client");
 /**
  * Additional GitHub account properties that we need for this app
  */
@@ -609,6 +601,44 @@ class GitHubAccount {
     }
 }
 exports.GitHubAccount = GitHubAccount;
+},{}],13:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Additional GitHub repo properties that we need for this app
+ */
+class GitHubRepo {
+    constructor(props) {
+        this.id = props.id || Math.random();
+        this.name = props.name || "";
+        this.full_name = props.full_name || "";
+        this.description = props.description || "";
+        this.fork = props.fork || false;
+        this.stargazers_count = props.stargazers_count || 0;
+        this.hidden = props.hidden || false;
+    }
+    /**
+     * Determines whether the GitHub Repo should be hidden, based on the specified config
+     */
+    isHidden(config) {
+        if (config.hide.has(this.full_name)) {
+            // This repo has been explicitly hidden
+            return false;
+        }
+        if (this.fork && !config.forks) {
+            // Don't show forked repos
+            return false;
+        }
+        return true;
+    }
+}
+exports.GitHubRepo = GitHubRepo;
+},{}],14:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const api_client_1 = require("../api-client");
+const github_account_1 = require("./github-account");
+const github_repo_1 = require("./github-repo");
 class GitHub {
     constructor() {
         this._client = new api_client_1.ApiClient();
@@ -619,7 +649,7 @@ class GitHub {
     async fetchAccount(account) {
         let accountPOJO = await this._client.fetchObject(`https://api.github.com/users/${account.login}`);
         if (isGitHubAccountPOJO(accountPOJO)) {
-            return new GitHubAccount({
+            return new github_account_1.GitHubAccount({
                 ...accountPOJO,
                 loading: false,
                 repos: [],
@@ -637,10 +667,10 @@ class GitHub {
         if (isArrayOfGitHubRepoPOJO(repoPOJOs)) {
             let repos = [];
             for (let repoPOJO of repoPOJOs) {
-                repos.push({
+                repos.push(new github_repo_1.GitHubRepo({
                     ...repoPOJO,
                     hidden: false,
-                });
+                }));
             }
             return repos;
         }
@@ -667,7 +697,7 @@ function isArrayOfGitHubRepoPOJO(repos) {
         typeof repos[0] === "object" &&
         typeof repos[0].name === "string";
 }
-},{"./api-client":1}],13:[function(require,module,exports){
+},{"../api-client":1,"./github-account":12,"./github-repo":13}],15:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("./config");
@@ -782,12 +812,12 @@ function parsePositiveInteger(value, defaultValue = 0) {
     let number = parseInteger(value, defaultValue);
     return number >= 0 ? number : defaultValue;
 }
-},{"./config":11,"./util":15}],14:[function(require,module,exports){
+},{"./config":11,"./util":17}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = require("./components/app/app");
 ReactDOM.render(React.createElement(app_1.App, null), document.body);
-},{"./components/app/app":5}],15:[function(require,module,exports){
+},{"./components/app/app":5}],17:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // When running on localhost, we introduce artificial delays
@@ -827,5 +857,5 @@ function accountCountCssClass(accounts) {
     }
 }
 exports.accountCountCssClass = accountCountCssClass;
-},{}]},{},[14])
+},{}]},{},[16])
 //# sourceMappingURL=my-repos.js.map

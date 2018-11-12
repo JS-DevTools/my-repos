@@ -1,10 +1,10 @@
 import { config } from "../../config";
-import { GitHubRepo } from "../../github";
+import { GitHubRepo } from "../../github/github-repo";
 import { RepoListProps } from "./props";
 
 export function RepoList(props: RepoListProps) {
   let { account, toggleRepo } = props;
-  let repos = account.repos.filter(byOptions);
+  let repos = config.filterRepos(account.repos);
 
   return (
     <ul className="repo-list">
@@ -28,21 +28,4 @@ function RepoItem(props: RepoItemProps) {
       {repo.description && <h3>{repo.description}</h3>}
     </li>
   );
-}
-
-/**
- * Returns true if the GitHub Repo should be shown, based on the current options
- */
-function byOptions(repo: GitHubRepo): boolean {
-  if (config.hide.has(repo.full_name)) {
-    // This repo has been explicitly hidden
-    return false;
-  }
-
-  if (repo.fork && !config.forks) {
-    // Don't show forked repos
-    return false;
-  }
-
-  return true;
 }

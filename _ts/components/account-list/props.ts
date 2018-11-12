@@ -1,4 +1,4 @@
-import { GitHubAccount } from "../../github";
+import { GitHubAccount } from "../../github/github-account";
 import { RemoveAccount, ToggleRepo } from "../app/state-store";
 
 export interface AccountListProps {

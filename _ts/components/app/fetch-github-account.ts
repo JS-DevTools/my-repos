@@ -1,4 +1,5 @@
-import { github, GitHubAccount } from "../../github";
+import { github } from "../../github/github";
+import { GitHubAccount } from "../../github/github-account";
 
 type ReplaceAccountCallback = (oldAccountID: number, newAccount: GitHubAccount) => void;
 

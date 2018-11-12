@@ -1,4 +1,4 @@
-import { GitHubAccount } from "../../github";
+import { GitHubAccount } from "../../github/github-account";
 import { RepoList } from "../repo-list/repo-list";
 import { AccountListProps } from "./props";
 

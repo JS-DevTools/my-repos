@@ -1,5 +1,5 @@
 import { config } from "../../config";
-import { GitHubAccount } from "../../github";
+import { GitHubAccount } from "../../github/github-account";
 import { hash } from "../../hash";
 import { fetchGitHubAccount } from "./fetch-github-account";
 
