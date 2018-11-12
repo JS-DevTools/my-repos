@@ -1,6 +1,6 @@
 {
   "name": "my-repos",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "All your GitHub repos on one page",
   "private": true,
   "author": {
@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@types/node": "^10.12.2",
-    "@types/react": "^16.4.18",
+    "@types/react": "^16.7.3",
     "@types/react-dom": "^16.0.9",
     "npm-check": "^5.8.0",
     "npm-run-all": "^4.1.3",
