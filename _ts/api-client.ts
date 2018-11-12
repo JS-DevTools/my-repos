@@ -1,4 +1,4 @@
-import { hash } from "./hash";
+import { config } from "./config";
 import { LOCAL_DEV_MODE, mapToPOJO, random } from "./util";
 
 interface JsonPojo {
@@ -205,8 +205,8 @@ async function parseResponseBody(response: Response): Promise<ParsedResponseBody
 async function artificialDelay(): Promise<void> {
   let milliseconds = 0;
 
-  if (hash.options.delay) {
-    milliseconds = random(0, hash.options.delay);
+  if (config.delay) {
+    milliseconds = random(0, config.delay);
   }
 
   await new Promise<unknown>((resolve) => setTimeout(resolve, milliseconds));

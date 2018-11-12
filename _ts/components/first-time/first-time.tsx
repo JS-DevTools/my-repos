@@ -1,11 +1,11 @@
-import { hash } from "../../hash";
+import { config } from "../../config";
 import { accountCountCssClass } from "../../util";
 import { AddAccount } from "../add-account/add-account";
 import { FirstTimeProps } from "./props";
 
 export function FirstTime(props: FirstTimeProps) {
   return (
-    <aside id="first_time" className={accountCountCssClass(hash.accounts)}>
+    <aside id="first_time" className={accountCountCssClass(config.accounts)}>
       <div className="responsive-container">
         <div className="welcome-message">
           <h3>Hi! 👋 Enter your GitHub username to get started</h3>

@@ -1,3 +1,4 @@
+import { config } from "../../config";
 import { GitHubAccount } from "../../github";
 import { hash } from "../../hash";
 import { fetchGitHubAccount } from "./fetch-github-account";
@@ -47,7 +48,7 @@ export class StateStore {
   public syncWithHash() {
     let accounts: GitHubAccount[] = [];
 
-    for (let login of hash.accounts) {
+    for (let login of config.accounts) {
       // Create a temporary account object to populate the UI
       // while we fetch the account info from GitHub
       let account = new GitHubAccount({
@@ -118,7 +119,7 @@ export class StateStore {
     // Sort the accounts so they're in the same order as the URL hash.
     // This makes it easy for users to hack the URL.
     let sortedAccounts: GitHubAccount[] = [];
-    for (let login of hash.accounts) {
+    for (let login of config.accounts) {
       let index = accounts.findIndex(byLogin(login));
       if (index >= 0) {
         let [account] = accounts.splice(index, 1);
@@ -129,7 +130,8 @@ export class StateStore {
     // Append any additional accounts that aren't in the hash yet
     for (let account of accounts) {
       sortedAccounts.push(account);
-      hash.addAccount(account);
+      config.addAccount(account);
+      hash.updateHash();
     }
 
     this.setState({ accounts: sortedAccounts });
@@ -144,7 +146,7 @@ export class StateStore {
 
     if (removed) {
       this.setState({ accounts });
-      hash.removeAccount(removed);
+      config.removeAccount(removed);
     }
   }
 
@@ -157,7 +159,7 @@ export class StateStore {
     let repo = account.repos.find(byID(repoID))!;
     repo.hidden = hidden;
     this.setState({ accounts });
-    hash.toggleRepo(account, repo, hidden);
+    config.toggleRepo(account, repo, hidden);
   }
 }
 

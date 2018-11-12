@@ -1,48 +1,13 @@
-import { GitHubAccount, GitHubRepo } from "./github";
+import { config } from "./config";
 import { LOCAL_DEV_MODE } from "./util";
 
 // Artificially delay AJAX calls for local development, to simulate network latency
 const defaultDelay = LOCAL_DEV_MODE ? 1000 : 0;
 
-export interface Options {
-  /**
-   * Whether to show forked repos on the dashboard
-   */
-  forks: boolean;
-
-  /**
-   * Delays AJAX responses by a number of milliseconds.
-   * This is mostly just used for local development, to simulate network latency.
-   */
-  delay: number;
-}
-
 /**
- * Reads and stores state in the URL hash
+ * Reads and stores the config settings in the URL hash
  */
 export class Hash extends EventTarget {
-  private readonly _accounts: Set<string> = new Set();
-  private readonly _hide: Set<string> = new Set();
-  private readonly _options: Options = {
-    forks: false,
-    delay: defaultDelay,
-  };
-
-  /**
-   * The accounts to show on the dashboard
-   */
-  public readonly accounts: ReadonlySet<string> = this._accounts;
-
-  /**
-   * Specific repos to hide
-   */
-  public readonly hide: ReadonlySet<string> = this._hide;
-
-  /**
-   * Options for how the dashboard should be displayed
-   */
-  public readonly options: Readonly<Options> = this._options;
-
   public constructor() {
     super();
     this._handleHashChange();
@@ -50,63 +15,32 @@ export class Hash extends EventTarget {
   }
 
   /**
-   * Updates the URL hash to include the specified GitHub account
+   * Updates the URL hash to match the Config object
    */
-  public addAccount(account: GitHubAccount) {
-    this._accounts.add(account.login);
-    this._updateHash();
+  public updateHash() {
+    location.hash = this.toString();
   }
 
   /**
-   * Updates the URL hash to remove the specified GitHub account
-   */
-  public removeAccount(account: GitHubAccount) {
-    this._accounts.delete(account.login);
-    this._updateHash();
-  }
-
-  /**
-   * Updates the URL hash to hide or show the specified GitHub repo
-   */
-  public toggleRepo(account: GitHubAccount, repo: GitHubRepo, hidden: boolean) {
-    if (hidden) {
-      this._hide.add(repo.full_name);
-    }
-    else {
-      this._hide.delete(repo.full_name);
-    }
-
-    this._updateHash();
-  }
-
-  /**
-   * Updates the URL hash to with the specified options
-   */
-  public setOptions(options: Partial<Options>) {
-    Object.assign(this.options, options);
-    this._updateHash();
-  }
-
-  /**
-   * Returns a URL hash string that matches the Hash object
+   * Returns a URL hash string that matches the Config object
    */
   public toString() {
     let params = new URLSearchParams();
 
-    if (this.accounts.size > 0) {
-      params.append("u", [...this.accounts].join(","));
+    if (config.accounts.size > 0) {
+      params.append("u", [...config.accounts].join(","));
     }
 
-    if (this.hide.size > 0) {
-      params.append("hide", [...this.hide].join(","));
+    if (config.hide.size > 0) {
+      params.append("hide", [...config.hide].join(","));
     }
 
-    if (this.options.forks) {
+    if (config.forks) {
       params.append("forks", "yes");
     }
 
-    if (this.options.delay && this.options.delay !== defaultDelay) {
-      params.append("delay", String(this.options.delay));
+    if (config.delay && config.delay !== defaultDelay) {
+      params.append("delay", String(config.delay));
     }
 
     let hashString = params.toString();
@@ -119,14 +53,7 @@ export class Hash extends EventTarget {
   }
 
   /**
-   * Updates the URL hash to match the Hash object
-   */
-  private _updateHash() {
-    location.hash = this.toString();
-  }
-
-  /**
-   * Updates the Hash object to match the URL hash
+   * Updates the Config object to match the URL hash
    */
   private _handleHashChange() {
     let actualHash = location.hash.substr(1);
@@ -135,10 +62,10 @@ export class Hash extends EventTarget {
     if (actualHash !== expectedHash) {
       let params = new URLSearchParams(location.hash.substr(1));
 
-      parseStringSet(params.get("u"), this._accounts);
-      parseStringSet(params.get("hide"), this._hide);
-      this._options.forks = parseBoolean(params.get("forks"), this._options.forks);
-      this._options.delay = parsePositiveInteger(params.get("delay"), this._options.delay);
+      config.accounts = parseStringSet(params.get("u"), config.accounts);
+      config.hide = parseStringSet(params.get("hide"), config.hide);
+      config.forks = parseBoolean(params.get("forks"), config.forks);
+      config.delay = parsePositiveInteger(params.get("delay"), config.delay);
 
       this.dispatchEvent(new Event("hashchange"));
     }
@@ -154,7 +81,7 @@ export const hash = new Hash();
  * Updates the contents of the given Set object to match the contents of
  * the specified comma-delimited string
  */
-function parseStringSet(value: string | null, set: Set<string>) {
+function parseStringSet(value: string | null, set: Set<string>): Set<string> {
   set.clear();
 
   if (value) {
@@ -166,6 +93,8 @@ function parseStringSet(value: string | null, set: Set<string>) {
       }
     }
   }
+
+  return set;
 }
 
 /**
