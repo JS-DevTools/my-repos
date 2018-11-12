@@ -1,8 +1,4 @@
 import { config } from "./config";
-import { LOCAL_DEV_MODE } from "./util";
-
-// Artificially delay AJAX calls for local development, to simulate network latency
-const defaultDelay = LOCAL_DEV_MODE ? 1000 : 0;
 
 /**
  * Reads and stores the config settings in the URL hash
@@ -39,7 +35,7 @@ export class Hash extends EventTarget {
       params.append("forks", "yes");
     }
 
-    if (config.delay && config.delay !== defaultDelay) {
+    if (config.delay && config.delay !== config.defaultDelay) {
       params.append("delay", String(config.delay));
     }
 

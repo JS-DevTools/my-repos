@@ -1,5 +1,6 @@
 import { GitHubAccount } from "./github/github-account";
 import { GitHubRepo } from "./github/github-repo";
+import { LOCAL_DEV_MODE } from "./util";
 
 export class Config {
   /**
@@ -23,11 +24,16 @@ export class Config {
    */
   public delay: number;
 
+  /**
+   * The default delay, based on whether we're in "local dev" mode
+   */
+  public readonly defaultDelay = LOCAL_DEV_MODE ? 1000 : 0;
+
   public constructor(props: Partial<Config> = {}) {
     this.accounts = props.accounts || new Set();
     this.hide = props.accounts || new Set();
     this.forks = props.forks || false;
-    this.delay = props.delay || 0;
+    this.delay = props.delay || this.defaultDelay;
   }
 
   /**
