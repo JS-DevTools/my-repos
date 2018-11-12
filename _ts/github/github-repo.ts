@@ -32,14 +32,14 @@ export class GitHubRepo {
   public isHidden(config: Config): boolean {
     if (config.hide.has(this.full_name)) {
       // This repo has been explicitly hidden
-      return false;
+      return true;
     }
 
     if (this.fork && !config.forks) {
       // Don't show forked repos
-      return false;
+      return true;
     }
 
-    return true;
+    return false;
   }
 }
