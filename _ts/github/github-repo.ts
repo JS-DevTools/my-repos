@@ -42,11 +42,6 @@ export class GitHubRepo implements GitHubRepoPOJO {
     html_url: "",
   };
 
-  /**
-   * Is this repo hidden from the dashboard?
-   */
-  public hidden: boolean;
-
   public constructor(props: Partial<GitHubRepo>) {
     this.id = props.id || Math.random();
     this.name = props.name || "";
@@ -58,7 +53,6 @@ export class GitHubRepo implements GitHubRepoPOJO {
     this.stargazers_count = props.stargazers_count || 0;
     this.watchers_count = props.watchers_count || 0;
     this.open_issues_count = props.open_issues_count || 0;
-    this.hidden = props.hidden || false;
     this.html_url = props.html_url || "";
   }
 

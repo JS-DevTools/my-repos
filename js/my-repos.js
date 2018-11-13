@@ -275,6 +275,7 @@ class App extends React.Component {
     render() {
         return [
             React.createElement(page_header_1.PageHeader, { key: "page_header", addAccount: this.addAccount }),
+            // <Options key="options" />,
             React.createElement(account_list_1.AccountList, Object.assign({ key: "account_list", removeAccount: this.removeAccount, toggleRepo: this.toggleRepo }, this.state)),
             React.createElement(first_time_1.FirstTime, { key: "first_time", addAccount: this.addAccount }),
         ];
@@ -461,7 +462,7 @@ class StateStore {
         let accounts = this.state.accounts.slice();
         let account = accounts.find(byID(accountID));
         let repo = account.repos.find(byID(repoID));
-        repo.hidden = hidden;
+        /////// repo.hidden = hidden;
         this.setState({ accounts });
         config_1.config.toggleRepo(account, repo, hidden);
     }
@@ -686,7 +687,6 @@ class GitHubRepo {
         this.stargazers_count = props.stargazers_count || 0;
         this.watchers_count = props.watchers_count || 0;
         this.open_issues_count = props.open_issues_count || 0;
-        this.hidden = props.hidden || false;
         this.html_url = props.html_url || "";
     }
     /**
@@ -750,10 +750,7 @@ class GitHub {
         if (github_repo_1.isArrayOfGitHubRepoPOJO(repoPOJOs)) {
             let repos = [];
             for (let repoPOJO of repoPOJOs) {
-                repos.push(new github_repo_1.GitHubRepo({
-                    ...repoPOJO,
-                    hidden: false,
-                }));
+                repos.push(new github_repo_1.GitHubRepo(repoPOJO));
             }
             return repos;
         }

@@ -33,10 +33,7 @@ export class GitHub {
       let repos: GitHubRepo[] = [];
 
       for (let repoPOJO of repoPOJOs) {
-        repos.push(new GitHubRepo({
-          ...repoPOJO,
-          hidden: false,
-        }));
+        repos.push(new GitHubRepo(repoPOJO));
       }
 
       return repos;
