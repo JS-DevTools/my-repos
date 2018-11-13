@@ -35,6 +35,10 @@ export class Hash extends EventTarget {
       params.append("forks", "yes");
     }
 
+    if (config.showArchived) {
+      params.append("archived", "yes");
+    }
+
     if (config.delay && config.delay !== config.defaultDelay) {
       params.append("delay", String(config.delay));
     }
@@ -61,6 +65,7 @@ export class Hash extends EventTarget {
       config.accounts = parseStringSet(params.get("u"), config.accounts);
       config.hiddenRepos = parseStringSet(params.get("hide"), config.hiddenRepos);
       config.showForks = parseBoolean(params.get("forks"), config.showForks);
+      config.showArchived = parseBoolean(params.get("archived"), config.showArchived);
       config.delay = parsePositiveInteger(params.get("delay"), config.delay);
 
       this.dispatchEvent(new Event("hashchange"));

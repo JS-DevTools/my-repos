@@ -19,6 +19,11 @@ export class Config {
   public showForks: boolean;
 
   /**
+   * Whether to show archived repos on the dashboard
+   */
+  public showArchived: boolean;
+
+  /**
    * Delays AJAX responses by a number of milliseconds.
    * This is mostly just used for local development, to simulate network latency.
    */
@@ -33,6 +38,7 @@ export class Config {
     this.accounts = props.accounts || new Set();
     this.hiddenRepos = props.accounts || new Set();
     this.showForks = props.showForks || false;
+    this.showArchived = props.showArchived || false;
     this.delay = props.delay || this.defaultDelay;
   }
 

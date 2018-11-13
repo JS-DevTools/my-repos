@@ -67,6 +67,11 @@ export class GitHubRepo implements GitHubRepoPOJO {
       return true;
     }
 
+    if (this.archived && !config.showArchived) {
+      // Don't show archived repos
+      return true;
+    }
+
     return false;
   }
 }
