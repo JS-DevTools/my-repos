@@ -33,6 +33,15 @@ export class GitHubRepo implements GitHubRepoPOJO {
   public open_issues_count: number;
   public html_url: string;
 
+  // TEMPORARY
+  public dependencies = {
+    total: 0,
+    out_of_date: 0,
+    up_to_date: 0,
+    advisories: 0,
+    html_url: "",
+  };
+
   /**
    * Is this repo hidden from the dashboard?
    */
