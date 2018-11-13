@@ -1,9 +1,26 @@
 import { Config } from "../config";
 
 /**
+ * A GitHub repository, as returned from the GitHub REST API
+ */
+export interface GitHubRepoPOJO {
+  readonly id: number;
+  name: string;
+  full_name: string;
+  description: string;
+  archived: boolean;
+  fork: boolean;
+  forks_count: number;
+  stargazers_count: number;
+  watchers_count: number;
+  open_issues_count: number;
+  html_url: string;
+}
+
+/**
  * Additional GitHub repo properties that we need for this app
  */
-export class GitHubRepo {
+export class GitHubRepo implements GitHubRepoPOJO {
   public readonly id: number;
   public name: string;
   public full_name: string;
@@ -42,4 +59,11 @@ export class GitHubRepo {
 
     return false;
   }
+}
+
+// tslint:disable-next-line:no-any
+export function isArrayOfGitHubRepoPOJO(repos: any[]): repos is GitHubRepoPOJO[] {
+  return repos.length > 0 &&
+    typeof repos[0] === "object" &&
+    typeof repos[0].name === "string";
 }
