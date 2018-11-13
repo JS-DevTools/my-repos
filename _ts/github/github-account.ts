@@ -21,6 +21,7 @@ export class GitHubAccount implements GitHubAccountPOJO {
   public name: string;
   public avatar_url: string;
   public bio: string;
+  public html_url: string;
 
   /**
    * This account's GitHub repos
@@ -46,6 +47,7 @@ export class GitHubAccount implements GitHubAccountPOJO {
     this.repos = props.repos || [];
     this.loading = Boolean(props.loading);
     this.error = props.error;
+    this.html_url = props.html_url || "";
   }
 }
 

@@ -27,6 +27,7 @@ export class GitHubRepo implements GitHubRepoPOJO {
   public description: string;
   public fork: boolean;
   public stargazers_count: number;
+  public html_url: string;
 
   /**
    * Is this repo hidden from the dashboard?
@@ -41,6 +42,7 @@ export class GitHubRepo implements GitHubRepoPOJO {
     this.fork = props.fork || false;
     this.stargazers_count = props.stargazers_count || 0;
     this.hidden = props.hidden || false;
+    this.html_url = props.html_url || "";
   }
 
   /**

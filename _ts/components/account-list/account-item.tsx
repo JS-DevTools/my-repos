@@ -13,7 +13,7 @@ export function AccountItem(props: AccountItemProps) {
     <section key={account.id} className="account">
       <header>
         <h1>
-          <a href={`https://github.com/${account.login}`}>
+          <a href={account.html_url}>
             {account.avatar_url && <img src={account.avatar_url} className="avatar" />}
             {account.name}
           </a>
