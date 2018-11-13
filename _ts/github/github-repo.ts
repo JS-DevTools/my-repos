@@ -25,8 +25,12 @@ export class GitHubRepo implements GitHubRepoPOJO {
   public name: string;
   public full_name: string;
   public description: string;
+  public archived: boolean;
   public fork: boolean;
+  public forks_count: number;
   public stargazers_count: number;
+  public watchers_count: number;
+  public open_issues_count: number;
   public html_url: string;
 
   /**
@@ -39,8 +43,12 @@ export class GitHubRepo implements GitHubRepoPOJO {
     this.name = props.name || "";
     this.full_name = props.full_name || "";
     this.description = props.description || "";
+    this.archived = props.archived || false;
     this.fork = props.fork || false;
+    this.forks_count = props.forks_count || 0;
     this.stargazers_count = props.stargazers_count || 0;
+    this.watchers_count = props.watchers_count || 0;
+    this.open_issues_count = props.open_issues_count || 0;
     this.hidden = props.hidden || false;
     this.html_url = props.html_url || "";
   }
