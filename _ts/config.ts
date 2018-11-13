@@ -11,12 +11,12 @@ export class Config {
   /**
    * Specific repos to hide
    */
-  public hide: Set<string>;
+  public hiddenRepos: Set<string>;
 
   /**
    * Whether to show forked repos on the dashboard
    */
-  public forks: boolean;
+  public showForks: boolean;
 
   /**
    * Delays AJAX responses by a number of milliseconds.
@@ -31,8 +31,8 @@ export class Config {
 
   public constructor(props: Partial<Config> = {}) {
     this.accounts = props.accounts || new Set();
-    this.hide = props.accounts || new Set();
-    this.forks = props.forks || false;
+    this.hiddenRepos = props.accounts || new Set();
+    this.showForks = props.showForks || false;
     this.delay = props.delay || this.defaultDelay;
   }
 
@@ -55,10 +55,10 @@ export class Config {
    */
   public toggleRepo(account: GitHubAccount, repo: GitHubRepo, hidden: boolean) {
     if (hidden) {
-      this.hide.add(repo.full_name);
+      this.hiddenRepos.add(repo.full_name);
     }
     else {
-      this.hide.delete(repo.full_name);
+      this.hiddenRepos.delete(repo.full_name);
     }
   }
 

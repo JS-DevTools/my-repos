@@ -27,11 +27,11 @@ export class Hash extends EventTarget {
       params.append("u", [...config.accounts].join(","));
     }
 
-    if (config.hide.size > 0) {
-      params.append("hide", [...config.hide].join(","));
+    if (config.hiddenRepos.size > 0) {
+      params.append("hide", [...config.hiddenRepos].join(","));
     }
 
-    if (config.forks) {
+    if (config.showForks) {
       params.append("forks", "yes");
     }
 
@@ -59,8 +59,8 @@ export class Hash extends EventTarget {
       let params = new URLSearchParams(location.hash.substr(1));
 
       config.accounts = parseStringSet(params.get("u"), config.accounts);
-      config.hide = parseStringSet(params.get("hide"), config.hide);
-      config.forks = parseBoolean(params.get("forks"), config.forks);
+      config.hiddenRepos = parseStringSet(params.get("hide"), config.hiddenRepos);
+      config.showForks = parseBoolean(params.get("forks"), config.showForks);
       config.delay = parsePositiveInteger(params.get("delay"), config.delay);
 
       this.dispatchEvent(new Event("hashchange"));

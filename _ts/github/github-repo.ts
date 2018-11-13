@@ -30,12 +30,12 @@ export class GitHubRepo {
    * Determines whether the GitHub Repo should be hidden, based on the specified config
    */
   public isHidden(config: Config): boolean {
-    if (config.hide.has(this.full_name)) {
+    if (config.hiddenRepos.has(this.full_name)) {
       // This repo has been explicitly hidden
       return true;
     }
 
-    if (this.fork && !config.forks) {
+    if (this.fork && !config.showForks) {
       // Don't show forked repos
       return true;
     }
