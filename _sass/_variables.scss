@@ -4,10 +4,18 @@ $medium-gray: #dfe2e5;
 $light-gray: #eaecef;
 $lighter-gray: #f4f4f4;
 
+$medium-blue: #0366d6;
+
 $bg-color: #fff;
 $text-color: #24292e;
-$link-color: #0366d6;
+$link-color: $medium-blue;
 $light-border: $light-gray;
+
+$info-color: $medium-blue;
+$info-bg-color: transparentize($info-color, .9);
+
+$error-color: red;
+$error-bg-color: transparentize($error-color, .9);
 
 $vertical-space-large: 30px;
 $vertical-space-medium: 20px;

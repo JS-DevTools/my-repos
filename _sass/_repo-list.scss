@@ -7,6 +7,18 @@
 
   .repo {
     margin-bottom: $vertical-space-large;
+    border-radius: 10px;
+    padding: $vertical-space-small $horizontal-space-medium;
+
+    &.forked {
+      background-color: $info-bg-color;
+      border: solid 1px $info-color;
+    }
+
+    &.archived {
+      background-color: $error-bg-color;
+      border: solid 1px $error-color;
+    }
 
     h2 {
       font-size: 1.2em;
