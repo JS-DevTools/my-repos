@@ -13,3 +13,21 @@
     max-width: 500px;
   }
 }
+
+@media (min-width: $tablet-min-width) and (min-height: 400px) {
+  #first_time {
+    margin-top: 100px;
+  }
+}
+
+@media (min-width: $tablet-min-width) and (min-height: 500px) {
+  #first_time {
+    margin-top: 150px;
+  }
+}
+
+@media (min-width: $tablet-min-width) and (min-height: 700px) {
+  #first_time {
+    margin-top: 250px;
+  }
+}
