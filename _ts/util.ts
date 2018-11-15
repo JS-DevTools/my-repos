@@ -33,8 +33,8 @@ export function random(min: number, max: number): number {
 /**
  * Returns a CSS class string that indicates the number of accounts.
  */
-export function accountCountCssClass(accounts: ReadonlySet<string>): string {
-  switch (accounts.size) {
+export function accountCountCssClass(accounts: ReadonlyArray<unknown>): string {
+  switch (accounts.length) {
     case 0:
       return "no-accounts";
     case 1:
@@ -42,4 +42,29 @@ export function accountCountCssClass(accounts: ReadonlySet<string>): string {
     default:
       return "has-accounts has-multiple-accounts";
   }
+}
+
+// @ts-ignore - Typescript complains that T is implicitly any
+type IdentityFunction<T> = (T) => unknown;
+
+/**
+ * Returns the unique items in both arrays, as determined by the specified identity function
+ */
+export function union<T>(array1: Iterable<T>, array2: Iterable<T>, identity: IdentityFunction<T> = (x: unknown) => x): T[] {
+  let uniques: T[] = [];
+  let ids = [];
+
+  for (let array of [array1, array2]) {
+    for (let item of array) {
+      let id = identity(item);
+      let alreadyExists = ids.includes(id);
+
+      if (!alreadyExists) {
+        ids.push(id);
+        uniques.push(item);
+      }
+    }
+  }
+
+  return uniques;
 }

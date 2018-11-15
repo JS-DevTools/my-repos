@@ -15,6 +15,7 @@ export class GitHub {
       return new GitHubAccount({
         ...accountPOJO,
         loading: false,
+        loaded: true,
         repos: [],
       });
     }
@@ -43,8 +44,3 @@ export class GitHub {
     }
   }
 }
-
-/**
- * Singleton instance of the GitHub API client
- */
-export const github = new GitHub();

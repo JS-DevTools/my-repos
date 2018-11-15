@@ -1,5 +1,9 @@
 import { ChangeEvent, FormEvent } from "react";
-import { AddAccountProps } from "./props";
+import { stateStore } from "../state-store";
+
+export interface AddAccountProps {
+  submitButtonText?: string;
+}
 
 interface State {
   login: string;
@@ -46,7 +50,7 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
 
     if (this.state.login) {
       this.setState({ busy: true });
-      await this.props.addAccount(this.state.login.trim());
+      await stateStore.addAccount(this.state.login);
       this.setState({ login: "", busy: false });
     }
   }

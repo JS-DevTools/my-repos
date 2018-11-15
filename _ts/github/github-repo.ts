@@ -1,10 +1,9 @@
-import { Config } from "../config";
+import { GitHubAccount } from "./github-account";
 
 /**
  * A GitHub repository, as returned from the GitHub REST API
  */
 export interface GitHubRepoPOJO {
-  readonly id: number;
   name: string;
   full_name: string;
   description: string;
@@ -21,17 +20,17 @@ export interface GitHubRepoPOJO {
  * Additional GitHub repo properties that we need for this app
  */
 export class GitHubRepo implements GitHubRepoPOJO {
-  public readonly id: number;
-  public name: string;
-  public full_name: string;
-  public description: string;
-  public archived: boolean;
-  public fork: boolean;
-  public forks_count: number;
-  public stargazers_count: number;
-  public watchers_count: number;
-  public open_issues_count: number;
-  public html_url: string;
+  public readonly account: GitHubAccount;
+  public name = "";
+  public full_name = "";
+  public description = "";
+  public archived = false;
+  public fork = false;
+  public forks_count = 0;
+  public stargazers_count = 0;
+  public watchers_count = 0;
+  public open_issues_count = 0;
+  public html_url = "";
 
   // TEMPORARY
   public dependencies = {
@@ -43,43 +42,16 @@ export class GitHubRepo implements GitHubRepoPOJO {
   };
 
   public constructor(props: Partial<GitHubRepo>) {
-    this.id = props.id || Math.random();
-    this.name = props.name || "";
-    this.full_name = props.full_name || "";
-    this.description = props.description || "";
-    this.archived = props.archived || false;
-    this.fork = props.fork || false;
-    this.forks_count = props.forks_count || 0;
-    this.stargazers_count = props.stargazers_count || 0;
-    this.watchers_count = props.watchers_count || 0;
-    this.open_issues_count = props.open_issues_count || 0;
-    this.html_url = props.html_url || "";
-  }
-
-  /**
-   * Determines whether the GitHub Repo should be hidden, based on the specified config
-   */
-  public isHidden(config: Config): boolean {
-    if (config.hiddenRepos.has(this.full_name)) {
-      // This repo has been explicitly hidden
-      return true;
+    if (!props.account) {
+      throw new Error(`No parent account was specified for GitHub repo "${props.name}"`);
     }
 
-    if (this.fork && !config.showForks) {
-      // Don't show forked repos
-      return true;
-    }
-
-    if (this.archived && !config.showArchived) {
-      // Don't show archived repos
-      return true;
-    }
-
-    return false;
+    this.account = props.account;
+    Object.assign(this, props);
   }
 }
 
-// tslint:disable-next-line:no-any
+// tslint:disable:no-any no-unsafe-any
 export function isArrayOfGitHubRepoPOJO(repos: any[]): repos is GitHubRepoPOJO[] {
   return repos.length > 0 &&
     typeof repos[0] === "object" &&

@@ -1,10 +1,14 @@
-import { config } from "../../config";
-import { GitHubRepo } from "../../github/github-repo";
-import { RepoListProps } from "./props";
+import { GitHubAccount } from "../github/github-account";
+import { GitHubRepo } from "../github/github-repo";
+import { stateStore } from "../state-store";
+
+export interface RepoListProps {
+  account: GitHubAccount;
+}
 
 export function RepoList(props: RepoListProps) {
-  let { account, toggleRepo } = props;
-  let repos = config.filterRepos(account.repos);
+  let { account } = props;
+  let repos = account.repos.filter((repo) => !stateStore.isHidden(repo));
 
   return (
     <ul className="repo-list">
@@ -21,7 +25,7 @@ function RepoItem(props: RepoItemProps) {
   let { repo } = props;
 
   return (
-    <li key={repo.id} className={`repo ${repo.fork ? "forked" : ""} ${repo.archived ? "archived" : ""}`}>
+    <li key={repo.name} className={`repo ${repo.fork ? "forked" : ""} ${repo.archived ? "archived" : ""}`}>
       <h2>
         <a href={repo.html_url}>{repo.name}</a>
       </h2>

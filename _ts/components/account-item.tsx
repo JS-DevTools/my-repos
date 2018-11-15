@@ -1,8 +1,7 @@
-import { GitHubAccount } from "../../github/github-account";
-import { RepoList } from "../repo-list/repo-list";
-import { AccountListProps } from "./props";
+import { GitHubAccount } from "../github/github-account";
+import { RepoList } from "./repo-list";
 
-interface AccountItemProps extends AccountListProps {
+interface AccountItemProps {
   account: GitHubAccount;
 }
 
@@ -10,7 +9,7 @@ export function AccountItem(props: AccountItemProps) {
   let { account } = props;
 
   return (
-    <section key={account.id} className="account">
+    <section key={account.login} className="account">
       <header>
         <h1>
           <a href={account.html_url}>
@@ -25,10 +24,10 @@ export function AccountItem(props: AccountItemProps) {
 }
 
 function AccountItemContents(props: AccountItemProps) {
-  let { account, toggleRepo } = props;
+  let { account } = props;
 
   if (account.repos.length > 0) {
-    return <RepoList account={account} toggleRepo={toggleRepo} />;
+    return <RepoList account={account} />;
   }
   else if (account.error) {
     return (

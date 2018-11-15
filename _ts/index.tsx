@@ -1,3 +1,3 @@
-import { App } from "./components/app/app";
+import { App } from "./components/app";
 
 ReactDOM.render(<App />, document.body);
