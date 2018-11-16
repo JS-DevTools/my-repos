@@ -17,7 +17,8 @@ export function writeStateToHash(state: Partial<ReadonlyAppState>) {
  */
 export function readStateFromHash(): Partial<AppState> {
   let hash = location.hash.substr(1);
-  return hashToState(hash);
+  let state = hashToState(hash);
+  return state;
 }
 
 /**
@@ -51,7 +52,7 @@ function stateToHash(state: Partial<ReadonlyAppState>): string {
     params.append("archived", "yes");
   }
 
-  if (state.delay && state.delay !== DEFAULT_DELAY) {
+  if (state.delay !== DEFAULT_DELAY) {
     params.append("delay", String(state.delay));
   }
 
@@ -74,7 +75,7 @@ function hashToState(hash: string): Partial<AppState> {
     hiddenRepos: parseStringSet(params.get("hide")),
     showForks: parseBoolean(params.get("forks")),
     showArchived: parseBoolean(params.get("archived")),
-    delay: parsePositiveInteger(params.get("delay")),
+    delay: parsePositiveInteger(params.get("delay"), DEFAULT_DELAY),
   };
   return state;
 }
@@ -123,43 +124,53 @@ function parseStringSet(value: string | null): Set<string> | undefined {
 /**
  * Parses a boolean string
  */
-function parseBoolean(value: string | null): boolean | undefined {
+function parseBoolean(value: string | null, defaultValue = false): boolean | undefined {
   value = value ? value.trim() : "";
 
   if (value) {
-    return ["yes", "true", "on", "ok", "show"].includes(value.toLowerCase());
+    let boolean = ["yes", "true", "on", "ok", "show"].includes(value.toLowerCase());
+    if (boolean !== defaultValue) {
+      return boolean;
+    }
   }
 }
 
 /**
  * Parses a numeric string.  It can be a float or integer, positive or negative.
  */
-function parseNumber(value: string | null): number | undefined {
+function parseNumber(value: string | null, defaultValue = 0): number | undefined {
   value = value ? value.trim() : "";
   let number = parseFloat(value);
-  return isNaN(number) ? undefined : number;
+  if (!isNaN(number) && number !== defaultValue) {
+    return number;
+  }
 }
 
 /**
  * Parses an integer string.  It can be positive or negative.
  */
-function parseInteger(value: string | null): number | undefined {
+function parseInteger(value: string | null, defaultValue = 0): number | undefined {
   value = value ? value.trim() : "";
   let number = parseNumber(value);
 
   if (typeof number === "number") {
-    return Number.isSafeInteger(number) ? number : Math.round(number);
+    number = Number.isSafeInteger(number) ? number : Math.round(number);
+    if (number !== defaultValue) {
+      return number;
+    }
   }
 }
 
 /**
  * Parses a positive integer string.  It can be positive or zero.
  */
-function parsePositiveInteger(value: string | null): number | undefined {
+function parsePositiveInteger(value: string | null, defaultValue = 0): number | undefined {
   value = value ? value.trim() : "";
   let number = parseInteger(value);
 
   if (typeof number === "number") {
-    return number >= 0 ? number : undefined;
+    if (number >= 0 && number !== defaultValue) {
+      return number;
+    }
   }
 }

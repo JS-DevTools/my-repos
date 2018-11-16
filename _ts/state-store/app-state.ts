@@ -47,6 +47,6 @@ export class AppState implements ReadonlyAppState {
     this.hiddenRepos = props.hiddenRepos ? new Set(props.hiddenRepos) : new Set();
     this.showForks = Boolean(props.showForks);
     this.showArchived = Boolean(props.showArchived);
-    this.delay = props.delay || 0;
+    this.delay = props.delay || DEFAULT_DELAY;
   }
 }
