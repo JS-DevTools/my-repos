@@ -36,10 +36,12 @@ export class StateStore extends EventTarget {
   /**
    * Dispatches a "statechange" event
    */
-  public setState(state: Partial<ReadonlyAppState>, callback?: () => void) {
+  public setState(partialState: Partial<ReadonlyAppState>, callback?: () => void) {
+    Object.assign(this.state, partialState);
+
     let stateChangeEvent = new CustomEvent<StateChangeEventDetail>(statechange, {
       detail: {
-        state,
+        state: this.state,
         callback: () => {
           writeStateToHash(this.state);
           callback && callback(); //tslint:disable-line:no-void-expression
