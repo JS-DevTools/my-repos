@@ -63,7 +63,7 @@ export class StateStore extends EventTarget {
     let state = new AppState(this.state);
 
     // Merge the URL hash state with the current app state
-    state.accounts = union(state.accounts, hashState.accounts || [], byLogin);
+    state.accounts = union(state.accounts, hashState.accounts || [], (account) => account.id);
     state.hiddenRepos = new Set(union(state.hiddenRepos, hashState.hiddenRepos || []));
     typeof hashState.showForks === "boolean" && (state.showForks = hashState.showForks);
     typeof hashState.showArchived === "boolean" && (state.showArchived = hashState.showArchived);
@@ -191,7 +191,7 @@ export class StateStore extends EventTarget {
 
 
 /**
- * Used to search an array for object with the specified "login" property
+ * Used to find GitHub accounts by their "login" property
  */
 function byLogin(login: string) {
   login = login.trim().toLowerCase();
