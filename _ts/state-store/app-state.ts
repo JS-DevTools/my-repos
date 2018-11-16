@@ -9,6 +9,14 @@ export interface ReadonlyAppState {
   readonly delay: number;
 }
 
+export interface PartialAppState {
+  accounts?: Array<Partial<GitHubAccount>>;
+  hiddenRepos?: Set<string>;
+  showForks?: boolean;
+  showArchived?: boolean;
+  delay?: number;
+}
+
 export class AppState implements ReadonlyAppState {
   /**
    * The GitHub accounts shown on the dashboard

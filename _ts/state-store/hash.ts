@@ -1,7 +1,6 @@
 import { GitHubAccount } from "../github/github-account";
-import { getLogin } from "../util";
-import { AppState, DEFAULT_DELAY, ReadonlyAppState } from "./app-state";
 import { DEFAULT_DELAY, getLogin } from "../util";
+import { PartialAppState, ReadonlyAppState } from "./app-state";
 
 /**
  * Updates the URL hash to match the specified app state
@@ -17,7 +16,7 @@ export function writeStateToHash(state: Partial<ReadonlyAppState>) {
 /**
  * Returns an AppState instance that matches the current URL hash
  */
-export function readStateFromHash(): Partial<AppState> {
+export function readStateFromHash(): PartialAppState {
   let hash = location.hash.substr(1);
   let state = hashToState(hash);
   return state;
@@ -43,7 +42,7 @@ function stateToHash(state: Partial<ReadonlyAppState>): string {
   }
 
   if (state.hiddenRepos && state.hiddenRepos.size > 0) {
-    params.append("hide", [...state.hiddenRepos].join(","));
+    params.append("hide", [...state.hiddenRepos].sort().join(","));
   }
 
   if (state.showForks) {
@@ -70,9 +69,9 @@ function stateToHash(state: Partial<ReadonlyAppState>): string {
 /**
  * Deserializes an AppState instance from the specified URL hash string
  */
-function hashToState(hash: string): Partial<AppState> {
+function hashToState(hash: string): PartialAppState {
   let params = new URLSearchParams(hash);
-  let state: Partial<AppState> = {
+  let state: PartialAppState = {
     accounts: parseAccounts(params.get("u")),
     hiddenRepos: parseStringSet(params.get("hide")),
     showForks: parseBoolean(params.get("forks")),
@@ -85,17 +84,17 @@ function hashToState(hash: string): Partial<AppState> {
 /**
  * Parses a comma-delimited string as an array of GitHub accounts
  */
-function parseAccounts(value: string | null): GitHubAccount[] | undefined {
+function parseAccounts(value: string | null): Array<Partial<GitHubAccount>> | undefined {
   let logins = parseStringSet(value);
 
   if (logins) {
-    let accounts: GitHubAccount[] = [];
+    let accounts: Array<Partial<GitHubAccount>> = [];
 
     for (let login of logins.values()) {
-      accounts.push(new GitHubAccount({
+      accounts.push({
         login,
         name: login,
-      }));
+      });
     }
 
     return accounts;

@@ -1,6 +1,5 @@
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
-import { getLogin, union } from "../util";
 import { AppState, ReadonlyAppState } from "./app-state";
 import { fetchGitHubAccount } from "./fetch-github-account";
 import { hashMatchesState, readStateFromHash, writeStateToHash } from "./hash";
@@ -65,22 +64,34 @@ export class StateStore extends EventTarget {
     let state = new AppState(this.state);
 
     // Merge the URL hash state with the current app state
-    state.accounts = union(state.accounts, hashState.accounts || [], getLogin);
-    state.hiddenRepos = new Set(union(state.hiddenRepos, hashState.hiddenRepos || []));
+    hashState.hiddenRepos && (state.hiddenRepos = hashState.hiddenRepos);
     typeof hashState.showForks === "boolean" && (state.showForks = hashState.showForks);
     typeof hashState.showArchived === "boolean" && (state.showArchived = hashState.showArchived);
     typeof hashState.delay === "number" && (state.delay = hashState.delay);
 
-    this.setState(state);
+    // Re-order the accounts to match the hash order
+    if (hashState.accounts) {
+      let accounts = state.accounts;
+      state.accounts = [];
 
-    // Fetch account info for any new accounts that were added via the URL hash
-    for (let account of state.accounts) {
-      if (!account.loading && !account.loaded) {
-        // This is a newly-added account, so fetch it's info from GitHub
-        // tslint:disable-next-line:no-floating-promises
-        fetchGitHubAccount(account, (updated) => this.updateAccount(updated));
+      for (let hashAccount of hashState.accounts) {
+        let account = accounts.find(byLogin(hashAccount.login!));
+        if (account) {
+          state.accounts.push(account);
+        }
+        else {
+          // This is a newly-added account
+          account = new GitHubAccount({ ...hashAccount, loading: true });
+          state.accounts.push(account);
+
+          // Fetch the account info from GitHub
+          // tslint:disable-next-line:no-floating-promises
+          fetchGitHubAccount(account, (updated) => this.updateAccount(updated));
+        }
       }
     }
+
+    this.setState(state);
   }
 
   /**
