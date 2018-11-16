@@ -1,8 +1,5 @@
 import { GitHubAccount } from "../github/github-account";
-import { LOCAL_DEV_MODE } from "../util";
-
-// The default delay, based on whether we're in "local dev" mode
-export const DEFAULT_DELAY = LOCAL_DEV_MODE ? 6000 : 0;
+import { DEFAULT_DELAY } from "../util";
 
 export interface ReadonlyAppState {
   readonly accounts: ReadonlyArray<GitHubAccount>;

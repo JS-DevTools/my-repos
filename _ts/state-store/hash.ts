@@ -1,6 +1,7 @@
 import { GitHubAccount } from "../github/github-account";
 import { getLogin } from "../util";
 import { AppState, DEFAULT_DELAY, ReadonlyAppState } from "./app-state";
+import { DEFAULT_DELAY, getLogin } from "../util";
 
 /**
  * Updates the URL hash to match the specified app state
