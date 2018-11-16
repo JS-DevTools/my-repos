@@ -1,6 +1,6 @@
 import { GitHubAccount } from "../github/github-account";
 import { DEFAULT_DELAY, getLogin } from "../util";
-import { PartialAppState, ReadonlyAppState } from "./app-state";
+import { AppState, ReadonlyAppState } from "./app-state";
 
 /**
  * Updates the URL hash to match the specified app state
@@ -16,7 +16,7 @@ export function writeStateToHash(state: Partial<ReadonlyAppState>) {
 /**
  * Returns an AppState instance that matches the current URL hash
  */
-export function readStateFromHash(): PartialAppState {
+export function readStateFromHash(): AppState {
   let hash = location.hash.substr(1);
   let state = hashToState(hash);
   return state;
@@ -69,9 +69,9 @@ function stateToHash(state: Partial<ReadonlyAppState>): string {
 /**
  * Deserializes an AppState instance from the specified URL hash string
  */
-function hashToState(hash: string): PartialAppState {
+function hashToState(hash: string): AppState {
   let params = new URLSearchParams(hash);
-  let state: PartialAppState = {
+  let state: AppState = {
     accounts: parseAccounts(params.get("u")),
     hiddenRepos: parseStringSet(params.get("hide")),
     showForks: parseBoolean(params.get("forks")),
@@ -84,32 +84,28 @@ function hashToState(hash: string): PartialAppState {
 /**
  * Parses a comma-delimited string as an array of GitHub accounts
  */
-function parseAccounts(value: string | null): Array<Partial<GitHubAccount>> | undefined {
+function parseAccounts(value: string | null): GitHubAccount[] {
   let logins = parseStringSet(value);
+  let accounts: GitHubAccount[] = [];
 
-  if (logins) {
-    let accounts: Array<Partial<GitHubAccount>> = [];
-
-    for (let login of logins.values()) {
-      accounts.push({
-        login,
-        name: login,
-      });
-    }
-
-    return accounts;
+  for (let login of logins.values()) {
+    accounts.push(new GitHubAccount({
+      login,
+      name: login,
+    }));
   }
+
+  return accounts;
 }
 
 /**
  * Parses a comma-delimited string as a Set of strings
  */
-function parseStringSet(value: string | null): Set<string> | undefined {
+function parseStringSet(value: string | null): Set<string> {
   value = value ? value.trim() : "";
+  let set = new Set<string>();
 
   if (value) {
-    let set = new Set<string>();
-
     let strings = value.split(",");
     for (let string of strings) {
       string = string.trim();
@@ -117,32 +113,35 @@ function parseStringSet(value: string | null): Set<string> | undefined {
         set.add(string);
       }
     }
-
-    return set;
   }
+
+  return set;
 }
 
 /**
  * Parses a boolean string
  */
-function parseBoolean(value: string | null, defaultValue = false): boolean | undefined {
+function parseBoolean(value: string | null, defaultValue = false): boolean {
   value = value ? value.trim() : "";
-
-  if (value) {
-    let boolean = ["yes", "true", "on", "ok", "show"].includes(value.toLowerCase());
-    if (boolean !== defaultValue) {
-      return boolean;
-    }
+  let boolean = ["yes", "true", "on", "ok", "show"].includes(value.toLowerCase());
+  if (boolean === defaultValue) {
+    return defaultValue;
+  }
+  else {
+    return boolean;
   }
 }
 
 /**
  * Parses a numeric string.  It can be a float or integer, positive or negative.
  */
-function parseNumber(value: string | null, defaultValue = 0): number | undefined {
+function parseNumber(value: string | null, defaultValue = 0): number {
   value = value ? value.trim() : "";
   let number = parseFloat(value);
-  if (!isNaN(number) && number !== defaultValue) {
+  if (isNaN(number) || number === defaultValue) {
+    return defaultValue;
+  }
+  else {
     return number;
   }
 }
@@ -150,28 +149,28 @@ function parseNumber(value: string | null, defaultValue = 0): number | undefined
 /**
  * Parses an integer string.  It can be positive or negative.
  */
-function parseInteger(value: string | null, defaultValue = 0): number | undefined {
+function parseInteger(value: string | null, defaultValue = 0): number {
   value = value ? value.trim() : "";
-  let number = parseNumber(value);
-
-  if (typeof number === "number") {
-    number = Number.isSafeInteger(number) ? number : Math.round(number);
-    if (number !== defaultValue) {
-      return number;
-    }
+  let number = parseNumber(value, defaultValue);
+  number = Number.isSafeInteger(number) ? number : Math.round(number);
+  if (number === defaultValue) {
+    return defaultValue;
+  }
+  else {
+    return number;
   }
 }
 
 /**
  * Parses a positive integer string.  It can be positive or zero.
  */
-function parsePositiveInteger(value: string | null, defaultValue = 0): number | undefined {
+function parsePositiveInteger(value: string | null, defaultValue = 0): number {
   value = value ? value.trim() : "";
-  let number = parseInteger(value);
-
-  if (typeof number === "number") {
-    if (number >= 0 && number !== defaultValue) {
-      return number;
-    }
+  let number = parseInteger(value, defaultValue);
+  if (number < 0 || number === defaultValue) {
+    return defaultValue;
+  }
+  else {
+    return number;
   }
 }

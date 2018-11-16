@@ -584,6 +584,7 @@ async function safeResolve(promise) {
 },{"../github":12,"../github/github-account":9}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const github_account_1 = require("../github/github-account");
 const util_1 = require("../util");
 /**
  * Updates the URL hash to match the specified app state
@@ -659,24 +660,22 @@ function hashToState(hash) {
  */
 function parseAccounts(value) {
     let logins = parseStringSet(value);
-    if (logins) {
-        let accounts = [];
-        for (let login of logins.values()) {
-            accounts.push({
-                login,
-                name: login,
-            });
-        }
-        return accounts;
+    let accounts = [];
+    for (let login of logins.values()) {
+        accounts.push(new github_account_1.GitHubAccount({
+            login,
+            name: login,
+        }));
     }
+    return accounts;
 }
 /**
  * Parses a comma-delimited string as a Set of strings
  */
 function parseStringSet(value) {
     value = value ? value.trim() : "";
+    let set = new Set();
     if (value) {
-        let set = new Set();
         let strings = value.split(",");
         for (let string of strings) {
             string = string.trim();
@@ -684,19 +683,20 @@ function parseStringSet(value) {
                 set.add(string);
             }
         }
-        return set;
     }
+    return set;
 }
 /**
  * Parses a boolean string
  */
 function parseBoolean(value, defaultValue = false) {
     value = value ? value.trim() : "";
-    if (value) {
-        let boolean = ["yes", "true", "on", "ok", "show"].includes(value.toLowerCase());
-        if (boolean !== defaultValue) {
-            return boolean;
-        }
+    let boolean = ["yes", "true", "on", "ok", "show"].includes(value.toLowerCase());
+    if (boolean === defaultValue) {
+        return defaultValue;
+    }
+    else {
+        return boolean;
     }
 }
 /**
@@ -705,7 +705,10 @@ function parseBoolean(value, defaultValue = false) {
 function parseNumber(value, defaultValue = 0) {
     value = value ? value.trim() : "";
     let number = parseFloat(value);
-    if (!isNaN(number) && number !== defaultValue) {
+    if (isNaN(number) || number === defaultValue) {
+        return defaultValue;
+    }
+    else {
         return number;
     }
 }
@@ -714,12 +717,13 @@ function parseNumber(value, defaultValue = 0) {
  */
 function parseInteger(value, defaultValue = 0) {
     value = value ? value.trim() : "";
-    let number = parseNumber(value);
-    if (typeof number === "number") {
-        number = Number.isSafeInteger(number) ? number : Math.round(number);
-        if (number !== defaultValue) {
-            return number;
-        }
+    let number = parseNumber(value, defaultValue);
+    number = Number.isSafeInteger(number) ? number : Math.round(number);
+    if (number === defaultValue) {
+        return defaultValue;
+    }
+    else {
+        return number;
     }
 }
 /**
@@ -727,14 +731,15 @@ function parseInteger(value, defaultValue = 0) {
  */
 function parsePositiveInteger(value, defaultValue = 0) {
     value = value ? value.trim() : "";
-    let number = parseInteger(value);
-    if (typeof number === "number") {
-        if (number >= 0 && number !== defaultValue) {
-            return number;
-        }
+    let number = parseInteger(value, defaultValue);
+    if (number < 0 || number === defaultValue) {
+        return defaultValue;
+    }
+    else {
+        return number;
     }
 }
-},{"../util":19}],17:[function(require,module,exports){
+},{"../github/github-account":9,"../util":19}],17:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const state_store_1 = require("./state-store");
@@ -791,32 +796,25 @@ class StateStore extends EventTarget {
             return;
         }
         let hashState = hash_1.readStateFromHash();
-        let state = new app_state_1.AppState(this.state);
-        // Merge the URL hash state with the current app state
-        hashState.hiddenRepos && (state.hiddenRepos = hashState.hiddenRepos);
-        typeof hashState.showForks === "boolean" && (state.showForks = hashState.showForks);
-        typeof hashState.showArchived === "boolean" && (state.showArchived = hashState.showArchived);
-        typeof hashState.delay === "number" && (state.delay = hashState.delay);
         // Re-order the accounts to match the hash order
         if (hashState.accounts) {
-            let accounts = state.accounts;
-            state.accounts = [];
-            for (let hashAccount of hashState.accounts) {
-                let account = accounts.find(byLogin(hashAccount.login));
+            let hashAccounts = hashState.accounts;
+            hashState.accounts = [];
+            for (let hashAccount of hashAccounts) {
+                let account = this.getAccount(hashAccount.login);
                 if (account) {
-                    state.accounts.push(account);
+                    hashState.accounts.push(account);
                 }
                 else {
                     // This is a newly-added account
-                    account = new github_account_1.GitHubAccount({ ...hashAccount, loading: true });
-                    state.accounts.push(account);
+                    hashState.accounts.push(hashAccount);
                     // Fetch the account info from GitHub
                     // tslint:disable-next-line:no-floating-promises
-                    fetch_github_account_1.fetchGitHubAccount(account, (updated) => this.updateAccount(updated));
+                    fetch_github_account_1.fetchGitHubAccount(hashAccount, (updated) => this.updateAccount(updated));
                 }
             }
         }
-        this.setState(state);
+        this.setState(hashState);
     }
     /**
      * Determines whether the specified account already exists

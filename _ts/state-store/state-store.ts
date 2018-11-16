@@ -61,37 +61,29 @@ export class StateStore extends EventTarget {
     }
 
     let hashState = readStateFromHash();
-    let state = new AppState(this.state);
-
-    // Merge the URL hash state with the current app state
-    hashState.hiddenRepos && (state.hiddenRepos = hashState.hiddenRepos);
-    typeof hashState.showForks === "boolean" && (state.showForks = hashState.showForks);
-    typeof hashState.showArchived === "boolean" && (state.showArchived = hashState.showArchived);
-    typeof hashState.delay === "number" && (state.delay = hashState.delay);
 
     // Re-order the accounts to match the hash order
     if (hashState.accounts) {
-      let accounts = state.accounts;
-      state.accounts = [];
+      let hashAccounts = hashState.accounts;
+      hashState.accounts = [];
 
-      for (let hashAccount of hashState.accounts) {
-        let account = accounts.find(byLogin(hashAccount.login!));
+      for (let hashAccount of hashAccounts) {
+        let account = this.getAccount(hashAccount.login);
         if (account) {
-          state.accounts.push(account);
+          hashState.accounts.push(account);
         }
         else {
           // This is a newly-added account
-          account = new GitHubAccount({ ...hashAccount, loading: true });
-          state.accounts.push(account);
+          hashState.accounts.push(hashAccount);
 
           // Fetch the account info from GitHub
           // tslint:disable-next-line:no-floating-promises
-          fetchGitHubAccount(account, (updated) => this.updateAccount(updated));
+          fetchGitHubAccount(hashAccount, (updated) => this.updateAccount(updated));
         }
       }
     }
 
-    this.setState(state);
+    this.setState(hashState);
   }
 
   /**
