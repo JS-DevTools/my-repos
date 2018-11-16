@@ -41,7 +41,7 @@ export class StateStore extends EventTarget {
       detail: {
         state,
         callback: () => {
-          writeStateToHash(state);
+          writeStateToHash(this.state);
           callback && callback(); //tslint:disable-line:no-void-expression
         }
       }
