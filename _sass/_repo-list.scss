@@ -70,23 +70,21 @@
     grid-row-gap: $vertical-space-small;
 
     .repo {
-      display: inline-block;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
       padding: $vertical-space-small $horizontal-space-medium;
+
+      h3 {
+        flex-grow: 1;
+      }
     }
-  }
-}
-
-
-@media (min-width: $monitor-min-width) {
-  .repo-list {
-    grid-template-columns: 33% 33% 33%;
   }
 }
 
 
 @media (min-width: $large-monitor-min-width) {
   .repo-list {
-    grid-template-columns: 25% 25% 25% 25%;
+    grid-template-columns: 33% 33% 33%;
   }
 }
