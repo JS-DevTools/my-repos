@@ -1,6 +1,6 @@
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
-import { union } from "../util";
+import { getLogin, union } from "../util";
 import { AppState, ReadonlyAppState } from "./app-state";
 import { fetchGitHubAccount } from "./fetch-github-account";
 import { hashMatchesState, readStateFromHash, writeStateToHash } from "./hash";
@@ -65,7 +65,7 @@ export class StateStore extends EventTarget {
     let state = new AppState(this.state);
 
     // Merge the URL hash state with the current app state
-    state.accounts = union(state.accounts, hashState.accounts || [], (account) => account.id);
+    state.accounts = union(state.accounts, hashState.accounts || [], getLogin);
     state.hiddenRepos = new Set(union(state.hiddenRepos, hashState.hiddenRepos || []));
     typeof hashState.showForks === "boolean" && (state.showForks = hashState.showForks);
     typeof hashState.showArchived === "boolean" && (state.showArchived = hashState.showArchived);

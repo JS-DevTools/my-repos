@@ -1,4 +1,5 @@
 import { GitHubAccount } from "../github/github-account";
+import { getLogin } from "../util";
 import { AppState, DEFAULT_DELAY, ReadonlyAppState } from "./app-state";
 
 /**
@@ -37,7 +38,7 @@ function stateToHash(state: Partial<ReadonlyAppState>): string {
   let params = new URLSearchParams();
 
   if (state.accounts && state.accounts.length > 0) {
-    params.append("u", [...state.accounts].join(","));
+    params.append("u", state.accounts.map(getLogin).join(","));
   }
 
   if (state.hiddenRepos && state.hiddenRepos.size > 0) {

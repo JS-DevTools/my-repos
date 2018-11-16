@@ -44,6 +44,13 @@ export function accountCountCssClass(accounts: ReadonlyArray<unknown>): string {
   }
 }
 
+/**
+ * Returns the `login` property of the given object
+ */
+export function getLogin(obj: { login: string }): string {
+  return obj.login;
+}
+
 // @ts-ignore - Typescript complains that T is implicitly any
 type IdentityFunction<T> = (T) => unknown;
 
