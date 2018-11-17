@@ -1,3 +1,5 @@
+import octicons = require("octicons");
+import { OcticonName } from "octicons";
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
 import { stateStore } from "../state-store";
@@ -34,28 +36,28 @@ function RepoItem(props: RepoItemProps) {
       <nav className="badges">
         <a href={`${repo.html_url}/network/members`}
           className={`badge ${repo.forks_count ? "badge-ok" : ""} forks`}>
-          <i className="glyphicon glyphicon-cutlery"></i>
+          <Octicon name="repo-forked" />
           <span className="badge-label">Forks</span>
           <span className="badge-count">{repo.forks_count}</span>
         </a>
 
         <a href={`${repo.html_url}/stargazers`}
           className={`badge ${repo.stargazers_count ? "badge-ok" : ""} stars`}>
-          <i className="glyphicon glyphicon-star"></i>
+          <Octicon name="star" />
           <span className="badge-label">Stars</span>
           <span className="badge-count">{repo.stargazers_count}</span>
         </a>
 
         <a href={`${repo.html_url}/watchers`}
           className={`badge ${repo.watchers_count ? "badge-ok" : ""} watchers`}>
-          <i className="glyphicon glyphicon-eye-open"></i>
+          <Octicon name="eye" />
           <span className="badge-label">Watchers</span>
           <span className="badge-count">{repo.watchers_count}</span>
         </a>
 
         <a href={`${repo.html_url}/issues`}
           className={`badge ${repo.open_issues_count ? "badge-warning" : "badge-ok"} issues`}>
-          <i className="glyphicon glyphicon-fire"></i>
+          <Octicon name={repo.open_issues_count ? "issue-opened" : "issue-closed"} />
           <span className="badge-label">Issues</span>
           <span className="badge-count">{repo.open_issues_count}</span>
         </a>
@@ -66,8 +68,18 @@ function RepoItem(props: RepoItemProps) {
   );
 }
 
+function Octicon({ name }: { name: OcticonName }) {
+  let icon = octicons[name];
+  return <svg {...icon.options} dangerouslySetInnerHTML={{ __html: icon.path }} />;
+}
+
 function DependencyBadge(props: RepoItemProps) {
   let { repo } = props;
+
+  if (repo.dependencies.total === 0) {
+    // This repo doesn't have any dependencies, so don't display this badge
+    return null;   // tslint:disable-line:no-null-keyword
+  }
 
   let hasError: boolean;
   let label: string;
@@ -92,7 +104,7 @@ function DependencyBadge(props: RepoItemProps) {
   return (
     <a href={repo.dependencies.html_url}
       className={`badge ${hasError ? "badge-error" : "badge-ok"} dependencies`}>
-      <i className="glyphicon glyphicon-calendar"></i>
+      <Octicon name="package" />
       <span className="badge-label">{label}</span>
       <span className="badge-count">{`${count} / ${repo.dependencies.total}`}</span>
     </a>

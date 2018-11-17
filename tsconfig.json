@@ -5,7 +5,6 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
     "lib": [
       "esnext",
       "dom"

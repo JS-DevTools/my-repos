@@ -89,6 +89,9 @@ rules:
   # Allow parameters to be reassigned
   no-parameter-reassignment: false
 
+  # Most npm modules (and built-in Node modules) are CommonJS, so require() is necessary
+  no-require-imports: false
+
   # Shadowing can be useful
   no-shadowed-variable:
     severity: warning
