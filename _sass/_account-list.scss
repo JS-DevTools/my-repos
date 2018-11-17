@@ -1,4 +1,6 @@
 #account_list {
+  margin: 0 $horizontal-space-small;
+
   &.no-accounts {
     display: none;
   }
@@ -38,5 +40,11 @@
       color: red;
       white-space: pre-wrap;
     }
+  }
+}
+
+@media (min-width: $tablet-min-width) {
+  #account_list {
+    margin: 0;
   }
 }
