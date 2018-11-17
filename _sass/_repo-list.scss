@@ -39,18 +39,49 @@
   }
 
   .badges {
-    margin-top: $vertical-space-medium;
+    margin-top: $vertical-space-small;
   }
 
   .badge {
     display: inline-block;
     font-size: 12px;
     color: $text-color;
-    background-color: $light-gray;
+    background-color: $medium-gray;
     border-radius: 5px;
     padding: 2px $horizontal-space-tiny;
     margin-top: $vertical-space-tiny;
     margin-right: $horizontal-space-tiny;
+
+    &:hover {
+      text-decoration: none;
+      background-color: $light-gray;
+    }
+
+    &.badge-warning {
+      font-weight: 500;
+      background-color: #f1e150;
+      color: brown;
+      fill: brown;
+
+      &:hover {
+        background-color: #fced6d;
+      }
+    }
+
+    &.badge-error {
+      font-weight: 500;
+      background-color: #dc3545;
+      color: white;
+      fill: white;
+
+      &:hover {
+        background-color: #f1e150;
+      }
+    }
+
+    .octicon {
+      vertical-align: middle;
+    }
 
     .badge-label {
       margin: 0 $horizontal-space-tiny;
@@ -67,7 +98,7 @@
   .repo-list {
     grid-template-columns: 50% 50%;
     grid-column-gap: $horizontal-space-small;
-    grid-row-gap: $vertical-space-small;
+    grid-row-gap: $vertical-space-medium;
 
     .repo {
       display: flex;
@@ -77,6 +108,10 @@
 
       h3 {
         flex-grow: 1;
+      }
+
+      .badges {
+        white-space: nowrap;
       }
     }
   }
