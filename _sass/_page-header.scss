@@ -41,6 +41,19 @@
   }
 }
 
+#options {
+  position: relative;
+  z-index: 1;
+  font-size: .8em;
+  text-align: right;
+  margin-top: $vertical-space-medium;
+  margin-right: $horizontal-space-small;
+
+  a + a {
+    margin-left: $horizontal-space-medium;
+  }
+}
+
 @media (min-width: $tablet-min-width) {
   #page_header {
     .responsive-container {
@@ -57,5 +70,10 @@
     .logo {
       left: 0;
     }
+  }
+
+  #options {
+    float: right;
+    margin-right: 0;
   }
 }
