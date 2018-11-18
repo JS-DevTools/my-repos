@@ -19,6 +19,13 @@ defaults:
     values:
       image: img/logo.png
 
+# Don't watch these files when running "jekyll serve"
+exclude:
+  - .git
+  - .vscode
+  - node_modules
+  - _ts
+
 # Jekyll Optional Front Matter
 # https://github.com/benbalter/jekyll-optional-front-matter/
 # optional_front_matter:
