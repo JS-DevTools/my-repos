@@ -82,7 +82,7 @@ export class StateStore extends EventTarget {
           fetchData(hashAccount, (updated) => this.updateAccount(updated))
             .catch((error) => {
               // Unable to fetch the account's data
-              hashAccount.error = error;
+              hashAccount.error = (error as Error).message;
               this.updateAccount(hashAccount);
             });
         }

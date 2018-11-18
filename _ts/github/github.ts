@@ -14,6 +14,7 @@ export class GitHub {
     let request = new Request(`https://api.github.com/users/${account.login}`);
 
     return this._client.fetch(request, (responseBody: unknown) => {
+      // tslint:disable-next-line:strict-type-predicates
       if (typeof responseBody !== "object") {
         throw new ApiError(request.url, "did not return a JSON object as expected", responseBody);
       }
@@ -52,7 +53,7 @@ export class GitHub {
           repos.push(new GitHubRepo({ ...repo, account }));
         }
         else {
-          throw new ApiError(request.url, "returned an invalid GitHub repo", repo);
+          throw new ApiError(request.url, "returned an invalid GitHub repo", repo as unknown);
         }
       }
 

@@ -41,7 +41,7 @@ export class ApiResponse<T> {
       }
     }
     catch (err) {
-      error = err;
+      error = err as Error;
     }
 
     // If an error occurred, then the response is not OK
@@ -59,7 +59,7 @@ export class ApiResponse<T> {
 async function parseResponseBody(rawResponse: Response): Promise<unknown> {
   try {
     // Try parsing the response as JSON first
-    return await rawResponse.clone().json();
+    return await rawResponse.clone().json() as unknown;
   }
   catch (error) {
     // Unable to parse as JSON

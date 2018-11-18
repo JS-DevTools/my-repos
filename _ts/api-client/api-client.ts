@@ -67,7 +67,7 @@ export class ApiClient {
       try {
         // Re-hydrate the cached Fetch Response object
         let { body, ...init } = JSON.parse(cache) as CachedResponse;
-        return new Response(body as string, init);
+        return new Response(body, init);
       }
       catch (error) {
         // The cached response is invalid, so delete it from LocalStorage

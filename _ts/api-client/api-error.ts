@@ -6,7 +6,7 @@ export class ApiError extends Error {
   public constructor(url: string, message: string, responseBody?: unknown) {
     message = `${url} ${message}`;
 
-    if (responseBody !== undefined) {
+    if (responseBody) {
       message += `\n${prettify(responseBody)}`;
     }
 
