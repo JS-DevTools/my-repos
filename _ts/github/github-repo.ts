@@ -6,13 +6,14 @@ import { GitHubAccount } from "./github-account";
 export interface GitHubRepoPOJO {
   name: string;
   full_name: string;
-  description: string;
+  description?: string;
   archived: boolean;
   fork: boolean;
   forks_count: number;
   stargazers_count: number;
   watchers_count: number;
   open_issues_count: number;
+  language: string;
   html_url: string;
 }
 
@@ -27,9 +28,11 @@ export class GitHubRepo implements GitHubRepoPOJO {
   public archived = false;
   public fork = false;
   public forks_count = 0;
+  public pull_count = 0;
   public stargazers_count = 0;
   public watchers_count = 0;
   public open_issues_count = 0;
+  public language = "";
   public html_url = "";
 
   // TEMPORARY
@@ -52,8 +55,12 @@ export class GitHubRepo implements GitHubRepoPOJO {
 }
 
 // tslint:disable:no-any no-unsafe-any
-export function isArrayOfGitHubRepoPOJO(repos: any[]): repos is GitHubRepoPOJO[] {
-  return repos.length > 0 &&
-    typeof repos[0] === "object" &&
-    typeof repos[0].name === "string";
+export function isGitHubRepoPOJO(repo: any): repo is GitHubRepoPOJO {
+  return repo &&
+    typeof repo === "object" &&
+    typeof repo.name === "string" &&
+    repo.name.length > 0 &&
+    typeof repo.full_name === "string" &&
+    repo.full_name.length > 0 &&
+    typeof repo.html_url === "string";
 }

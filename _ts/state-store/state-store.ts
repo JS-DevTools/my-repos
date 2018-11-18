@@ -1,7 +1,7 @@
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
 import { AppState, ReadonlyAppState } from "./app-state";
-import { fetchGitHubAccount } from "./fetch-github-account";
+import { fetchData } from "./fetch-data";
 import { hashMatchesState, readStateFromHash, writeStateToHash } from "./hash";
 
 const hashchange = "hashchange";
@@ -75,10 +75,16 @@ export class StateStore extends EventTarget {
         else {
           // This is a newly-added account
           hashState.accounts.push(hashAccount);
+          hashAccount.loading = true;
 
-          // Fetch the account info from GitHub
-          // tslint:disable-next-line:no-floating-promises
-          fetchGitHubAccount(hashAccount, (updated) => this.updateAccount(updated));
+          // Fetch the account's data from GitHub, David-DM, etc.
+          // NOTE: We do this asynchronously, so this function can return immediately
+          fetchData(hashAccount, (updated) => this.updateAccount(updated))
+            .catch((error) => {
+              // Unable to fetch the account's data
+              hashAccount.error = error;
+              this.updateAccount(hashAccount);
+            });
         }
       }
     }
@@ -127,8 +133,8 @@ export class StateStore extends EventTarget {
     accounts.push(account);
     this.setState({ accounts });
 
-    // Fetch the account info from GitHub
-    await fetchGitHubAccount(account, (updated) => this.updateAccount(updated));
+    // Fetch the account's data from GitHub, David-DM, etc.
+    await fetchData(account, (updated) => this.updateAccount(updated));
   }
 
   /**

@@ -6,8 +6,8 @@ import { GitHubRepo } from "./github-repo";
 export interface GitHubAccountPOJO {
   login: string;
   name: string;
-  avatar_url: string;
   bio: string;
+  avatar_url: string;
   html_url: string;
 }
 
@@ -17,8 +17,8 @@ export interface GitHubAccountPOJO {
 export class GitHubAccount implements GitHubAccountPOJO {
   public login = "";
   public name = "";
-  public avatar_url = "";
   public bio = "";
+  public avatar_url = "";
   public html_url = "";
 
   /**
@@ -49,9 +49,13 @@ export class GitHubAccount implements GitHubAccountPOJO {
 
 // tslint:disable:no-any no-unsafe-any
 export function isGitHubAccountPOJO(account: any): account is GitHubAccountPOJO {
-  return typeof account === "object" &&
-    "login" in account && typeof account.login === "string" &&
-    "name" in account && typeof account.name === "string" &&
-    "bio" in account && typeof account.bio === "string" &&
-    "avatar_url" in account && typeof account.avatar_url === "string";
+  return account &&
+    typeof account === "object" &&
+    typeof account.login === "string" &&
+    account.login.length > 0 &&
+    typeof account.name === "string" &&
+    account.name.length > 0 &&
+    typeof account.bio === "string" &&
+    typeof account.avatar_url === "string" &&
+    typeof account.html_url === "string";
 }

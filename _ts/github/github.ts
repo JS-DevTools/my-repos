@@ -1,6 +1,8 @@
-import { ApiClient } from "../api-client";
+import { ApiClient } from "../api-client/api-client";
+import { ApiError } from "../api-client/api-error";
+import { ApiResponse } from "../api-client/api-response";
 import { GitHubAccount, isGitHubAccountPOJO } from "./github-account";
-import { GitHubRepo, isArrayOfGitHubRepoPOJO } from "./github-repo";
+import { GitHubRepo, isGitHubRepoPOJO } from "./github-repo";
 
 export class GitHub {
   private readonly _client: ApiClient = new ApiClient();
@@ -8,39 +10,60 @@ export class GitHub {
   /**
    * Fetches the specified GitHub account's info, NOT including its repos
    */
-  public async fetchAccount(account: GitHubAccount): Promise<GitHubAccount> {
-    let accountPOJO = await this._client.fetchObject(`https://api.github.com/users/${account.login}`);
+  public async fetchAccount(account: GitHubAccount): Promise<ApiResponse<GitHubAccount>> {
+    let request = new Request(`https://api.github.com/users/${account.login}`);
 
-    if (isGitHubAccountPOJO(accountPOJO)) {
+    return this._client.fetch(request, (responseBody: unknown) => {
+      if (typeof responseBody !== "object") {
+        throw new ApiError(request.url, "did not return a JSON object as expected", responseBody);
+      }
+      else if (Array.isArray(responseBody)) {
+        throw new ApiError(request.url, "returned a JSON array, but a JSON object was expected", responseBody);
+      }
+      else if (!isGitHubAccountPOJO(responseBody)) {
+        throw new ApiError(request.url, "returned an invalid GitHub account", responseBody);
+      }
+
+      // Convert the response body to a GitHubAccount object
       return new GitHubAccount({
-        ...accountPOJO,
+        ...responseBody,
         loading: false,
         loaded: true,
         repos: [],
       });
-    }
-    else {
-      throw this._client.createError("Invalid GitHub account:", accountPOJO);
-    }
+    });
   }
 
   /**
-   * Fetches the GitHub repos for the specified account
+   * Fetches the GitHub repos for the specified account, NOT including pull requests
    */
-  public async fetchRepos(account: GitHubAccount): Promise<GitHubRepo[]> {
-    let repoPOJOs = await this._client.fetchArray(`https://api.github.com/users/${account.login}/repos`);
+  public async fetchRepos(account: GitHubAccount): Promise<ApiResponse<GitHubRepo[]>> {
+    let request = new Request(`https://api.github.com/users/${account.login}/repos`);
 
-    if (isArrayOfGitHubRepoPOJO(repoPOJOs)) {
+    return this._client.fetch(request, (responseBody: unknown) => {
+      if (!Array.isArray(responseBody)) {
+        throw new ApiError(request.url, "did not return a JSON array as expected", responseBody);
+      }
+
       let repos: GitHubRepo[] = [];
 
-      for (let repoPOJO of repoPOJOs) {
-        repos.push(new GitHubRepo({ ...repoPOJO, account }));
+      for (let repo of responseBody) {
+        if (isGitHubRepoPOJO(repo)) {
+          repos.push(new GitHubRepo({ ...repo, account }));
+        }
+        else {
+          throw new ApiError(request.url, "returned an invalid GitHub repo", repo);
+        }
       }
 
       return repos;
-    }
-    else {
-      throw this._client.createError("Invalid GitHub repo:", repoPOJOs);
-    }
+    });
+  }
+
+  /**
+   * Fetches the number of open pull requests for the specified GitHub repo
+   */
+  public async fetchPullCount(repo: GitHubRepo): Promise<number> {
+    return 0;
   }
 }
