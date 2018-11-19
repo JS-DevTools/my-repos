@@ -16,6 +16,9 @@ export class ApiClient {
   /**
    * Sends the given HTTP Request, and maps the response to the desired data type using the given
    * mapper function.
+   *
+   * NOTE: Unlike the native Fetch API, this will never throw an error.  If an error occurs, then
+   * the `ApiResponse.error` property will be set.
    */
   public async fetch<T>(request: Request, mapper: ResponseMapper<T>): Promise<ApiResponse<T>> {
     let [response] = await Promise.all([
@@ -30,30 +33,50 @@ export class ApiClient {
    * Fetches the requested HTTP resource from the LocalStorage cache if possible.
    * If there is no cached response, then perform a real HTTP fetch.
    * This helps avoid hitting API rate limits.
+   *
+   * NOTE: Unlike the native Fetch API, this will never throw an error.  If an error occurs, then
+   * the `ApiResponse.error` property will be set.
    */
   private async _fetch<T>(request: Request, mapper: ResponseMapper<T>): Promise<ApiResponse<T>> {
-    let fromCache: boolean;
+    try {
+      let fromCache: boolean;
 
-    // Try to get the response from the cache first
-    let rawResponse = this._fetchFromCache(request);
+      // Try to get the response from the cache first
+      let rawResponse = this._fetchFromCache(request);
 
-    if (rawResponse) {
-      fromCache = true;
-    }
-    else {
-      fromCache = false;
-
-      // Unable to retrieve from cache, so perform a real HTTP fetch
-      rawResponse = await fetch(request);
-
-      if (rawResponse.ok) {
-        // Cache the raw Response
-        await this._cacheResponse(rawResponse);
+      if (rawResponse) {
+        fromCache = true;
       }
-    }
+      else {
+        fromCache = false;
 
-    // Convert teh raw Fetch Response to an ApiResponse
-    return ApiResponse.fromRaw<T>(rawResponse, fromCache, mapper);
+        // Unable to retrieve from cache, so perform a real HTTP fetch
+        rawResponse = await fetch(request);
+
+        if (rawResponse.ok) {
+          // Cache the raw Response
+          await this._cacheResponse(rawResponse);
+        }
+      }
+
+      // Convert teh raw Fetch Response to an ApiResponse
+      return ApiResponse.fromRaw<T>(rawResponse, fromCache, mapper);
+    }
+    catch (error) {
+      // Create a dummy response and set the `error` property
+      let rawResponse = new Response(
+        (error as Error).message,
+        {
+          status: 503,
+          statusText: "Service Unavailable",
+          headers: {
+            "Content-Type": "text/plain",
+          }
+        }
+      );
+
+      return ApiResponse.fromRaw<T>(rawResponse, false, mapper);
+    }
   }
 
   /**
