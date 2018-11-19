@@ -1,7 +1,7 @@
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
 import { AppState, ReadonlyAppState } from "./app-state";
-import { fetchData } from "./fetch-data";
+import { fetchData, UpdateAccount, UpdateRepo } from "./fetch-data";
 import { hashMatchesState, readStateFromHash, writeStateToHash } from "./hash";
 
 const hashchange = "hashchange";
@@ -77,14 +77,8 @@ export class StateStore extends EventTarget {
           hashState.accounts.push(hashAccount);
           hashAccount.loading = true;
 
-          // Fetch the account's data from GitHub, David-DM, etc.
-          // NOTE: We do this asynchronously, so this function can return immediately
-          fetchData(hashAccount, (updated) => this.updateAccount(updated))
-            .catch((error) => {
-              // Unable to fetch the account's data
-              hashAccount.error = (error as Error).message;
-              this.updateAccount(hashAccount);
-            });
+          // Start fetching the account's data from GitHub, David-DM, etc.
+          this._fetchData(hashAccount);
         }
       }
     }
@@ -134,11 +128,11 @@ export class StateStore extends EventTarget {
     this.setState({ accounts });
 
     // Fetch the account's data from GitHub, David-DM, etc.
-    await fetchData(account, (updated) => this.updateAccount(updated));
+    this._fetchData(account);
   }
 
   /**
-   * Removes the specified GitHub account from the accounts list
+   * Updates the specified GitHub account
    */
   public updateAccount(account: GitHubAccount) {
     let accounts = this.state.accounts.slice();
@@ -160,6 +154,23 @@ export class StateStore extends EventTarget {
     if (index >= 0) {
       accounts.splice(index, 1);
       this.setState({ accounts });
+    }
+  }
+
+  /**
+   * Updates the specified GitHub repo
+   */
+  public updateRepo(repo: GitHubRepo) {
+    let accounts = this.state.accounts.slice();
+    let account = accounts.find(byLogin(repo.account.login));
+
+    if (account) {
+      let index = account.repos.findIndex(byName(repo.name));
+
+      if (index >= 0) {
+        account.repos.splice(index, 1, repo);
+        this.setState({ accounts });
+      }
     }
   }
 
@@ -198,6 +209,17 @@ export class StateStore extends EventTarget {
 
     return false;
   }
+
+  /**
+   * Begins fetching all the data for the specified GitHub account. This function returns immediately,
+   * but the data is fetched asynchronously, and the `updateAccount()` and `updateRepo()` callbacks
+   * are called as data is received.
+   */
+  private _fetchData(account: GitHubAccount) {
+    let updateAccount = this.updateAccount.bind(this) as UpdateAccount;
+    let updateRepo = this.updateRepo.bind(this) as UpdateRepo;
+    fetchData(account, updateAccount, updateRepo);
+  }
 }
 
 
@@ -206,5 +228,13 @@ export class StateStore extends EventTarget {
  */
 function byLogin(login: string) {
   login = login.trim().toLowerCase();
-  return (obj: { login: string }) => obj.login.trim().toLowerCase() === login;
+  return (account: GitHubAccount) => account.login.trim().toLowerCase() === login;
+}
+
+/**
+ * Used to find GitHub repos by their "name" property
+ */
+function byName(name: string) {
+  name = name.trim().toLowerCase();
+  return (repo: GitHubRepo) => repo.name.trim().toLowerCase() === name;
 }
