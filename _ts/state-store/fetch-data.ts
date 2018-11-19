@@ -1,5 +1,7 @@
 import { github } from "../github";
 import { GitHubAccount } from "../github/github-account";
+import { GitHubRepo } from "../github/github-repo";
+import { packageRegistry } from "../package-registry";
 
 export type UpdateAccount = (account: GitHubAccount) => void;
 export type UpdateRepo = (repo: GitHubRepo) => void;
@@ -22,6 +24,22 @@ export function fetchData(account: GitHubAccount, updateAccount: UpdateAccount, 
  * and the specified update callback will be called multiple times.
  */
 export async function fetchDataAsync(account: GitHubAccount, updateAccount: UpdateAccount, updateRepo: UpdateRepo) {
+  // Fetch the account and repos simultaneously
+  account = await fetchAccountAndRepos(account);
+
+  // Immediately update the app state with the account & repo info
+  updateAccount(account);
+
+  // Fetch additional data for each repo
+  await Promise.all(account.repos.map((repo) => fetchRepoData(repo, updateRepo)));
+
+  // TODO: Perform a second-pass without cache
+}
+
+/**
+ * Fetches the specified GitHub account and its repos
+ */
+async function fetchAccountAndRepos(account: GitHubAccount): Promise<GitHubAccount> {
   // Fetch the GitHub account and repos at the same time
   let [accountResponse, reposResponse] = await Promise.all([
     github.fetchAccount(account),
@@ -49,5 +67,65 @@ export async function fetchDataAsync(account: GitHubAccount, updateAccount: Upda
     }
   }
 
-  update(account);
+  return account;
+}
+
+/**
+ * Fetches the issues, pull requests, and dependencies for the specified repo.
+ * The specified update callback is called as each piece of data is received.
+ */
+async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo) {
+  // Fetch the issues, pull requests, and dependencies at the same time,
+  // and call the update callback as each piece of data is received
+  await Promise.all([
+    fetchIssuesAndPullRequests(repo, updateRepo),
+    fetchDependencies(repo, updateRepo),
+  ]);
+}
+
+/**
+ * Fetches the issues and pull requests for the specified repo,
+ * and calls the specified update callback.
+ */
+async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRepo) {
+  let prCountResponse = await github.fetchPullCount(repo);
+
+  if (prCountResponse.ok) {
+    let open_pulls_count = prCountResponse.body!;
+    let { open_issues_count, issues_includes_pulls } = repo;
+
+    if (issues_includes_pulls) {
+      // The `open_issues_count` field actually includes open issues AND open PRs.
+      // So remove the PRs from the count
+      open_issues_count = open_issues_count - open_pulls_count;
+      issues_includes_pulls = false;
+    }
+
+    // Update the app state with the "correct" numbers
+    repo = new GitHubRepo({
+      ...repo,
+      open_issues_count,
+      open_pulls_count,
+      issues_includes_pulls,
+    });
+
+    updateRepo(repo);
+  }
+}
+
+/**
+ * Fetches the dependencies for the specified repo, and calls the specified update callback.
+ */
+async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo) {
+  let dependenciesResponse = await packageRegistry.fetchDependencies(repo);
+
+  if (dependenciesResponse.ok) {
+    // Update the app state with the repo's dependencies
+    repo = new GitHubRepo({
+      ...repo,
+      dependencies: dependenciesResponse.body!,
+    });
+
+    updateRepo(repo);
+  }
 }

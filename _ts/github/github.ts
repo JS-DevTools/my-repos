@@ -62,9 +62,11 @@ export class GitHub {
   }
 
   /**
-   * Fetches the number of open pull requests for the specified GitHub repo
+   * Fetches the number of open pull requests for the specified GitHub repo.
+   * This is necessary because the `open_issues_count` field on the GitHubRepo object
+   * actually includes open issues AND open PRs.
    */
-  public async fetchPullCount(repo: GitHubRepo): Promise<number> {
-    return 0;
+  public async fetchPullCount(repo: GitHubRepo): Promise<ApiResponse<number>> {
+    return XXXXXXXXXXXX;
   }
 }

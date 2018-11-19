@@ -1,3 +1,4 @@
+import { Dependencies } from "../package-registry/dependencies";
 import { GitHubAccount } from "./github-account";
 
 /**
@@ -28,21 +29,14 @@ export class GitHubRepo implements GitHubRepoPOJO {
   public archived = false;
   public fork = false;
   public forks_count = 0;
-  public pull_count = 0;
   public stargazers_count = 0;
   public watchers_count = 0;
   public open_issues_count = 0;
+  public open_pulls_count = 0;
+  public issues_includes_pulls = true;
   public language = "";
   public html_url = "";
-
-  // TEMPORARY
-  public dependencies = {
-    total: 0,
-    out_of_date: 0,
-    up_to_date: 0,
-    advisories: 0,
-    html_url: "",
-  };
+  public dependencies = new Dependencies();
 
   public constructor(props: Partial<GitHubRepo>) {
     if (!props.account) {
