@@ -67,6 +67,7 @@ export class GitHub {
    * actually includes open issues AND open PRs.
    */
   public async fetchPullCount(repo: GitHubRepo): Promise<ApiResponse<number>> {
-    return XXXXXXXXXXXX;
+    let rawResponse = new Response();
+    return ApiResponse.fromRaw<number>(rawResponse, false, () => 0);
   }
 }

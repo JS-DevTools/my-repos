@@ -12,8 +12,9 @@ export class PackageRegistry {
   public async fetchDependencies(repo: GitHubRepo): Promise<ApiResponse<Dependencies>> {
     if (repo.language !== "JavaScript" && repo.language !== "TypeScript") {
       // Not yet implemented for this language
-      return XXXXXXXXX;
     }
 
+    let rawResponse = new Response();
+    return ApiResponse.fromRaw<Dependencies>(rawResponse, false, () => new Dependencies());
   }
 }
