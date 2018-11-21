@@ -19,6 +19,7 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
+    "strictBindCallApply": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "stripInternal": true

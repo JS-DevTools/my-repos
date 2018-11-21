@@ -1,7 +1,7 @@
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
 import { AppState, ReadonlyAppState } from "./app-state";
-import { fetchData, UpdateAccount, UpdateRepo } from "./fetch-data";
+import { fetchData } from "./fetch-data";
 import { hashMatchesState, readStateFromHash, writeStateToHash } from "./hash";
 
 const hashchange = "hashchange";
@@ -216,8 +216,8 @@ export class StateStore extends EventTarget {
    * are called as data is received.
    */
   private _fetchData(account: GitHubAccount) {
-    let updateAccount = this.updateAccount.bind(this) as UpdateAccount;
-    let updateRepo = this.updateRepo.bind(this) as UpdateRepo;
+    let updateAccount = this.updateAccount.bind(this);
+    let updateRepo = this.updateRepo.bind(this);
     fetchData(account, updateAccount, updateRepo);
   }
 }
