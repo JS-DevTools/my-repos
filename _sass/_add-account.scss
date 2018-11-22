@@ -1,18 +1,6 @@
 .add-account {
   position: relative;
 
-  &.busy:after {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 10%;
-    left: 0;
-    width: 100%;
-    height: 80%;
-    background: url(../img/loading-spinner.gif) center center no-repeat;
-    background-size: contain;
-  }
-
   .form-group {
     display: inline-block;
     margin: 0;

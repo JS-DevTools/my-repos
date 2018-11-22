@@ -13,15 +13,14 @@ interface State {
 export class AddAccount extends React.Component<AddAccountProps, State> {
   public readonly state: State = {
     login: "",
-    busy: false,
   };
 
   public render() {
     let { submitButtonText } = this.props;
-    let { login, busy } = this.state;
+    let { login } = this;
 
     return (
-      <form className={`add-account form ${busy ? "busy" : ""}`} onSubmit={this.handleSubmit}>
+      <form className="add-account form" onsubmit={this.handleSubmit}>
         <dl className="form-group">
           <dt className="input-label">
             <label htmlFor="repo_owner">GitHub Username</label>
@@ -34,7 +33,7 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
           </dd>
         </dl>
 
-        <button type="submit" className="btn btn-primary" disabled={busy}>
+        <button type="submit" className="btn btn-primary">
           {submitButtonText || "Add"}
         </button>
       </form>
@@ -48,10 +47,8 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
   private readonly handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (this.state.login) {
-      this.setState({ busy: true });
-      await stateStore.addAccount(this.state.login);
-      this.setState({ login: "", busy: false });
+    if (this.login) {
+      stateStore.addAccount(this.login);
     }
   }
 }
