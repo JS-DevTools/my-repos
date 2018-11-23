@@ -1,19 +1,13 @@
-import { ChangeEvent, FormEvent } from "react";
+import { h } from "petit-dom";
 import { stateStore } from "../state-store";
+import { Component } from "./component";
 
 export interface AddAccountProps {
   submitButtonText?: string;
 }
 
-interface State {
-  login: string;
-  busy: boolean;
-}
-
-export class AddAccount extends React.Component<AddAccountProps, State> {
-  public readonly state: State = {
-    login: "",
-  };
+export class AddAccount extends Component<AddAccountProps> {
+  private login = "";
 
   public render() {
     let { submitButtonText } = this.props;
@@ -27,9 +21,8 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
           </dt>
           <dd className="input-field">
             <input type="text" name="account_name" className="form-control short"
-              maxLength={100} autoFocus autoCapitalize="off" autoComplete="on" spellCheck={false}
-              placeholder="GitHub Username" disabled={busy}
-              value={login} onChange={this.handleChange} />
+              maxLength={100} autofocus autocapitalize="off" autocomplete="on" spellcheck={false}
+              placeholder="GitHub Username" value={login} onchange={this.handleChange} />
           </dd>
         </dl>
 
@@ -40,11 +33,13 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
     );
   }
 
-  private readonly handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    this.setState({ login: event.target.value });
+  private readonly handleChange = (event: Event) => {
+    let textInput = event.target as HTMLInputElement;
+    this.login = textInput.value;
+    this.updateUI();
   }
 
-  private readonly handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  private readonly handleSubmit = async (event: Event) => {
     event.preventDefault();
 
     if (this.login) {

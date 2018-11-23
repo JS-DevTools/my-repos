@@ -1,3 +1,6 @@
+import { h, mount } from "petit-dom";
 import { App } from "./components/app";
 
-ReactDOM.render(<App />, document.body);
+let app = <App />;
+let element = mount(app) as HTMLBodyElement;
+document.body = element;

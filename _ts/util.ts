@@ -5,6 +5,9 @@ export const LOCAL_DEV_MODE = location.hostname === "localhost";
 // The default delay, based on whether we're in "local dev" mode
 export const DEFAULT_DELAY = LOCAL_DEV_MODE ? 1000 : 0;
 
+// PetitDom doesn't support null elements, so we have to use an empty string instead
+export const NULL = "";
+
 export interface POJOof<T> {
   [key: string]: T;
 }

@@ -106,9 +106,9 @@ export class StateStore extends EventTarget {
 
   /**
    * Adds a new GitHub account with the specified login to the accounts list,
-   * and asynchronously fetches the account info from GitHub
+   * and starts fetching the account data
    */
-  public async addAccount(login: string) {
+  public addAccount(login: string) {
     login = login.trim();
 
     if (this.hasAccount(login)) {

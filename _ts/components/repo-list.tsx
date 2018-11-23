@@ -1,8 +1,10 @@
 import octicons = require("octicons");
 import { OcticonName } from "octicons";
+import { h } from "petit-dom";
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
 import { stateStore } from "../state-store";
+import { NULL } from "../util";
 
 export interface RepoListProps {
   account: GitHubAccount;
@@ -38,28 +40,28 @@ function RepoItem(props: RepoItemProps) {
           className={`badge ${repo.forks_count ? "badge-ok" : ""} forks`}>
           <Octicon name="repo-forked" />
           <span className="badge-label">Forks</span>
-          <span className="badge-count">{repo.forks_count}</span>
+          <span className="badge-count">{String(repo.forks_count)}</span>
         </a>
 
         <a href={`${repo.html_url}/stargazers`}
           className={`badge ${repo.stargazers_count ? "badge-ok" : ""} stars`}>
           <Octicon name="star" />
           <span className="badge-label">Stars</span>
-          <span className="badge-count">{repo.stargazers_count}</span>
+          <span className="badge-count">{String(repo.stargazers_count)}</span>
         </a>
 
         <a href={`${repo.html_url}/watchers`}
           className={`badge ${repo.watchers_count ? "badge-ok" : ""} watchers`}>
           <Octicon name="eye" />
           <span className="badge-label">Watchers</span>
-          <span className="badge-count">{repo.watchers_count}</span>
+          <span className="badge-count">{String(repo.watchers_count)}</span>
         </a>
 
         <a href={`${repo.html_url}/issues`}
           className={`badge ${repo.open_issues_count ? "badge-warning" : "badge-ok"} issues`}>
           <Octicon name={repo.open_issues_count ? "issue-opened" : "issue-closed"} />
           <span className="badge-label">Issues</span>
-          <span className="badge-count">{repo.open_issues_count}</span>
+          <span className="badge-count">{String(repo.open_issues_count)}</span>
         </a>
 
         {DependencyBadge(props)}
@@ -70,7 +72,8 @@ function RepoItem(props: RepoItemProps) {
 
 function Octicon({ name }: { name: OcticonName }) {
   let icon = octicons[name];
-  return <svg {...icon.options} dangerouslySetInnerHTML={{ __html: icon.path }} />;
+  // @ts-ignore - SVGSVGElement's properties are objects, not primitives
+  return <svg {...icon.options} innerHTML={icon.path} />;
 }
 
 function DependencyBadge(props: RepoItemProps) {
@@ -78,7 +81,7 @@ function DependencyBadge(props: RepoItemProps) {
 
   if (repo.dependencies.total === 0) {
     // This repo doesn't have any dependencies, so don't display this badge
-    return null;   // tslint:disable-line:no-null-keyword
+    return NULL;   // tslint:disable-line:no-null-keyword
   }
 
   let hasError: boolean;

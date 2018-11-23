@@ -1,3 +1,4 @@
+import { h } from "petit-dom";
 import { stateStore } from "../state-store";
 import { accountCountCssClass } from "../util";
 import { AccountItem } from "./account-item";

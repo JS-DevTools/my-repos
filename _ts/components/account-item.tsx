@@ -1,3 +1,4 @@
+import { h } from "petit-dom";
 import { GitHubAccount } from "../github/github-account";
 import { RepoList } from "./repo-list";
 

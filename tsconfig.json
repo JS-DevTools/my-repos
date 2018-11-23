@@ -10,6 +10,7 @@
       "dom"
     ],
     "jsx": "react",
+    "jsxFactory": "h",
 
     "outDir": "js",
     "sourceMap": true,
