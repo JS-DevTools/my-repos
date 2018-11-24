@@ -1,10 +1,9 @@
 import octicons = require("octicons");
 import { OcticonName } from "octicons";
-import { h } from "petit-dom";
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
 import { stateStore } from "../state-store";
-import { NULL } from "../util";
+import { h } from "../virtual-dom";
 
 export interface RepoListProps {
   account: GitHubAccount;
@@ -64,7 +63,7 @@ function RepoItem(props: RepoItemProps) {
           <span className="badge-count">{String(repo.open_issues_count)}</span>
         </a>
 
-        {DependencyBadge(props)}
+        <DependencyBadge {...props} />
       </nav>
     </li>
   );
@@ -80,8 +79,8 @@ function DependencyBadge(props: RepoItemProps) {
   let { repo } = props;
 
   if (repo.dependencies.total === 0) {
-    // This repo doesn't have any dependencies, so don't display this badge
-    return NULL;   // tslint:disable-line:no-null-keyword
+    // The repo has dependencies, so don't show this badge
+    return null;   // tslint:disable-line:no-null-keyword
   }
 
   let hasError: boolean;

@@ -1,6 +1,6 @@
-import { h } from "petit-dom";
 import { stateStore } from "../state-store";
 import { accountCountCssClass } from "../util";
+import { h } from "../virtual-dom";
 import { AddAccount } from "./add-account";
 
 export function FirstTime() {

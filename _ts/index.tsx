@@ -1,6 +1,12 @@
-import { h, mount } from "petit-dom";
 import { App } from "./components/app";
+import { stateStore } from "./state-store";
+import { mountTo, patch } from "./virtual-dom";
 
-let app = <App />;
-let element = mount(app) as HTMLBodyElement;
-document.body = element;
+let app = App();
+mountTo(document.body, app);
+
+stateStore.onStateChange((event) => {
+  let oldApp = app;
+  let newApp = App();
+  patch(document.body, oldApp, newApp);
+});

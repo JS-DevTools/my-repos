@@ -1,5 +1,5 @@
-import { h } from "petit-dom";
 import { GitHubAccount } from "../github/github-account";
+import { h } from "../virtual-dom";
 import { RepoList } from "./repo-list";
 
 interface AccountItemProps {

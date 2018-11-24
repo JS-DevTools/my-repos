@@ -1,6 +1,5 @@
-import { h } from "petit-dom";
 import { stateStore } from "../state-store";
-import { NULL } from "../util";
+import { h } from "../virtual-dom";
 
 export function Options() {
   let { accounts, showForks, showArchived } = stateStore.state;
@@ -14,23 +13,23 @@ export function Options() {
   }
 
   if (!hasForks && !hasArchived) {
-    return NULL;
+    return null;    // tslint:disable-line:no-null-keyword
   }
 
   return (
     <div className="responsive-container">
       <aside id="options">
         {
-          hasForks ?
-            <a id="toggle_forks" href={`#forks=${showForks ? "hide" : "show"}`} onclick={handleOptionClick}>
-              {showForks ? "hide" : "show"} forks
-            </a> : NULL
+          hasForks &&
+          <a id="toggle_forks" href={`#forks=${showForks ? "hide" : "show"}`} onclick={handleOptionClick}>
+            {showForks ? "hide" : "show"} forks
+          </a>
         }
         {
-          hasArchived ?
-            <a id="toggle_archived" href={`#archived=${showArchived ? "hide" : "show"}`} onclick={handleOptionClick}>
-              {showArchived ? "hide" : "show"} archived
-            </a> : NULL
+          hasArchived &&
+          <a id="toggle_archived" href={`#archived=${showArchived ? "hide" : "show"}`} onclick={handleOptionClick}>
+            {showArchived ? "hide" : "show"} archived
+          </a>
         }
       </aside>
     </div>

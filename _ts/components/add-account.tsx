@@ -1,6 +1,5 @@
-import { h } from "petit-dom";
 import { stateStore } from "../state-store";
-import { Component } from "./component";
+import { Component, h } from "../virtual-dom";
 
 export interface AddAccountProps {
   submitButtonText?: string;
@@ -36,7 +35,6 @@ export class AddAccount extends Component<AddAccountProps> {
   private readonly handleChange = (event: Event) => {
     let textInput = event.target as HTMLInputElement;
     this.login = textInput.value;
-    this.updateUI();
   }
 
   private readonly handleSubmit = async (event: Event) => {
