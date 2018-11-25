@@ -1,14 +1,11 @@
-import { VirtualNode } from "./virtual-node";
+import { flattenNodes } from "./flatten-nodes";
+import { VirtualNode, VirtualNodesOrNulls } from "./virtual-node";
 
 /**
  * Removes the actual DOM Nodes that correspond to the specified VirtualNodes
  */
-export function unmountFrom(parent: Element, nodes: VirtualNode | VirtualNode[]): void {
-  if (!Array.isArray(nodes)) {
-    nodes = [nodes];
-  }
-
-  for (let node of nodes) {
+export function unmountFrom(parent: Element, nodes: VirtualNodesOrNulls): void {
+  for (let node of flattenNodes(nodes)) {
     unmount(node);
     parent.removeChild(node.domNode!);
   }

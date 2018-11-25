@@ -1,18 +1,15 @@
 import { SVG_NAMESPACE } from "../util";
+import { flattenNodes } from "./flatten-nodes";
 import { setProp } from "./set-prop";
-import { VirtualNode } from "./virtual-node";
+import { VirtualNode, VirtualNodesOrNulls } from "./virtual-node";
 
 /**
  * Creates actual DOM Nodes from VirtualNodes, and adds them as children of the specifid DOM element
  */
-export function mountTo(parent: Element, children: VirtualNode | VirtualNode[], isSVG = false): void {
-  if (!Array.isArray(children)) {
-    children = [children];
-  }
-
+export function mountTo(parent: Element, children: VirtualNodesOrNulls, isSVG = false): void {
   isSVG = isSVG || parent.namespaceURI === SVG_NAMESPACE;
 
-  for (let child of children) {
+  for (let child of flattenNodes(children)) {
     let domNode = mount(child, isSVG);
     parent.appendChild(domNode);
   }

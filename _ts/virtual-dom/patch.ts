@@ -1,23 +1,16 @@
 import { POJO, SVG_NAMESPACE } from "../util";
+import { flattenNodes } from "./flatten-nodes";
 import { mount, mountTo } from "./mount";
 import { setProp } from "./set-prop";
 import { unmount, unmountFrom } from "./unmount";
-import { VirtualNode, VirtualTextNode } from "./virtual-node";
+import { VirtualNode, VirtualNodesOrNulls, VirtualTextNode } from "./virtual-node";
 
-export function patch(parent: Element, oldChildren: VirtualNode | VirtualNode[], newChildren: VirtualNode | VirtualNode[], isSVG = false): void {
-  if (!Array.isArray(oldChildren)) {
-    oldChildren = [oldChildren];
-  }
-  if (!Array.isArray(newChildren)) {
-    newChildren = [newChildren];
-  }
-
+export function patch(parent: Element, oldChildren: VirtualNodesOrNulls, newChildren: VirtualNodesOrNulls, isSVG = false): void {
   isSVG = isSVG || parent.namespaceURI === SVG_NAMESPACE;
-  let remainingOldChildren = oldChildren.slice();
+  let remainingOldChildren = flattenNodes(oldChildren).slice();
 
-  for (let i = 0; i < newChildren.length; i++) {
-    let newNode = newChildren[i];
-    let newKey = getKey(newNode, i);
+  for (let [index, newNode] of flattenNodes(newChildren).entries()) {
+    let newKey = getKey(newNode, index);
     let oldNode = splice(remainingOldChildren, newKey);
 
     if (oldNode) {
