@@ -24,4 +24,6 @@ export function unmount(node: VirtualNode): void {
   if ("component" in node) {
     node.component.onUnmount();
   }
+
+  node.domNode = undefined;
 }

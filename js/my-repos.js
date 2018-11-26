@@ -1,5 +1,5 @@
 /*!
- * My Repos v0.4.0 (November 25th 2018)
+ * My Repos v0.4.0 (November 26th 2018)
  * 
  * https://myrepos.io/
  * 
@@ -7,7 +7,7 @@
  * @license MIT
  */
 /*!
- * My Repos v0.4.0 (November 25th 2018)
+ * My Repos v0.4.0 (November 26th 2018)
  * 
  * https://myrepos.io/
  * 
@@ -622,6 +622,7 @@ const app_1 = require("./components/app");
 const state_store_1 = require("./state-store");
 const virtual_dom_1 = require("./virtual-dom");
 let app = app_1.App();
+document.body.innerHTML = "";
 virtual_dom_1.mountTo(document.body, app);
 state_store_1.stateStore.onStateChange((event) => {
     let oldApp = app;
@@ -1418,11 +1419,9 @@ const set_prop_1 = require("./set-prop");
 const unmount_1 = require("./unmount");
 function patch(parent, oldChildren, newChildren, isSVG = false) {
     isSVG = isSVG || parent.namespaceURI === util_1.SVG_NAMESPACE;
-    let remainingOldChildren = flatten_nodes_1.flattenNodes(oldChildren).slice();
-    for (let [index, newNode] of flatten_nodes_1.flattenNodes(newChildren).entries()) {
-        let newKey = getKey(newNode, index);
-        let oldNode = splice(remainingOldChildren, newKey);
-        if (oldNode) {
+    let nodePairs = matchNodes(flatten_nodes_1.flattenNodes(oldChildren), flatten_nodes_1.flattenNodes(newChildren));
+    for (let [oldNode, newNode] of nodePairs) {
+        if (oldNode && newNode) {
             if (isSameType(oldNode, newNode)) {
                 updateNode(oldNode, newNode, isSVG);
             }
@@ -1430,11 +1429,13 @@ function patch(parent, oldChildren, newChildren, isSVG = false) {
                 replaceNode(parent, oldNode, newNode, isSVG);
             }
         }
-        else {
+        else if (newNode) {
             mount_1.mountTo(parent, newNode, isSVG);
         }
+        else {
+            unmount_1.unmountFrom(parent, oldNode);
+        }
     }
-    unmount_1.unmountFrom(parent, remainingOldChildren);
 }
 exports.patch = patch;
 function updateNode(oldNode, newNode, isSVG) {
@@ -1463,7 +1464,9 @@ function updateNode(oldNode, newNode, isSVG) {
         }
     }
     // Patch grandchildren
-    patch(newNode.domNode, oldNode.children, newNode.children, isSVG);
+    if (oldNode.children.length > 0 || newNode.children.length > 0) {
+        patch(newNode.domNode, oldNode.children, newNode.children, isSVG);
+    }
 }
 function replaceNode(parent, oldNode, newNode, isSVG) {
     unmount_1.unmount(oldNode);
@@ -1485,6 +1488,9 @@ function isSameType(nodeA, nodeB) {
     }
 }
 function getKey(node, index) {
+    if (!node) {
+        return index;
+    }
     if ("text" in node) {
         return node.text;
     }
@@ -1492,15 +1498,36 @@ function getKey(node, index) {
         return node.props.key || index;
     }
 }
-function splice(nodes, key) {
-    for (let i = 0; i < nodes.length; i++) {
-        let node = nodes[i];
-        let nodeKey = getKey(node, i);
-        if (nodeKey === key) {
-            nodes.splice(i, 1);
-            return node;
+function matchNodes(oldNodes, newNodes) {
+    let pairs = [];
+    for (let i = 0; i < oldNodes.length; i++) {
+        let oldNode = oldNodes[i];
+        let oldKey = getKey(oldNode, i);
+        let matchFound = false;
+        for (let j = 0; j < newNodes.length; j++) {
+            let newNode = newNodes[j];
+            let newKey = getKey(newNode, j);
+            if (oldKey === newKey) {
+                matchFound = true;
+                pairs.push([oldNode, newNode]);
+                // Remove this node from the array so it won't be paired again.
+                // Setting it to undefined ensures that the index of other nodes remain the same.
+                // tslint:disable-next-line:no-any
+                newNodes[j] = undefined;
+                break;
+            }
+        }
+        if (!matchFound) {
+            pairs.push([oldNode, undefined]);
         }
     }
+    // Any remaining newNodes have no corresponding oldNode
+    for (let newNode of newNodes) {
+        if (newNode) {
+            pairs.push([undefined, newNode]);
+        }
+    }
+    return pairs;
 }
 
 },{"../util":25,"./flatten-nodes":27,"./mount":30,"./set-prop":32,"./unmount":33}],32:[function(require,module,exports){
@@ -1563,6 +1590,7 @@ function unmount(node) {
     if ("component" in node) {
         node.component.onUnmount();
     }
+    node.domNode = undefined;
 }
 exports.unmount = unmount;
 

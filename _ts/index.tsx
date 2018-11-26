@@ -3,6 +3,7 @@ import { stateStore } from "./state-store";
 import { mountTo, patch } from "./virtual-dom";
 
 let app = App();
+document.body.innerHTML = "";
 mountTo(document.body, app);
 
 stateStore.onStateChange((event) => {

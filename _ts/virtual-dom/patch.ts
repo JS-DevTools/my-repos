@@ -7,13 +7,10 @@ import { VirtualNode, VirtualNodesOrNulls, VirtualTextNode } from "./virtual-nod
 
 export function patch(parent: Element, oldChildren: VirtualNodesOrNulls, newChildren: VirtualNodesOrNulls, isSVG = false): void {
   isSVG = isSVG || parent.namespaceURI === SVG_NAMESPACE;
-  let remainingOldChildren = flattenNodes(oldChildren).slice();
+  let nodePairs = matchNodes(flattenNodes(oldChildren), flattenNodes(newChildren));
 
-  for (let [index, newNode] of flattenNodes(newChildren).entries()) {
-    let newKey = getKey(newNode, index);
-    let oldNode = splice(remainingOldChildren, newKey);
-
-    if (oldNode) {
+  for (let [oldNode, newNode] of nodePairs) {
+    if (oldNode && newNode) {
       if (isSameType(oldNode, newNode)) {
         updateNode(oldNode, newNode, isSVG);
       }
@@ -21,12 +18,13 @@ export function patch(parent: Element, oldChildren: VirtualNodesOrNulls, newChil
         replaceNode(parent, oldNode, newNode, isSVG);
       }
     }
-    else {
+    else if (newNode) {
       mountTo(parent, newNode, isSVG);
     }
+    else {
+      unmountFrom(parent, oldNode!);
+    }
   }
-
-  unmountFrom(parent, remainingOldChildren);
 }
 
 function updateNode(oldNode: VirtualNode, newNode: VirtualNode, isSVG: boolean) {
@@ -61,7 +59,9 @@ function updateNode(oldNode: VirtualNode, newNode: VirtualNode, isSVG: boolean) 
   }
 
   // Patch grandchildren
-  patch(newNode.domNode!, oldNode.children, newNode.children, isSVG);
+  if (oldNode.children.length > 0 || newNode.children.length > 0) {
+    patch(newNode.domNode!, oldNode.children, newNode.children, isSVG);
+  }
 }
 
 function replaceNode(parent: Element, oldNode: VirtualNode, newNode: VirtualNode, isSVG: boolean) {
@@ -85,7 +85,11 @@ function isSameType(nodeA: VirtualNode, nodeB: VirtualNode): boolean {
   }
 }
 
-function getKey(node: VirtualNode, index: number): string | number {
+function getKey(node: VirtualNode | undefined, index: number): string | number {
+  if (!node) {
+    return index;
+  }
+
   if ("text" in node) {
     return node.text;
   }
@@ -94,14 +98,42 @@ function getKey(node: VirtualNode, index: number): string | number {
   }
 }
 
-function splice(nodes: VirtualNode[], key: string | number): VirtualNode | undefined {
-  for (let i = 0; i < nodes.length; i++) {
-    let node = nodes[i];
-    let nodeKey = getKey(node, i);
+function matchNodes(oldNodes: VirtualNode[], newNodes: VirtualNode[]): Array<[VirtualNode?, VirtualNode?]> {
+  let pairs: Array<[VirtualNode?, VirtualNode?]> = [];
 
-    if (nodeKey === key) {
-      nodes.splice(i, 1);
-      return node;
+  for (let i = 0; i < oldNodes.length; i++) {
+    let oldNode = oldNodes[i];
+    let oldKey = getKey(oldNode, i);
+    let matchFound = false;
+
+    for (let j = 0; j < newNodes.length; j++) {
+      let newNode = newNodes[j];
+      let newKey = getKey(newNode, j);
+
+      if (oldKey === newKey) {
+        matchFound = true;
+        pairs.push([oldNode, newNode]);
+
+        // Remove this node from the array so it won't be paired again.
+        // Setting it to undefined ensures that the index of other nodes remain the same.
+        // tslint:disable-next-line:no-any
+        newNodes[j] = undefined as any;
+
+        break;
+      }
+    }
+
+    if (!matchFound) {
+      pairs.push([oldNode, undefined]);
     }
   }
+
+  // Any remaining newNodes have no corresponding oldNode
+  for (let newNode of newNodes) {
+    if (newNode) {
+      pairs.push([undefined, newNode]);
+    }
+  }
+
+  return pairs;
 }
