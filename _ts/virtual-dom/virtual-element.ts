@@ -18,4 +18,6 @@ export interface IntrinsicProps {
 }
 
 export type VirtualElementProps<E extends Element = Element> =
-  IntrinsicProps & DomElementProps<E, VirtualNodeOrPrimitive | VirtualNodeOrPrimitive[]>;
+  IntrinsicProps &
+  DomElementAttributes &
+  DomElementProps<E, VirtualNodeOrPrimitive | VirtualNodeOrPrimitive[]>;

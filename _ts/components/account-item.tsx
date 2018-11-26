@@ -10,11 +10,11 @@ export function AccountItem(props: AccountItemProps) {
   let { account } = props;
 
   return (
-    <section key={account.login} className="account">
+    <section key={account.login} class="account">
       <header>
         <h1>
           <a href={account.html_url}>
-            {account.avatar_url && <img src={account.avatar_url} className="avatar" />}
+            {account.avatar_url && <img src={account.avatar_url} class="avatar" />}
             {account.name}
           </a>
         </h1>
@@ -32,22 +32,22 @@ function AccountItemContents(props: AccountItemProps) {
   }
   else if (account.error) {
     return (
-      <div className="error">
-        <div className="error-message">{account.error}</div>
+      <div class="error">
+        <div class="error-message">{account.error}</div>
       </div>
     );
   }
   else if (account.loading) {
     return (
-      <div className="loading">
-        <div className="loading-message">Loading...</div>
+      <div class="loading">
+        <div class="loading-message">Loading...</div>
       </div>
     );
   }
   else {
     return (
-      <div className="no-repos">
-        <div className="empty-message">There are no repos to show</div>
+      <div class="no-repos">
+        <div class="empty-message">There are no repos to show</div>
       </div>
     );
   }

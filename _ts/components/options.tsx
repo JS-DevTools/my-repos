@@ -17,7 +17,7 @@ export function Options() {
   }
 
   return (
-    <div className="responsive-container">
+    <div class="responsive-container">
       <aside id="options">
         {
           hasForks &&

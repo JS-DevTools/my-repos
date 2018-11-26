@@ -206,11 +206,11 @@ const virtual_dom_1 = require("../virtual-dom");
 const repo_list_1 = require("./repo-list");
 function AccountItem(props) {
     let { account } = props;
-    return (virtual_dom_1.h("section", { key: account.login, className: "account" },
+    return (virtual_dom_1.h("section", { key: account.login, class: "account" },
         virtual_dom_1.h("header", null,
             virtual_dom_1.h("h1", null,
                 virtual_dom_1.h("a", { href: account.html_url },
-                    account.avatar_url && virtual_dom_1.h("img", { src: account.avatar_url, className: "avatar" }),
+                    account.avatar_url && virtual_dom_1.h("img", { src: account.avatar_url, class: "avatar" }),
                     account.name))),
         virtual_dom_1.h(AccountItemContents, Object.assign({}, props))));
 }
@@ -221,16 +221,16 @@ function AccountItemContents(props) {
         return virtual_dom_1.h(repo_list_1.RepoList, { account: account });
     }
     else if (account.error) {
-        return (virtual_dom_1.h("div", { className: "error" },
-            virtual_dom_1.h("div", { className: "error-message" }, account.error)));
+        return (virtual_dom_1.h("div", { class: "error" },
+            virtual_dom_1.h("div", { class: "error-message" }, account.error)));
     }
     else if (account.loading) {
-        return (virtual_dom_1.h("div", { className: "loading" },
-            virtual_dom_1.h("div", { className: "loading-message" }, "Loading...")));
+        return (virtual_dom_1.h("div", { class: "loading" },
+            virtual_dom_1.h("div", { class: "loading-message" }, "Loading...")));
     }
     else {
-        return (virtual_dom_1.h("div", { className: "no-repos" },
-            virtual_dom_1.h("div", { className: "empty-message" }, "There are no repos to show")));
+        return (virtual_dom_1.h("div", { class: "no-repos" },
+            virtual_dom_1.h("div", { class: "empty-message" }, "There are no repos to show")));
     }
 }
 
@@ -243,8 +243,8 @@ const virtual_dom_1 = require("../virtual-dom");
 const account_item_1 = require("./account-item");
 function AccountList() {
     let { accounts } = state_store_1.stateStore.state;
-    return (virtual_dom_1.h("main", { id: "account_list", className: util_1.accountCountCssClass(accounts) },
-        virtual_dom_1.h("div", { className: "responsive-container" }, accounts.map((account) => virtual_dom_1.h(account_item_1.AccountItem, { account: account })))));
+    return (virtual_dom_1.h("main", { id: "account_list", class: util_1.accountCountCssClass(accounts) },
+        virtual_dom_1.h("div", { class: "responsive-container" }, accounts.map((account) => virtual_dom_1.h(account_item_1.AccountItem, { account: account })))));
 }
 exports.AccountList = AccountList;
 
@@ -271,13 +271,13 @@ class AddAccount extends virtual_dom_1.Component {
     render() {
         let { submitButtonText } = this.props;
         let { login } = this;
-        return (virtual_dom_1.h("form", { className: "add-account form", onsubmit: this.handleSubmit },
-            virtual_dom_1.h("dl", { className: "form-group" },
-                virtual_dom_1.h("dt", { className: "input-label" },
+        return (virtual_dom_1.h("form", { class: "add-account form", onsubmit: this.handleSubmit },
+            virtual_dom_1.h("dl", { class: "form-group" },
+                virtual_dom_1.h("dt", { class: "input-label" },
                     virtual_dom_1.h("label", { htmlFor: "repo_owner" }, "GitHub Username")),
-                virtual_dom_1.h("dd", { className: "input-field" },
-                    virtual_dom_1.h("input", { type: "text", name: "account_name", className: "form-control short", maxLength: 100, autofocus: true, autocapitalize: "off", autocomplete: "on", spellcheck: false, placeholder: "GitHub Username", value: login, onchange: this.handleChange }))),
-            virtual_dom_1.h("button", { type: "submit", className: "btn btn-primary" }, submitButtonText || "Add")));
+                virtual_dom_1.h("dd", { class: "input-field" },
+                    virtual_dom_1.h("input", { type: "text", name: "account_name", class: "form-control short", maxLength: 100, autofocus: true, autocapitalize: "off", autocomplete: "on", spellcheck: false, placeholder: "GitHub Username", value: login, onchange: this.handleChange }))),
+            virtual_dom_1.h("button", { type: "submit", class: "btn btn-primary" }, submitButtonText || "Add")));
     }
 }
 exports.AddAccount = AddAccount;
@@ -309,9 +309,9 @@ const virtual_dom_1 = require("../virtual-dom");
 const add_account_1 = require("./add-account");
 function FirstTime() {
     let { accounts } = state_store_1.stateStore.state;
-    return (virtual_dom_1.h("aside", { id: "first_time", className: util_1.accountCountCssClass(accounts) },
-        virtual_dom_1.h("div", { className: "responsive-container" },
-            virtual_dom_1.h("div", { className: "welcome-message" },
+    return (virtual_dom_1.h("aside", { id: "first_time", class: util_1.accountCountCssClass(accounts) },
+        virtual_dom_1.h("div", { class: "responsive-container" },
+            virtual_dom_1.h("div", { class: "welcome-message" },
                 virtual_dom_1.h("h3", null, "Hi! \uD83D\uDC4B Enter your GitHub username to get started"),
                 virtual_dom_1.h(add_account_1.AddAccount, { submitButtonText: "Show My Repos" })))));
 }
@@ -334,7 +334,7 @@ function Options() {
     if (!hasForks && !hasArchived) {
         return null; // tslint:disable-line:no-null-keyword
     }
-    return (virtual_dom_1.h("div", { className: "responsive-container" },
+    return (virtual_dom_1.h("div", { class: "responsive-container" },
         virtual_dom_1.h("aside", { id: "options" },
             hasForks &&
                 virtual_dom_1.h("a", { id: "toggle_forks", href: `#forks=${showForks ? "hide" : "show"}`, onclick: handleOptionClick },
@@ -368,9 +368,9 @@ const virtual_dom_1 = require("../virtual-dom");
 const add_account_1 = require("./add-account");
 function PageHeader() {
     let { accounts } = state_store_1.stateStore.state;
-    return (virtual_dom_1.h("header", { id: "page_header", className: util_1.accountCountCssClass(accounts) },
-        virtual_dom_1.h("div", { className: "responsive-container" },
-            virtual_dom_1.h("img", { className: "logo", src: "img/logo.png", alt: "logo image" }),
+    return (virtual_dom_1.h("header", { id: "page_header", class: util_1.accountCountCssClass(accounts) },
+        virtual_dom_1.h("div", { class: "responsive-container" },
+            virtual_dom_1.h("img", { class: "logo", src: "img/logo.png", alt: "logo image" }),
             virtual_dom_1.h("h1", null, "My GitHub Repos"),
             virtual_dom_1.h("h2", null, "All your GitHub repos on one page"),
             virtual_dom_1.h(add_account_1.AddAccount, null))));
@@ -386,32 +386,32 @@ const virtual_dom_1 = require("../virtual-dom");
 function RepoList(props) {
     let { account } = props;
     let repos = account.repos.filter((repo) => !state_store_1.stateStore.isHidden(repo));
-    return (virtual_dom_1.h("ul", { className: "repo-list" }, repos.map((repo) => virtual_dom_1.h(RepoItem, Object.assign({ repo: repo }, props)))));
+    return (virtual_dom_1.h("ul", { class: "repo-list" }, repos.map((repo) => virtual_dom_1.h(RepoItem, Object.assign({ repo: repo }, props)))));
 }
 exports.RepoList = RepoList;
 function RepoItem(props) {
     let { repo } = props;
-    return (virtual_dom_1.h("li", { key: repo.name, className: `repo ${repo.fork ? "forked" : ""} ${repo.archived ? "archived" : ""}` },
+    return (virtual_dom_1.h("li", { key: repo.name, class: `repo ${repo.fork ? "forked" : ""} ${repo.archived ? "archived" : ""}` },
         virtual_dom_1.h("h2", null,
             virtual_dom_1.h("a", { href: repo.html_url }, repo.name)),
         repo.description && virtual_dom_1.h("h3", null, repo.description),
-        virtual_dom_1.h("nav", { className: "badges" },
-            virtual_dom_1.h("a", { href: `${repo.html_url}/network/members`, className: `badge ${repo.forks_count ? "badge-ok" : ""} forks` },
+        virtual_dom_1.h("nav", { class: "badges" },
+            virtual_dom_1.h("a", { href: `${repo.html_url}/network/members`, class: `badge ${repo.forks_count ? "badge-ok" : ""} forks` },
                 virtual_dom_1.h(Octicon, { name: "repo-forked" }),
-                virtual_dom_1.h("span", { className: "badge-label" }, "Forks"),
-                virtual_dom_1.h("span", { className: "badge-count" }, String(repo.forks_count))),
-            virtual_dom_1.h("a", { href: `${repo.html_url}/stargazers`, className: `badge ${repo.stargazers_count ? "badge-ok" : ""} stars` },
+                virtual_dom_1.h("span", { class: "badge-label" }, "Forks"),
+                virtual_dom_1.h("span", { class: "badge-count" }, String(repo.forks_count))),
+            virtual_dom_1.h("a", { href: `${repo.html_url}/stargazers`, class: `badge ${repo.stargazers_count ? "badge-ok" : ""} stars` },
                 virtual_dom_1.h(Octicon, { name: "star" }),
-                virtual_dom_1.h("span", { className: "badge-label" }, "Stars"),
-                virtual_dom_1.h("span", { className: "badge-count" }, String(repo.stargazers_count))),
-            virtual_dom_1.h("a", { href: `${repo.html_url}/watchers`, className: `badge ${repo.watchers_count ? "badge-ok" : ""} watchers` },
+                virtual_dom_1.h("span", { class: "badge-label" }, "Stars"),
+                virtual_dom_1.h("span", { class: "badge-count" }, String(repo.stargazers_count))),
+            virtual_dom_1.h("a", { href: `${repo.html_url}/watchers`, class: `badge ${repo.watchers_count ? "badge-ok" : ""} watchers` },
                 virtual_dom_1.h(Octicon, { name: "eye" }),
-                virtual_dom_1.h("span", { className: "badge-label" }, "Watchers"),
-                virtual_dom_1.h("span", { className: "badge-count" }, String(repo.watchers_count))),
-            virtual_dom_1.h("a", { href: `${repo.html_url}/issues`, className: `badge ${repo.open_issues_count ? "badge-warning" : "badge-ok"} issues` },
+                virtual_dom_1.h("span", { class: "badge-label" }, "Watchers"),
+                virtual_dom_1.h("span", { class: "badge-count" }, String(repo.watchers_count))),
+            virtual_dom_1.h("a", { href: `${repo.html_url}/issues`, class: `badge ${repo.open_issues_count ? "badge-warning" : "badge-ok"} issues` },
                 virtual_dom_1.h(Octicon, { name: repo.open_issues_count ? "issue-opened" : "issue-closed" }),
-                virtual_dom_1.h("span", { className: "badge-label" }, "Issues"),
-                virtual_dom_1.h("span", { className: "badge-count" }, String(repo.open_issues_count))),
+                virtual_dom_1.h("span", { class: "badge-label" }, "Issues"),
+                virtual_dom_1.h("span", { class: "badge-count" }, String(repo.open_issues_count))),
             virtual_dom_1.h(DependencyBadge, Object.assign({}, props)))));
 }
 function Octicon({ name }) {
@@ -443,10 +443,10 @@ function DependencyBadge(props) {
         label = "Up-to-Date";
         count = repo.dependencies.up_to_date;
     }
-    return (virtual_dom_1.h("a", { href: repo.dependencies.html_url, className: `badge ${hasError ? "badge-error" : "badge-ok"} dependencies` },
+    return (virtual_dom_1.h("a", { href: repo.dependencies.html_url, class: `badge ${hasError ? "badge-error" : "badge-ok"} dependencies` },
         virtual_dom_1.h(Octicon, { name: "package" }),
-        virtual_dom_1.h("span", { className: "badge-label" }, label),
-        virtual_dom_1.h("span", { className: "badge-count" }, `${count} / ${repo.dependencies.total}`)));
+        virtual_dom_1.h("span", { class: "badge-label" }, label),
+        virtual_dom_1.h("span", { class: "badge-count" }, `${count} / ${repo.dependencies.total}`)));
 }
 
 },{"../state-store":23,"../virtual-dom":29,"octicons":36}],12:[function(require,module,exports){

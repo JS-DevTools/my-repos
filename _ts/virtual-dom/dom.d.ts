@@ -2,6 +2,10 @@ interface DomElements extends HTMLElementTagNameMap, SVGElementTagNameMap {
   "main": HTMLMainElement;
 }
 
+interface DomElementAttributes {
+  class?: string;
+}
+
 // The "C" type parameter is used to override the Element.children property
 // so it accepts VirtuaNodes rather than Elements.  This is hacky, but
 // required to satisfy TypeScript's JSX type checking

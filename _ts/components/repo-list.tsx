@@ -14,7 +14,7 @@ export function RepoList(props: RepoListProps) {
   let repos = account.repos.filter((repo) => !stateStore.isHidden(repo));
 
   return (
-    <ul className="repo-list">
+    <ul class="repo-list">
       {repos.map((repo) => <RepoItem repo={repo} {...props} />)}
     </ul>
   );
@@ -28,39 +28,39 @@ function RepoItem(props: RepoItemProps) {
   let { repo } = props;
 
   return (
-    <li key={repo.name} className={`repo ${repo.fork ? "forked" : ""} ${repo.archived ? "archived" : ""}`}>
+    <li key={repo.name} class={`repo ${repo.fork ? "forked" : ""} ${repo.archived ? "archived" : ""}`}>
       <h2>
         <a href={repo.html_url}>{repo.name}</a>
       </h2>
       {repo.description && <h3>{repo.description}</h3>}
 
-      <nav className="badges">
+      <nav class="badges">
         <a href={`${repo.html_url}/network/members`}
-          className={`badge ${repo.forks_count ? "badge-ok" : ""} forks`}>
+          class={`badge ${repo.forks_count ? "badge-ok" : ""} forks`}>
           <Octicon name="repo-forked" />
-          <span className="badge-label">Forks</span>
-          <span className="badge-count">{String(repo.forks_count)}</span>
+          <span class="badge-label">Forks</span>
+          <span class="badge-count">{String(repo.forks_count)}</span>
         </a>
 
         <a href={`${repo.html_url}/stargazers`}
-          className={`badge ${repo.stargazers_count ? "badge-ok" : ""} stars`}>
+          class={`badge ${repo.stargazers_count ? "badge-ok" : ""} stars`}>
           <Octicon name="star" />
-          <span className="badge-label">Stars</span>
-          <span className="badge-count">{String(repo.stargazers_count)}</span>
+          <span class="badge-label">Stars</span>
+          <span class="badge-count">{String(repo.stargazers_count)}</span>
         </a>
 
         <a href={`${repo.html_url}/watchers`}
-          className={`badge ${repo.watchers_count ? "badge-ok" : ""} watchers`}>
+          class={`badge ${repo.watchers_count ? "badge-ok" : ""} watchers`}>
           <Octicon name="eye" />
-          <span className="badge-label">Watchers</span>
-          <span className="badge-count">{String(repo.watchers_count)}</span>
+          <span class="badge-label">Watchers</span>
+          <span class="badge-count">{String(repo.watchers_count)}</span>
         </a>
 
         <a href={`${repo.html_url}/issues`}
-          className={`badge ${repo.open_issues_count ? "badge-warning" : "badge-ok"} issues`}>
+          class={`badge ${repo.open_issues_count ? "badge-warning" : "badge-ok"} issues`}>
           <Octicon name={repo.open_issues_count ? "issue-opened" : "issue-closed"} />
-          <span className="badge-label">Issues</span>
-          <span className="badge-count">{String(repo.open_issues_count)}</span>
+          <span class="badge-label">Issues</span>
+          <span class="badge-count">{String(repo.open_issues_count)}</span>
         </a>
 
         <DependencyBadge {...props} />
@@ -105,10 +105,10 @@ function DependencyBadge(props: RepoItemProps) {
 
   return (
     <a href={repo.dependencies.html_url}
-      className={`badge ${hasError ? "badge-error" : "badge-ok"} dependencies`}>
+      class={`badge ${hasError ? "badge-error" : "badge-ok"} dependencies`}>
       <Octicon name="package" />
-      <span className="badge-label">{label}</span>
-      <span className="badge-count">{`${count} / ${repo.dependencies.total}`}</span>
+      <span class="badge-label">{label}</span>
+      <span class="badge-count">{`${count} / ${repo.dependencies.total}`}</span>
     </a>
   );
 }

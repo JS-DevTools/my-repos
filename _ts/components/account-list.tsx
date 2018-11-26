@@ -7,8 +7,8 @@ export function AccountList() {
   let { accounts } = stateStore.state;
 
   return (
-    <main id="account_list" className={accountCountCssClass(accounts)}>
-      <div className="responsive-container">
+    <main id="account_list" class={accountCountCssClass(accounts)}>
+      <div class="responsive-container">
         {accounts.map((account) => <AccountItem account={account} />)}
       </div>
     </main>
