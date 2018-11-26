@@ -12,14 +12,19 @@ export function setProp(element: Element, key: string, value: unknown): void {
     (element as POJO)[key] = value;
   }
   else {
-    if (value === true) {
-      element.setAttribute(key, "");
-    }
-    else if (value === false) {
-      element.removeAttribute(key);
-    }
-    else {
-      element.setAttribute(key, String(value));
+    switch (value) {
+      case true:
+        element.setAttribute(key, "");
+        break;
+
+      case false:
+      case null:  // tslint:disable-line:no-null-keyword
+      case undefined:
+        element.removeAttribute(key);
+        break;
+
+      default:
+        element.setAttribute(key, String(value));
     }
   }
 }
