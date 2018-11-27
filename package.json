@@ -1,6 +1,6 @@
 {
   "name": "my-repos",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "All your GitHub repos on one page",
   "private": true,
   "author": {
