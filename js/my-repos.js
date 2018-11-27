@@ -1,5 +1,5 @@
 /*!
- * my-repos v0.5.0 (Tue Nov 27 2018)
+ * my-repos v0.5.1 (Tue Nov 27 2018)
  *
  * https://myrepos.io/
  *
