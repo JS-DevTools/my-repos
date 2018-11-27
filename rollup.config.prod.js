@@ -1,3 +1,5 @@
+process.env.NODE_ENV = "production";
+
 import config from "./rollup.config.dev";
 import manifest from "./package.json";
 import { terser } from "rollup-plugin-terser";
