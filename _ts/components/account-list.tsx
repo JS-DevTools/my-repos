@@ -1,3 +1,4 @@
+import * as React from "react";
 import { stateStore } from "../state-store";
 import { accountCountCssClass } from "../util";
 import { AccountItem } from "./account-item";

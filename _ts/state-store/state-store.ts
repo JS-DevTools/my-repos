@@ -7,11 +7,6 @@ import { hashMatchesState, readStateFromHash, writeStateToHash } from "./hash";
 const hashchange = "hashchange";
 const statechange = "statechange";
 
-interface StateChangeEventDetail {
-  state: Partial<ReadonlyAppState>;
-  callback(): void;
-}
-
 export class StateStore extends EventTarget {
   public readonly state: ReadonlyAppState = new AppState();
 
@@ -28,26 +23,18 @@ export class StateStore extends EventTarget {
   /**
    * Subscribes to the "statechange" event
    */
-  public onStateChange(listener: (evt: CustomEvent<StateChangeEventDetail>) => void) {
+  public onStateChange(listener: (evt: CustomEvent) => void) {
     this.addEventListener(statechange, listener);
   }
 
   /**
    * Dispatches a "statechange" event
    */
-  public setState(partialState: Partial<ReadonlyAppState>, callback?: () => void) {
+  public setState(partialState: Partial<ReadonlyAppState>) {
     Object.assign(this.state, partialState);
+    writeStateToHash(this.state);
 
-    let stateChangeEvent = new CustomEvent<StateChangeEventDetail>(statechange, {
-      detail: {
-        state: this.state,
-        callback: () => {
-          writeStateToHash(this.state);
-          callback && callback(); //tslint:disable-line:no-void-expression
-        }
-      }
-    });
-
+    let stateChangeEvent = new CustomEvent<{}>(statechange);
     this.dispatchEvent(stateChangeEvent);
   }
 
@@ -108,7 +95,7 @@ export class StateStore extends EventTarget {
    * Adds a new GitHub account with the specified login to the accounts list,
    * and asynchronously fetches the account info from GitHub
    */
-  public async addAccount(login: string) {
+  public addAccount(login: string) {
     login = login.trim();
 
     if (this.hasAccount(login)) {

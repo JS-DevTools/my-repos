@@ -1,3 +1,4 @@
+import * as React from "react";
 import { GitHubAccount } from "../github/github-account";
 import { RepoList } from "./repo-list";
 

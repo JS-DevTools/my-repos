@@ -1,3 +1,5 @@
+import * as React from "react";
+// tslint:disable-next-line:no-duplicate-imports
 import { MouseEvent } from "react";
 import { stateStore } from "../state-store";
 

@@ -31,7 +31,7 @@ export async function fetchDataAsync(account: GitHubAccount, updateAccount: Upda
   updateAccount(account);
 
   // Fetch additional data for each repo
-  await Promise.all(account.repos.map((repo) => fetchRepoData(repo, updateRepo)));
+  await Promise.all(account.repos.map(async (repo) => fetchRepoData(repo, updateRepo)));
 
   // TODO: Perform a second-pass without cache
 }

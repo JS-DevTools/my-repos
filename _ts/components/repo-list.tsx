@@ -1,5 +1,7 @@
-import octicons = require("octicons");
+import * as octicons from "octicons";
+// tslint:disable-next-line:no-duplicate-imports
 import { OcticonName } from "octicons";
+import * as React from "react";
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
 import { stateStore } from "../state-store";

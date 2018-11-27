@@ -1,3 +1,4 @@
+import * as React from "react";
 import { stateStore } from "../state-store";
 import { ReadonlyAppState } from "../state-store/app-state";
 import { AccountList } from "./account-list";
@@ -13,7 +14,7 @@ export class App extends React.Component<{}, ReadonlyAppState> {
 
     // Connect the StateStore with this app instance
     this.state = stateStore.state;
-    stateStore.onStateChange((event) => this.setState(event.detail.state, event.detail.callback));  //tslint:disable-line:no-unbound-method
+    stateStore.onStateChange(() => this.setState(stateStore.state));
   }
 
   public render() {

@@ -67,10 +67,6 @@ rules:
     - true
     - ignore-module: source-map-support/register
 
-  no-implicit-dependencies:
-    - true
-    - [react, react-dom]
-
   # Allow types to be explicitly declared, for clarity
   no-inferrable-types: false
 
