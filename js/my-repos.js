@@ -25635,11 +25635,6 @@
 	// Import data into exports
 	var octicons = data$2;
 
-	var octicons$1 = /*#__PURE__*/Object.freeze({
-		default: octicons,
-		__moduleExports: octicons
-	});
-
 	function RepoList(props) {
 	    let { account } = props;
 	    let repos = account.repos.filter((repo) => !stateStore.isHidden(repo));
@@ -25671,8 +25666,13 @@
 	            DependencyBadge(props))));
 	}
 	function Octicon({ name }) {
-	    let icon = octicons$1[name];
-	    return react_1("svg", Object.assign({}, icon.options, { dangerouslySetInnerHTML: { __html: icon.path } }));
+	    let icon = octicons[name];
+	    let props = {
+	        ...icon.options,
+	        className: icon.options.class,
+	    };
+	    delete props.class;
+	    return react_1("svg", Object.assign({}, props, { dangerouslySetInnerHTML: { __html: icon.path } }));
 	}
 	function DependencyBadge(props) {
 	    let { repo } = props;

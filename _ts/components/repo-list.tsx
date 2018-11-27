@@ -1,6 +1,4 @@
-import * as octicons from "octicons";
-// tslint:disable-next-line:no-duplicate-imports
-import { OcticonName } from "octicons";
+import { default as octicons, OcticonName } from "octicons";
 import * as React from "react";
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
@@ -72,7 +70,12 @@ function RepoItem(props: RepoItemProps) {
 
 function Octicon({ name }: { name: OcticonName }) {
   let icon = octicons[name];
-  return <svg {...icon.options} dangerouslySetInnerHTML={{ __html: icon.path }} />;
+  let props = {
+    ...icon.options,
+    className: icon.options.class,
+  };
+  delete props.class;
+  return <svg {...props} dangerouslySetInnerHTML={{ __html: icon.path }} />;
 }
 
 function DependencyBadge(props: RepoItemProps) {
