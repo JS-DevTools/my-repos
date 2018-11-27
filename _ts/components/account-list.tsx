@@ -9,7 +9,7 @@ export function AccountList() {
   return (
     <main id="account_list" className={accountCountCssClass(accounts)}>
       <div className="responsive-container">
-        {accounts.map((account) => <AccountItem account={account} />)}
+        {accounts.map((account) => <AccountItem key={account.login} account={account} />)}
       </div>
     </main>
   );

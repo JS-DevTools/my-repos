@@ -16,7 +16,7 @@ export function RepoList(props: RepoListProps) {
 
   return (
     <ul className="repo-list">
-      {repos.map((repo) => <RepoItem repo={repo} {...props} />)}
+      {repos.map((repo) => <RepoItem key={repo.name} repo={repo} {...props} />)}
     </ul>
   );
 }
