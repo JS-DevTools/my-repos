@@ -24,22 +24,36 @@ export function fetchData(account: GitHubAccount, updateAccount: UpdateAccount, 
  * and the specified update callback will be called multiple times.
  */
 export async function fetchDataAsync(account: GitHubAccount, updateAccount: UpdateAccount, updateRepo: UpdateRepo) {
-  // Fetch the account and repos simultaneously
-  account = await fetchAccountAndRepos(account);
+  // We fetch data in two phases:
+  //
+  // Phase 1 - Only fetch data that we don't already have cached.
+  //           This ensures that uncached data will be fetched first
+  //
+  // Phase 2 - Fetch cached data to ensure we have the latest.
+  //           We may run into API rate limits at this point,
+  //           but that's ok because we can fallback to the cached data.
+  let phases = [true, false];
 
-  // Immediately update the app state with the account & repo info
-  updateAccount(account);
+  for (let phase of phases) {
+    // Fetch the account and repos simultaneously
+    account = await fetchAccountAndRepos(account, updateAccount, phase);
 
-  // Fetch additional data for each repo
-  await Promise.all(account.repos.map(async (repo) => fetchRepoData(repo, updateRepo)));
-
-  // TODO: Perform a second-pass without cache
+    // Fetch additional data for each repo
+    await Promise.all(account.repos.map(
+      async (repo) => fetchRepoData(repo, updateRepo, phase))
+    );
+  }
 }
 
 /**
  * Fetches the specified GitHub account and its repos
  */
-async function fetchAccountAndRepos(account: GitHubAccount): Promise<GitHubAccount> {
+async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: UpdateAccount, skipIfCached: boolean): Promise<GitHubAccount> {
+  if (skipIfCached && account.loaded) {
+    // Skip fetching this account, since it has already been loaded from the cache
+    return account;
+  }
+
   // Fetch the GitHub account and repos at the same time
   let [accountResponse, reposResponse] = await Promise.all([
     github.fetchAccount(account),
@@ -67,6 +81,7 @@ async function fetchAccountAndRepos(account: GitHubAccount): Promise<GitHubAccou
     }
   }
 
+  updateAccount(account);
   return account;
 }
 
@@ -74,12 +89,12 @@ async function fetchAccountAndRepos(account: GitHubAccount): Promise<GitHubAccou
  * Fetches the issues, pull requests, and dependencies for the specified repo.
  * The specified update callback is called as each piece of data is received.
  */
-async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo) {
+async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo, skipIfCached: boolean) {
   // Fetch the issues, pull requests, and dependencies at the same time,
   // and call the update callback as each piece of data is received
   await Promise.all([
-    fetchIssuesAndPullRequests(repo, updateRepo),
-    fetchDependencies(repo, updateRepo),
+    fetchIssuesAndPullRequests(repo, updateRepo, skipIfCached),
+    fetchDependencies(repo, updateRepo, skipIfCached),
   ]);
 }
 
@@ -87,7 +102,17 @@ async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo) {
  * Fetches the issues and pull requests for the specified repo,
  * and calls the specified update callback.
  */
-async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRepo) {
+async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRepo, skipIfCached: boolean) {
+  if (skipIfCached && !repo.issues_includes_pulls) {
+    // Skip fetching the PR count, since we already have it cached
+    return;
+  }
+
+  if (repo.issues_includes_pulls && repo.open_issues_count === 0) {
+    // There are no open issues or PRs.  No need to fetch anything.
+    return;
+  }
+
   let prCountResponse = await github.fetchPullCount(repo);
 
   if (prCountResponse.error) {
@@ -119,7 +144,12 @@ async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRe
 /**
  * Fetches the dependencies for the specified repo, and calls the specified update callback.
  */
-async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo) {
+async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, skipIfCached: boolean) {
+  if (skipIfCached && repo.dependencies.loaded) {
+    // Skip fetching this repo's dependencies, since they've alredy been loaded from the cache
+    return;
+  }
+
   let dependenciesResponse = await packageRegistry.fetchDependencies(repo);
 
   if (dependenciesResponse.error) {
