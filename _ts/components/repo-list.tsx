@@ -62,6 +62,19 @@ function RepoItem(props: RepoItemProps) {
           <span className="badge-count">{repo.open_issues_count}</span>
         </a>
 
+        <a href={`${repo.html_url}/pulls`}
+          className={`badge ${repo.open_pulls_count ? "badge-warning" : "badge-ok"} pulls`}>
+          <Octicon name="git-pull-request" />
+          <span className="badge-label">PRs</span>
+          <span className="badge-count">
+            {
+              repo.issues_includes_pulls ?
+                repo.open_issues_count === 0 ? 0 : "?" :
+                repo.open_pulls_count
+            }
+          </span>
+        </a>
+
         {DependencyBadge(props)}
       </nav>
     </li>

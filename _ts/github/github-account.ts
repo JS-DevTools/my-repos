@@ -55,7 +55,6 @@ export function isGitHubAccountPOJO(account: any): account is GitHubAccountPOJO 
     account.login.length > 0 &&
     typeof account.name === "string" &&
     account.name.length > 0 &&
-    typeof account.bio === "string" &&
     typeof account.avatar_url === "string" &&
     typeof account.html_url === "string";
 }
