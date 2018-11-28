@@ -14,19 +14,6 @@ export interface POJO extends POJOof<unknown> { }
 export interface JsonPOJO extends POJOof<string | number | boolean | JsonPOJO | JsonPOJO[]> { }
 
 /**
- * Converts a Map-like object to a POJO with string keys
- */
-export function mapToPOJO<K, V>(map: Map<K, V>): POJOof<V> {
-  let pojo = {} as POJOof<V>;
-
-  for (let [key, value] of map.entries()) {
-    pojo[key.toString()] = value;
-  }
-
-  return pojo;
-}
-
-/**
  * Returns the given value as a pretty-formatted string
  */
 export function prettify(value: unknown): string {

@@ -1,6 +1,7 @@
 import { stateStore } from "../state-store";
-import { mapToPOJO, POJOof, random } from "../util";
-import { ApiResponse, ResponseMapper } from "./api-response";
+import { POJOof, random } from "../util";
+import { ApiResponse } from "./api-response";
+import { headersToPOJO, mapResponse, ResponseMapper } from "./map-response";
 
 interface CachedResponse {
   status: number;
@@ -20,7 +21,7 @@ export class ApiClient {
    * NOTE: Unlike the native Fetch API, this will never throw an error.  If an error occurs, then
    * the `ApiResponse.error` property will be set.
    */
-  public async fetch<T>(request: Request, mapper: ResponseMapper<T>): Promise<ApiResponse<T>> {
+  public async fetch<T>(request: Request, mapper: ResponseMapper<T>): Promise<Readonly<ApiResponse<T>>> {
     let [response] = await Promise.all([
       await this._fetch<T>(request, mapper),
       artificialDelay(),
@@ -37,7 +38,7 @@ export class ApiClient {
    * NOTE: Unlike the native Fetch API, this will never throw an error.  If an error occurs, then
    * the `ApiResponse.error` property will be set.
    */
-  private async _fetch<T>(request: Request, mapper: ResponseMapper<T>): Promise<ApiResponse<T>> {
+  private async _fetch<T>(request: Request, mapper: ResponseMapper<T>): Promise<Readonly<ApiResponse<T>>> {
     try {
       let fromCache: boolean;
 
@@ -60,7 +61,7 @@ export class ApiClient {
       }
 
       // Convert teh raw Fetch Response to an ApiResponse
-      return ApiResponse.fromRaw<T>(rawResponse, fromCache, mapper);
+      return mapResponse(rawResponse, fromCache, mapper);
     }
     catch (error) {
       // Create a dummy response and set the `error` property
@@ -75,7 +76,7 @@ export class ApiClient {
         }
       );
 
-      return ApiResponse.fromRaw<T>(rawResponse, false, mapper);
+      return mapResponse(rawResponse, false, mapper);
     }
   }
 
@@ -107,7 +108,7 @@ export class ApiClient {
     let responsePOJO: CachedResponse = {
       status: response.status,
       statusText: response.statusText,
-      headers: mapToPOJO(response.headers as any),    // tslint:disable-line:no-any
+      headers: headersToPOJO(response.headers),
       body: await response.clone().text(),
     };
 

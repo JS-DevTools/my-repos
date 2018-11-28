@@ -55,7 +55,7 @@ async function fetchAccountAndRepos(account: GitHubAccount): Promise<GitHubAccou
   }
   else {
     // We successfully fetched the GitHub account
-    account = accountResponse.body!;
+    account = accountResponse.body;
 
     if (reposResponse.error) {
       // An error occurred while fetching the repos, so add the error message to the account
@@ -63,7 +63,7 @@ async function fetchAccountAndRepos(account: GitHubAccount): Promise<GitHubAccou
     }
     else {
       // We successfully fetched the GitHub repos
-      account.repos = reposResponse.body!;
+      account.repos = reposResponse.body;
     }
   }
 
@@ -90,8 +90,11 @@ async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo) {
 async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRepo) {
   let prCountResponse = await github.fetchPullCount(repo);
 
-  if (prCountResponse.ok) {
-    let open_pulls_count = prCountResponse.body!;
+  if (prCountResponse.error) {
+    console.error(prCountResponse.error);
+  }
+  else {
+    let open_pulls_count = prCountResponse.body;
     let { open_issues_count, issues_includes_pulls } = repo;
 
     if (issues_includes_pulls) {
@@ -119,11 +122,14 @@ async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRe
 async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo) {
   let dependenciesResponse = await packageRegistry.fetchDependencies(repo);
 
-  if (dependenciesResponse.ok) {
+  if (dependenciesResponse.error) {
+    console.error(dependenciesResponse.error);
+  }
+  else {
     // Update the app state with the repo's dependencies
     repo = new GitHubRepo({
       ...repo,
-      dependencies: dependenciesResponse.body!,
+      dependencies: dependenciesResponse.body,
     });
 
     updateRepo(repo);
