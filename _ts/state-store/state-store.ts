@@ -1,6 +1,7 @@
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
 import { AppState, ReadonlyAppState } from "./app-state";
+import { Cache } from "./cache";
 import { fetchData } from "./fetch-data";
 import { hashMatchesState, readStateFromHash, writeStateToHash } from "./hash";
 
@@ -9,6 +10,7 @@ const statechange = "statechange";
 
 export class StateStore extends EventTarget {
   public readonly state: ReadonlyAppState = new AppState();
+  private readonly _cache = new Cache();
 
   public constructor() {
     super();
@@ -55,40 +57,25 @@ export class StateStore extends EventTarget {
       hashState.accounts = [];
 
       for (let hashAccount of hashAccounts) {
-        let account = this.getAccount(hashAccount.login);
+        let account = this.state.accounts.find(byLogin(hashAccount.login));
+
         if (account) {
           hashState.accounts.push(account);
         }
         else {
-          // This is a newly-added account
-          hashState.accounts.push(hashAccount);
-          hashAccount.loading = true;
+          // This is a newly-added account. Get its data from the cache, if possible
+          account = this._cache.getAccount(hashAccount.login) || hashAccount;
 
           // Start fetching the account's data from GitHub, David-DM, etc.
-          this._fetchData(hashAccount);
+          account.loading = true;
+          this._fetchData(account);
+
+          hashState.accounts.push(account);
         }
       }
     }
 
     this.setState(hashState);
-  }
-
-  /**
-   * Determines whether the specified account already exists
-   */
-  public hasAccount(login: string | GitHubAccount): boolean {
-    if (typeof login === "object") {
-      login = login.login;
-    }
-
-    return Boolean(this.getAccount(login));
-  }
-
-  /**
-   * Returns the account with the specified login
-   */
-  public getAccount(login: string) {
-    return this.state.accounts.find(byLogin(login));
   }
 
   /**
@@ -98,24 +85,28 @@ export class StateStore extends EventTarget {
   public addAccount(login: string) {
     login = login.trim();
 
-    if (this.hasAccount(login)) {
-      // The account already exists
+    // Determine whether the account already exists
+    let account = this.state.accounts.find(byLogin(login));
+    if (account) {
       return;
     }
 
-    let account = new GitHubAccount({
-      login,
-      name: login,
-      loading: true,
-    });
+    // Get the account data from the cache, if possible
+    account = this._cache.getAccount(login);
+
+    if (!account) {
+      // Cache miss.  So create a skeleton GitHubAccount object
+      account = new GitHubAccount({ login, name: login });
+    }
+
+    // Start fetching the account's data from GitHub, David-DM, etc.
+    account.loading = true;
+    this._fetchData(account);
 
     // Add this account
     let accounts = this.state.accounts.slice();
     accounts.push(account);
     this.setState({ accounts });
-
-    // Fetch the account's data from GitHub, David-DM, etc.
-    this._fetchData(account);
   }
 
   /**
@@ -127,6 +118,7 @@ export class StateStore extends EventTarget {
 
     if (index >= 0) {
       accounts.splice(index, 1, account);
+      this._cache.setAccount(account);
       this.setState({ accounts });
     }
   }
@@ -156,6 +148,7 @@ export class StateStore extends EventTarget {
 
       if (index >= 0) {
         account.repos.splice(index, 1, repo);
+        this._cache.setRepo(repo);
         this.setState({ accounts });
       }
     }
@@ -198,8 +191,8 @@ export class StateStore extends EventTarget {
   }
 
   /**
-   * Begins fetching all the data for the specified GitHub account. This function returns immediately,
-   * but the data is fetched asynchronously, and the `updateAccount()` and `updateRepo()` callbacks
+   * Fetchs all the data for the specified GitHub account from GitHub, David-DM, etc.
+   * This function returns immediately, and the `updateAccount()` and `updateRepo()` callbacks
    * are called as data is received.
    */
   private _fetchData(account: GitHubAccount) {
