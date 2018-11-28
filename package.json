@@ -1,6 +1,6 @@
 {
   "name": "my-repos",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "All your GitHub repos on one page",
   "private": true,
   "author": {
@@ -27,7 +27,7 @@
     "start": "jekyll serve",
     "test": "npm run lint",
     "upgrade": "npm-check -u",
-    "bump": "bump --prompt --tag --push --all",
+    "bump": "bump --prompt --grep js/* --tag --push --all",
     "release": "npm run upgrade && npm run test && npm run build && npm run bump"
   },
   "devDependencies": {
