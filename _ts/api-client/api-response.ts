@@ -8,7 +8,6 @@ export interface UnmappedApiResponse {
   status: number;
   statusText: string;
   url: string;
-  fromCache: boolean;
   headers: Readonly<POJOof<string>>;
   rawBody: unknown;
 }
@@ -20,5 +19,4 @@ export interface MappedApiResponse<T> extends UnmappedApiResponse {
 export interface ApiErrorResponse extends UnmappedApiResponse {
   ok: false;
   error: Error;
-  fromCache: false;
 }

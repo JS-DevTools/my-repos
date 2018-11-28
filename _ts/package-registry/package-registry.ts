@@ -16,7 +16,7 @@ export class PackageRegistry {
     }
 
     let rawResponse = new Response();
-    return mapResponse<Dependencies>(rawResponse, false, (response) => ({
+    return mapResponse<Dependencies>(rawResponse, (response) => ({
       ...response,
       body: new Dependencies(),
     }));

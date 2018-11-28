@@ -8,11 +8,11 @@ export type ResponseMapper<T> = (response: UnmappedApiResponse) => MappedApiResp
  * Maps a raw Fetch Response to a typed ApiResponse, if possible.
  * Otherwise, returns an ApiErrorResponse.
  */
-export async function mapResponse<T>(rawResponse: Response, fromCache: boolean, mapper: ResponseMapper<T>)
+export async function mapResponse<T>(rawResponse: Response, mapper: ResponseMapper<T>)
   : Promise<Readonly<ApiResponse<T>>> {
 
   let { ok, status, statusText, url } = rawResponse;
-  let apiResponse: Partial<UnmappedApiResponse> = { ok, status, statusText, url, fromCache };
+  let apiResponse: Partial<UnmappedApiResponse> = { ok, status, statusText, url };
 
   try {
     // Parse the headers, even if it's an error response
@@ -22,7 +22,7 @@ export async function mapResponse<T>(rawResponse: Response, fromCache: boolean, 
     apiResponse.rawBody = await parseResponseBody(rawResponse);
 
     if (apiResponse.ok) {
-      // Map the response body to the desired type
+      // Map the response body to the desired format
       let mappedApiResponse = mapper(apiResponse as UnmappedApiResponse);
       return mappedApiResponse;
     }
