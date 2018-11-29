@@ -3,8 +3,8 @@ import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
 import { packageRegistry } from "../package-registry";
 
-export type UpdateAccount = (account: GitHubAccount) => void;
-export type UpdateRepo = (repo: GitHubRepo) => void;
+export type UpdateAccount = (account: Partial<GitHubAccount>) => void;
+export type UpdateRepo = (repo: Partial<GitHubRepo>) => void;
 
 /**
  * Begins fetching all the data for the specified GitHub account.  This function returns immediately,
@@ -29,17 +29,22 @@ export async function fetchDataAsync(account: GitHubAccount, updateAccount: Upda
   // Phase 1 - Only fetch data that we don't already have cached.
   //           This ensures that uncached data will be fetched first
   //
-  // Phase 2 - Fetch cached data to ensure we have the latest.
+  // Phase 2 - Fetch previously-cached data to ensure we have the latest.
   //           We may run into API rate limits at this point,
   //           but that's ok because we can fallback to the cached data.
-  let phases = [true, false];
+  let phases = [
+    new Date(0),  // Phase 1 - Fetch everything that's never been cached
+    new Date(),   // Phase 2 - Fetch everything that's was cached before Phase 1
+  ];
 
   for (let phase of phases) {
     // Fetch the account and repos simultaneously
     account = await fetchAccountAndRepos(account, updateAccount, phase);
 
-    // Fetch additional data for each repo
-    await Promise.all(account.repos.map(
+    // Fetch data for each repo, in order of cache age
+    let sortedRepos = account.repos.sort((a, b) => a.last_refresh.getTime() - b.last_refresh.getTime());
+
+    await Promise.all(sortedRepos.map(
       async (repo) => fetchRepoData(repo, updateRepo, phase))
     );
   }
@@ -48,9 +53,9 @@ export async function fetchDataAsync(account: GitHubAccount, updateAccount: Upda
 /**
  * Fetches the specified GitHub account and its repos
  */
-async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: UpdateAccount, skipIfCached: boolean): Promise<GitHubAccount> {
-  if (skipIfCached && account.loaded) {
-    // Skip fetching this account, since it has already been loaded from the cache
+async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: UpdateAccount, cacheExpiry: Date): Promise<GitHubAccount> {
+  if (account.last_refresh > cacheExpiry) {
+    // No need to fetch this account, since the cached version is new enough
     return account;
   }
 
@@ -89,12 +94,12 @@ async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: Updat
  * Fetches the issues, pull requests, and dependencies for the specified repo.
  * The specified update callback is called as each piece of data is received.
  */
-async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo, skipIfCached: boolean) {
+async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpiry: Date) {
   // Fetch the issues, pull requests, and dependencies at the same time,
   // and call the update callback as each piece of data is received
   await Promise.all([
-    fetchIssuesAndPullRequests(repo, updateRepo, skipIfCached),
-    fetchDependencies(repo, updateRepo, skipIfCached),
+    fetchIssuesAndPullRequests(repo, updateRepo, cacheExpiry),
+    fetchDependencies(repo, updateRepo, cacheExpiry),
   ]);
 }
 
@@ -102,9 +107,9 @@ async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo, skipIfCac
  * Fetches the issues and pull requests for the specified repo,
  * and calls the specified update callback.
  */
-async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRepo, skipIfCached: boolean) {
-  if (skipIfCached && !repo.issues_includes_pulls) {
-    // Skip fetching the PR count, since we already have it cached
+async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpiry: Date) {
+  if (repo.last_refresh > cacheExpiry) {
+    // No need to fetch this repo, since the cached version is new enough
     return;
   }
 
