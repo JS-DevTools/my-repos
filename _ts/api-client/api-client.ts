@@ -15,17 +15,12 @@ export class ApiClient {
    * the `ApiResponse.error` property will be set.
    */
   public async fetch<T>(request: Request, mapper: ResponseMapper<T>): Promise<Readonly<ApiResponse<T>>> {
-    let [response] = await Promise.all([
-      await this._fetch<T>(request, mapper),
-      artificialDelay(),
-    ]);
-
-    return response;
-  }
-
-  private async _fetch<T>(request: Request, mapper: ResponseMapper<T>): Promise<Readonly<ApiResponse<T>>> {
     try {
-      let rawResponse = await fetch(request);
+      // Send the HTTP Request, and possibly simulate network latency
+      let [rawResponse] = await Promise.all([
+        fetch(request),
+        artificialDelay(),
+      ]);
 
       // Convert teh raw Fetch Response to an ApiResponse
       return mapResponse(rawResponse, mapper);
