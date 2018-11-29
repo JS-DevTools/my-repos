@@ -2,7 +2,8 @@ import { GitHubAccount, isGitHubAccountPOJO } from "../github/github-account";
 import { GitHubRepo, isGitHubRepoPOJO } from "../github/github-repo";
 import { JsonPOJO, POJO } from "../util";
 
-interface CachedGitHubAccount extends GitHubAccount {
+interface CachedGitHubAccount {
+  account: GitHubAccount;
   repoNames: string[];
 }
 
@@ -17,14 +18,14 @@ export class Cache {
    * The account is fully re-hydrated, including its repos.
    */
   public getAccount(login: string): GitHubAccount | undefined {
-    let pojo = getItem(login) as CachedGitHubAccount | undefined;
+    let { account, repoNames } = (getItem(login) || {}) as unknown as CachedGitHubAccount;
 
-    if (isGitHubAccountPOJO(pojo)) {
-      let account = new GitHubAccount(pojo);
+    if (isGitHubAccountPOJO(account)) {
+      account = new GitHubAccount(account);
 
-      if (Array.isArray(pojo.repoNames)) {
+      if (Array.isArray(repoNames)) {
         // Load the account's GitHub repos as well
-        for (let repoName of pojo.repoNames) {
+        for (let repoName of repoNames) {
           let repo = this.getRepo(repoName);
           if (repo) {
             account.repos.push(repo);
@@ -40,19 +41,21 @@ export class Cache {
    * Stores the specified GitHub Account and its repos in the cache.
    */
   public setAccount(account: GitHubAccount): void {
-    let pojo: CachedGitHubAccount = {
-      ...account,
-      error: undefined,
-      repos: [],
+    let cachedAccount: CachedGitHubAccount = {
+      account: {
+        ...account,
+        error: undefined,
+        repos: [],
+      },
       repoNames: [],
     };
 
     for (let repo of account.repos) {
-      pojo.repoNames.push(repo.full_name);
+      cachedAccount.repoNames.push(repo.full_name);
       this.setRepo(repo);
     }
 
-    setItem(account.login, pojo);
+    setItem(account.login, cachedAccount);
   }
 
   /**
@@ -60,10 +63,10 @@ export class Cache {
    * The repo is fully re-hydrated, including its dependencies.
    */
   public getRepo(full_name: string): GitHubRepo | undefined {
-    let pojo = getItem(full_name);
+    let cachedRepo = getItem(full_name);
 
-    if (isGitHubRepoPOJO(pojo)) {
-      let repo = new GitHubRepo(pojo);
+    if (isGitHubRepoPOJO(cachedRepo)) {
+      let repo = new GitHubRepo(cachedRepo);
       return repo;
     }
   }
