@@ -65,28 +65,28 @@ async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: Updat
     github.fetchRepos(account),
   ]);
 
+  let diff: Partial<GitHubAccount> = { login: account.login };
+
   if (accountResponse.error) {
     // An error occurred while fetching the account
-    account = new GitHubAccount({
-      ...account,
-      error: accountResponse.error.message,
-    });
+    diff.error = accountResponse.error.message;
   }
   else {
     // We successfully fetched the GitHub account
-    account = accountResponse.body;
+    diff = accountResponse.body;
+    diff.last_refresh = new Date();
 
     if (reposResponse.error) {
       // An error occurred while fetching the repos, so add the error message to the account
-      account.error = reposResponse.error.message;
+      diff.error = reposResponse.error.message;
     }
     else {
       // We successfully fetched the GitHub repos
-      account.repos = reposResponse.body;
+      diff.repos = reposResponse.body;
     }
   }
 
-  updateAccount(account);
+  updateAccount(diff);
   return account;
 }
 
@@ -135,23 +135,23 @@ async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRe
     }
 
     // Update the app state with the "correct" numbers
-    repo = new GitHubRepo({
-      ...repo,
+    updateRepo({
+      login: repo.login,
+      name: repo.name,
       open_issues_count,
       open_pulls_count,
       issues_includes_pulls,
+      last_refresh: new Date(),
     });
-
-    updateRepo(repo);
   }
 }
 
 /**
  * Fetches the dependencies for the specified repo, and calls the specified update callback.
  */
-async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, skipIfCached: boolean) {
-  if (skipIfCached && repo.dependencies.loaded) {
-    // Skip fetching this repo's dependencies, since they've alredy been loaded from the cache
+async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpiry: Date) {
+  if (repo.dependencies.last_refresh > cacheExpiry) {
+    // No need to fetch this repo's dependencies, since the cached version is new enough
     return;
   }
 
@@ -161,12 +161,14 @@ async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, skipI
     console.error(dependenciesResponse.error);
   }
   else {
-    // Update the app state with the repo's dependencies
-    repo = new GitHubRepo({
-      ...repo,
-      dependencies: dependenciesResponse.body,
-    });
+    let dependencies = dependenciesResponse.body;
+    dependencies.last_refresh = new Date();
 
-    updateRepo(repo);
+    // Update the app state with the repo's dependencies
+    updateRepo({
+      login: repo.login,
+      name: repo.name,
+      dependencies,
+    });
   }
 }

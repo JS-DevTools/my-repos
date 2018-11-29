@@ -112,12 +112,16 @@ export class StateStore extends EventTarget {
   /**
    * Updates the specified GitHub account
    */
-  public updateAccount(account: GitHubAccount) {
-    let accounts = this.state.accounts.slice();
-    let index = accounts.findIndex(byLogin(account.login));
+  public updateAccount(diff: Partial<GitHubAccount>) {
+    if (!diff.login) {
+      throw new Error(`Account login must be specified when updating an account`);
+    }
 
-    if (index >= 0) {
-      accounts.splice(index, 1, account);
+    let accounts = this.state.accounts.slice();
+    let account = accounts.find(byLogin(diff.login));
+
+    if (account) {
+      Object.assign(account, diff);
       this._cache.setAccount(account);
       this.setState({ accounts });
     }
@@ -139,15 +143,19 @@ export class StateStore extends EventTarget {
   /**
    * Updates the specified GitHub repo
    */
-  public updateRepo(repo: GitHubRepo) {
+  public updateRepo(diff: Partial<GitHubRepo>) {
+    if (!diff.login || !diff.name) {
+      throw new Error(`Account login and repo name must be specified when updating a repo`);
+    }
+
     let accounts = this.state.accounts.slice();
-    let account = accounts.find(byLogin(repo.account.login));
+    let account = accounts.find(byLogin(diff.login));
 
     if (account) {
-      let index = account.repos.findIndex(byName(repo.name));
+      let repo = account.repos.find(byName(diff.name));
 
-      if (index >= 0) {
-        account.repos.splice(index, 1, repo);
+      if (repo) {
+        Object.assign(repo, diff);
         this._cache.setRepo(repo);
         this.setState({ accounts });
       }
