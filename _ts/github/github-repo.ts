@@ -22,10 +22,10 @@ export interface GitHubRepoPOJO {
  * Additional GitHub repo properties that we need for this app
  */
 export class GitHubRepo implements GitHubRepoPOJO {
-  public readonly account: GitHubAccount;
   public name = "";
   public full_name = "";
   public description = "";
+  public login!: string;
   public archived = false;
   public fork = false;
   public forks_count = 0;
@@ -38,12 +38,22 @@ export class GitHubRepo implements GitHubRepoPOJO {
   public html_url = "";
   public dependencies = new Dependencies();
 
+  /**
+   * The date/time that the repo's data was last fetched from GitHub
+   */
+  public last_refresh = new Date(0);
+
   public constructor(props: Partial<GitHubRepo>) {
-    if (!props.account) {
+    if (!props.login) {
       throw new Error(`No parent account was specified for GitHub repo "${props.name}"`);
     }
 
-    this.account = props.account;
+    // Handle JSON deserialization
+    // tslint:disable-next-line:strict-type-predicates
+    if (typeof props.last_refresh === "string") {
+      props.last_refresh = new Date(props.last_refresh);
+    }
+
     Object.assign(this, props);
   }
 }

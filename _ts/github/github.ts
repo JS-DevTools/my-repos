@@ -28,9 +28,8 @@ export class GitHub {
       // Convert the response body to a GitHubAccount object
       let body = new GitHubAccount({
         ...response.rawBody,
-        loading: false,
-        loaded: true,
         repos: [],
+        loading: false,
       });
 
       return { ...response, body };
@@ -52,7 +51,10 @@ export class GitHub {
 
       for (let repo of response.rawBody) {
         if (isGitHubRepoPOJO(repo)) {
-          repos.push(new GitHubRepo({ ...repo, account }));
+          repos.push(new GitHubRepo({
+            ...repo,
+            login: account.login,
+          }));
         }
         else {
           throw new ApiError(request.url, "returned an invalid GitHub repo", repo as unknown);
