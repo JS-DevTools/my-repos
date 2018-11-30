@@ -7,6 +7,8 @@ interface CachedGitHubAccount {
   repoNames: string[];
 }
 
+const jsonDatePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+
 /**
  * Caches data to LocalStorage, so we can render the page immediately on subsequent visits,
  * rather than waiting for all data to be fetched from GitHub, David-DM, etc.
@@ -88,7 +90,7 @@ function getItem(key: string): JsonPOJO | undefined {
     let json = localStorage.getItem(key);
 
     if (json) {
-      return JSON.parse(json) as JsonPOJO;
+      return JSON.parse(json, reviver) as JsonPOJO;
     }
     else {
       return undefined;
@@ -107,4 +109,17 @@ function setItem(key: string, value: POJO): void {
   key = key.trim().toLowerCase();
   let json = JSON.stringify(value);
   localStorage.setItem(key, json);
+}
+
+/**
+ * Deserializes date strings when parsing JSON
+ */
+function reviver(key: string, value: unknown): unknown {
+  // TSLint Bug - https://github.com/palantir/tslint/issues/4107
+  // tslint:disable-next-line:strict-type-predicate
+  if (typeof value === "string" && jsonDatePattern.test(value)) {
+    value = new Date(value);
+  }
+
+  return value;
 }

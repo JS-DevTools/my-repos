@@ -42,12 +42,6 @@ export class GitHubAccount implements GitHubAccountPOJO {
   public error?: string;
 
   public constructor(props: Partial<GitHubAccount> = {}) {
-    // Handle JSON deserialization
-    // tslint:disable-next-line:strict-type-predicates
-    if (typeof props.last_refresh === "string") {
-      props.last_refresh = new Date(props.last_refresh);
-    }
-
     Object.assign(this, props);
   }
 }

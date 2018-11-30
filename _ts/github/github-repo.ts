@@ -52,12 +52,6 @@ export class GitHubRepo implements GitHubRepoPOJO {
       throw new Error(`No parent account was specified for GitHub repo "${props.name}"`);
     }
 
-    // Handle JSON deserialization
-    // tslint:disable-next-line:strict-type-predicates
-    if (typeof props.last_refresh === "string") {
-      props.last_refresh = new Date(props.last_refresh);
-    }
-
     Object.assign(this, props);
   }
 }
