@@ -10,7 +10,7 @@ export interface RepoListProps {
 
 export function RepoList(props: RepoListProps) {
   let { account } = props;
-  let repos = account.repos.filter((repo) => !stateStore.isHidden(repo));
+  let repos = account.repos.filter((repo) => !repo.isHidden());
 
   return (
     <ul className="repo-list">

@@ -42,9 +42,28 @@ export async function fetchDataAsync(account: GitHubAccount, updateAccount: Upda
     // Fetch the account and repos simultaneously
     account = await fetchAccountAndRepos(account, updateAccount, phase);
 
-    // Fetch data for each repo, in order of cache age
-    let sortedRepos = account.repos.sort((a, b) => a.last_refresh.getTime() - b.last_refresh.getTime());
+    // Prioritize the repos by how much we need to refresh their data.
+    // This helps ensure that we update the most important repos before running into API rate limits
+    let sortedRepos = account.repos.sort((a, b) => {
+      let aHidden = a.isHidden();
+      let bHidden = b.isHidden();
 
+      if (aHidden === bHidden) {
+        // Both repos are hidden or visible, so sort by their last refresh time
+        return a.last_pull_count_refresh.getTime() - b.last_pull_count_refresh.getTime();
+      }
+      else if (aHidden) {
+        return 1; // b comes first because it's visible
+      }
+      else if (bHidden) {
+        return -1; // a comes first because it's visible
+      }
+      else {
+        return 0; // Both repos have the same priority
+      }
+    });
+
+    // Fetch data for each repo
     await Promise.all(sortedRepos.map(
       async (repo) => fetchRepoData(repo, updateRepo, phase))
     );
@@ -137,7 +156,7 @@ async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRe
     // Update the app state with the "correct" numbers
     updateRepo({
       login: repo.login,
-      name: repo.name,
+      full_name: repo.full_name,
       open_issues_count,
       open_pulls_count,
       issues_includes_pulls,

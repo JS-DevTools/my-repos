@@ -1,4 +1,5 @@
 import { Dependencies } from "../package-registry/dependencies";
+import { stateStore } from "../state-store";
 
 /**
  * A GitHub repository, as returned from the GitHub REST API
@@ -53,6 +54,30 @@ export class GitHubRepo implements GitHubRepoPOJO {
     }
 
     Object.assign(this, props);
+  }
+
+  /**
+   * Determines whether the GitHub Repo is currently hidden
+   */
+  public isHidden(): boolean {
+    const { hiddenRepos, showForks, showArchived } = stateStore.state;
+
+    if (hiddenRepos.has(this.full_name)) {
+      // This repo has been explicitly hidden
+      return true;
+    }
+
+    if (this.fork && !showForks) {
+      // Don't show forked repos
+      return true;
+    }
+
+    if (this.archived && !showArchived) {
+      // Don't show archived repos
+      return true;
+    }
+
+    return false;
   }
 }
 

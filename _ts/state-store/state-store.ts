@@ -177,28 +177,6 @@ export class StateStore extends EventTarget {
   }
 
   /**
-   * Determines whether the GitHub Repo is current hidden
-   */
-  public isHidden(repo: GitHubRepo): boolean {
-    if (this.state.hiddenRepos.has(repo.full_name)) {
-      // This repo has been explicitly hidden
-      return true;
-    }
-
-    if (repo.fork && !this.state.showForks) {
-      // Don't show forked repos
-      return true;
-    }
-
-    if (repo.archived && !this.state.showArchived) {
-      // Don't show archived repos
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
    * Fetchs all the data for the specified GitHub account from GitHub, David-DM, etc.
    * This function returns immediately, and the `updateAccount()` and `updateRepo()` callbacks
    * are called as data is received.
