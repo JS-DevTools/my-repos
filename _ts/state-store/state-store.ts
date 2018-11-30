@@ -49,33 +49,32 @@ export class StateStore extends EventTarget {
       return;
     }
 
-    let hashState = readStateFromHash();
+    let { accounts: hashAccounts, ...hashState } = readStateFromHash();
 
     // Re-order the accounts to match the hash order
-    if (hashState.accounts) {
-      let hashAccounts = hashState.accounts;
-      hashState.accounts = [];
+    let accounts: GitHubAccount[] = [];
 
-      for (let hashAccount of hashAccounts) {
-        let account = this.state.accounts.find(byLogin(hashAccount.login));
+    for (let hashAccount of hashAccounts) {
+      let account = this.state.accounts.find(byLogin(hashAccount.login));
 
-        if (account) {
-          hashState.accounts.push(account);
+      if (!account) {
+        // This is a newly-added account. Get its data from the cache, if possible
+        account = this._cache.getAccount(hashAccount.login);
+
+        if (!account) {
+          // Cache miss.  So create a skeleton GitHubAccount object
+          account = new GitHubAccount(hashAccount);
         }
-        else {
-          // This is a newly-added account. Get its data from the cache, if possible
-          account = this._cache.getAccount(hashAccount.login) || hashAccount;
 
-          // Start fetching the account's data from GitHub, David-DM, etc.
-          account.loading = true;
-          this._fetchData(account);
-
-          hashState.accounts.push(account);
-        }
+        // Start fetching the account's data from GitHub, David-DM, etc.
+        account.loading = true;
+        this._fetchData(account);
       }
+
+      accounts.push(account);
     }
 
-    this.setState(hashState);
+    this.setState({ accounts, ...hashState });
   }
 
   /**

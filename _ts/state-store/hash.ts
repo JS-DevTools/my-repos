@@ -1,6 +1,18 @@
-import { GitHubAccount } from "../github/github-account";
 import { DEFAULT_DELAY, getLogin } from "../util";
-import { AppState, ReadonlyAppState } from "./app-state";
+import { ReadonlyAppState } from "./app-state";
+
+export interface HashAccount {
+  login: string;
+  name: string;
+}
+
+export interface HashState {
+  accounts: HashAccount[];
+  hiddenRepos: Set<string>;
+  showForks: boolean;
+  showArchived: boolean;
+  delay: number;
+}
 
 /**
  * Updates the URL hash to match the specified app state
@@ -16,7 +28,7 @@ export function writeStateToHash(state: Partial<ReadonlyAppState>) {
 /**
  * Returns an AppState instance that matches the current URL hash
  */
-export function readStateFromHash(): AppState {
+export function readStateFromHash(): HashState {
   let hash = location.hash.substr(1);
   let state = hashToState(hash);
   return state;
@@ -69,9 +81,9 @@ function stateToHash(state: Partial<ReadonlyAppState>): string {
 /**
  * Deserializes an AppState instance from the specified URL hash string
  */
-function hashToState(hash: string): AppState {
+function hashToState(hash: string): HashState {
   let params = new URLSearchParams(hash);
-  let state: AppState = {
+  let state: HashState = {
     accounts: parseAccounts(params.get("u")),
     hiddenRepos: parseStringSet(params.get("hide")),
     showForks: parseBoolean(params.get("forks")),
@@ -84,15 +96,15 @@ function hashToState(hash: string): AppState {
 /**
  * Parses a comma-delimited string as an array of GitHub accounts
  */
-function parseAccounts(value: string | null): GitHubAccount[] {
+function parseAccounts(value: string | null): HashAccount[] {
   let logins = parseStringSet(value);
-  let accounts: GitHubAccount[] = [];
+  let accounts: HashAccount[] = [];
 
   for (let login of logins.values()) {
-    accounts.push(new GitHubAccount({
+    accounts.push({
       login,
       name: login,
-    }));
+    });
   }
 
   return accounts;
