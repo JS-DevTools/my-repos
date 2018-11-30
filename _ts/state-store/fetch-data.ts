@@ -14,6 +14,7 @@ export type UpdateRepo = (repo: Partial<GitHubRepo>) => void;
 export function fetchData(account: GitHubAccount, updateAccount: UpdateAccount, updateRepo: UpdateRepo) {
   fetchDataAsync(account, updateAccount, updateRepo)
     .catch((error) => {
+      console.error(`Error fetching data for account: ${account.login}.`, error);
       account.error = (error as Error).message;
       updateAccount(account);
     });
@@ -97,7 +98,7 @@ async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: Updat
 async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpiry: Date) {
   // Fetch the issues, pull requests, and dependencies at the same time,
   // and call the update callback as each piece of data is received
-  await Promise.all([
+  return Promise.all([
     fetchIssuesAndPullRequests(repo, updateRepo, cacheExpiry),
     fetchDependencies(repo, updateRepo, cacheExpiry),
   ]);
@@ -121,7 +122,7 @@ async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRe
   let prCountResponse = await github.fetchPullCount(repo);
 
   if (prCountResponse.error) {
-    console.error(prCountResponse.error);
+    console.error(`Error retrieving the number of open PRs for ${repo.full_name}.`, prCountResponse.error);
   }
   else {
     let open_pulls_count = prCountResponse.body;
@@ -158,7 +159,7 @@ async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, cache
   let dependenciesResponse = await packageRegistry.fetchDependencies(repo);
 
   if (dependenciesResponse.error) {
-    console.error(dependenciesResponse.error);
+    console.error(`Error fetching dependency stats for ${repo.full_name}.`, dependenciesResponse.error);
   }
   else {
     let dependencies = dependenciesResponse.body;
