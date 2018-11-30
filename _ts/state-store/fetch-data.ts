@@ -75,7 +75,6 @@ async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: Updat
   else {
     // We successfully fetched the GitHub account
     diff = accountResponse.body;
-    diff.last_refresh = new Date();
 
     if (reposResponse.error) {
       // An error occurred while fetching the repos, so add the error message to the account
@@ -163,12 +162,11 @@ async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, cache
   }
   else {
     let dependencies = dependenciesResponse.body;
-    dependencies.last_refresh = new Date();
 
     // Update the app state with the repo's dependencies
     updateRepo({
       login: repo.login,
-      name: repo.name,
+      full_name: repo.full_name,
       dependencies,
     });
   }

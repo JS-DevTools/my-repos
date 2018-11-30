@@ -30,6 +30,7 @@ export class GitHub {
         ...response.rawBody,
         repos: [],
         loading: false,
+        last_refresh: new Date(),
       });
 
       return { ...response, body };
@@ -54,6 +55,7 @@ export class GitHub {
           repos.push(new GitHubRepo({
             ...repo,
             login: account.login,
+            last_refresh: new Date(),
           }));
         }
         else {
