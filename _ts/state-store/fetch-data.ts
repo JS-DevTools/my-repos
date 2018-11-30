@@ -109,7 +109,7 @@ async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpi
  * and calls the specified update callback.
  */
 async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpiry: Date) {
-  if (repo.last_refresh > cacheExpiry) {
+  if (repo.last_pull_count_refresh > cacheExpiry) {
     // No need to fetch this repo, since the cached version is new enough
     return;
   }
@@ -142,7 +142,7 @@ async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRe
       open_issues_count,
       open_pulls_count,
       issues_includes_pulls,
-      last_refresh: new Date(),
+      last_pull_count_refresh: new Date(),
     });
   }
 }

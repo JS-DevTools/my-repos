@@ -1,5 +1,4 @@
 import { Dependencies } from "../package-registry/dependencies";
-import { GitHubAccount } from "./github-account";
 
 /**
  * A GitHub repository, as returned from the GitHub REST API
@@ -42,6 +41,11 @@ export class GitHubRepo implements GitHubRepoPOJO {
    * The date/time that the repo's data was last fetched from GitHub
    */
   public last_refresh = new Date(0);
+
+  /**
+   * The date/time that the repo's PR count was last fetched from GitHub
+   */
+  public last_pull_count_refresh = new Date(0);
 
   public constructor(props: Partial<GitHubRepo>) {
     if (!props.login) {
