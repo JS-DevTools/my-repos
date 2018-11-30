@@ -1,6 +1,8 @@
 import { ApiClient } from "../api-client/api-client";
 import { ApiError } from "../api-client/api-error";
 import { ApiResponse } from "../api-client/api-response";
+import { Dependencies } from "../package-registry/dependencies";
+import { byName } from "../util";
 import { GitHubAccount, isGitHubAccountPOJO } from "./github-account";
 import { GitHubRepo, isGitHubRepoPOJO } from "./github-repo";
 
@@ -52,10 +54,20 @@ export class GitHub {
 
       for (let repo of response.rawBody) {
         if (isGitHubRepoPOJO(repo)) {
+          // Merge additional data from the old repo state
+          let oldRepoState = account.repos.find(byName(repo.full_name));
+          let { last_pull_count_refresh, dependencies } =
+            oldRepoState ? oldRepoState : {
+              last_pull_count_refresh: new Date(0),
+              dependencies: new Dependencies(),
+            };
+
           repos.push(new GitHubRepo({
             ...repo,
             login: account.login,
             last_refresh: new Date(),
+            last_pull_count_refresh,
+            dependencies,
           }));
         }
         else {
