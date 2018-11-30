@@ -1,5 +1,6 @@
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
+import { byLogin, byName } from "../util";
 import { AppState, ReadonlyAppState } from "./app-state";
 import { Cache } from "./cache";
 import { fetchData } from "./fetch-data";
@@ -143,7 +144,7 @@ export class StateStore extends EventTarget {
    * Updates the specified GitHub repo
    */
   public updateRepo(diff: Partial<GitHubRepo>) {
-    if (!diff.login || !diff.name) {
+    if (!diff.login || !diff.full_name) {
       throw new Error(`Account login and repo name must be specified when updating a repo`);
     }
 
@@ -151,7 +152,7 @@ export class StateStore extends EventTarget {
     let account = accounts.find(byLogin(diff.login));
 
     if (account) {
-      let repo = account.repos.find(byName(diff.name));
+      let repo = account.repos.find(byName(diff.full_name));
 
       if (repo) {
         Object.assign(repo, diff);
@@ -207,21 +208,4 @@ export class StateStore extends EventTarget {
     let updateRepo = this.updateRepo.bind(this);
     fetchData(account, updateAccount, updateRepo);
   }
-}
-
-
-/**
- * Used to find GitHub accounts by their "login" property
- */
-function byLogin(login: string) {
-  login = login.trim().toLowerCase();
-  return (account: GitHubAccount) => account.login.trim().toLowerCase() === login;
-}
-
-/**
- * Used to find GitHub repos by their "name" property
- */
-function byName(name: string) {
-  name = name.trim().toLowerCase();
-  return (repo: GitHubRepo) => repo.name.trim().toLowerCase() === name;
 }

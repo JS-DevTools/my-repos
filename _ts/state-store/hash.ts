@@ -1,4 +1,4 @@
-import { DEFAULT_DELAY, getLogin } from "../util";
+import { DEFAULT_DELAY } from "../util";
 import { ReadonlyAppState } from "./app-state";
 
 export interface HashAccount {
@@ -50,7 +50,7 @@ function stateToHash(state: Partial<ReadonlyAppState>): string {
   let params = new URLSearchParams();
 
   if (state.accounts && state.accounts.length > 0) {
-    params.append("u", state.accounts.map(getLogin).join(","));
+    params.append("u", state.accounts.map((account) => account.login).join(","));
   }
 
   if (state.hiddenRepos && state.hiddenRepos.size > 0) {

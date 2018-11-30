@@ -50,8 +50,17 @@ export function accountCountCssClass(accounts: ReadonlyArray<unknown>): string {
 }
 
 /**
- * Returns the `login` property of the given object
+ * Used to find GitHub accounts by their "login" property
  */
-export function getLogin(obj: { login: string }): string {
-  return obj.login;
+export function byLogin(login: string) {
+  login = login.trim().toLowerCase();
+  return (account: { login: string }) => account.login.trim().toLowerCase() === login;
+}
+
+/**
+ * Used to find GitHub repos by their "name" property
+ */
+export function byName(full_name: string) {
+  full_name = full_name.trim().toLowerCase();
+  return (repo: { full_name: string }) => repo.full_name.trim().toLowerCase() === full_name;
 }
