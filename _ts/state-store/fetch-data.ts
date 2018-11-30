@@ -89,6 +89,7 @@ async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: Updat
 
   if (accountResponse.error) {
     // An error occurred while fetching the account
+    console.error(`Error fetching data for account: ${account.login}.`, accountResponse.error);
     diff.error = accountResponse.error.message;
   }
   else {
@@ -97,6 +98,7 @@ async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: Updat
 
     if (reposResponse.error) {
       // An error occurred while fetching the repos, so add the error message to the account
+      console.error(`Error fetching repos for account: ${account.login}.`, reposResponse.error);
       diff.error = reposResponse.error.message;
     }
     else {
