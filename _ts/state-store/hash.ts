@@ -1,4 +1,4 @@
-import { DEFAULT_DELAY } from "../util";
+import { DEFAULT_CACHE_DURATION, DEFAULT_DELAY } from "../util";
 import { ReadonlyAppState } from "./app-state";
 
 export interface HashAccount {
@@ -12,6 +12,7 @@ export interface HashState {
   showForks: boolean;
   showArchived: boolean;
   delay: number;
+  cacheDuration: number;
 }
 
 /**
@@ -69,6 +70,10 @@ function stateToHash(state: Partial<ReadonlyAppState>): string {
     params.append("delay", String(state.delay));
   }
 
+  if (state.cacheDuration !== DEFAULT_CACHE_DURATION) {
+    params.append("cache", String(state.cacheDuration));
+  }
+
   let hashString = params.toString();
 
   // Don't encode common characters that are valid in the hash
@@ -89,6 +94,7 @@ function hashToState(hash: string): HashState {
     showForks: parseBoolean(params.get("forks")),
     showArchived: parseBoolean(params.get("archived")),
     delay: parsePositiveInteger(params.get("delay"), DEFAULT_DELAY),
+    cacheDuration: parsePositiveInteger(params.get("cache"), DEFAULT_CACHE_DURATION),
   };
   return state;
 }

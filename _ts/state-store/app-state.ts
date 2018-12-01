@@ -1,5 +1,5 @@
 import { GitHubAccount } from "../github/github-account";
-import { DEFAULT_DELAY } from "../util";
+import { DEFAULT_CACHE_DURATION, DEFAULT_DELAY } from "../util";
 
 export interface ReadonlyAppState {
   readonly accounts: ReadonlyArray<GitHubAccount>;
@@ -7,6 +7,7 @@ export interface ReadonlyAppState {
   readonly showForks: boolean;
   readonly showArchived: boolean;
   readonly delay: number;
+  readonly cacheDuration: number;
 }
 
 export class AppState implements ReadonlyAppState {
@@ -37,6 +38,12 @@ export class AppState implements ReadonlyAppState {
   public delay: number;
 
   /**
+   * Re-use cached data for the specified number of milliseconds, before re-fretching it.
+   * This is mostly just used for local development, to avoid hitting API rate limits.
+   */
+  public cacheDuration: number;
+
+  /**
    * Creates a new AppState instance, optionally cloning an existing state
    */
   public constructor(props: Partial<ReadonlyAppState> = {}) {
@@ -45,5 +52,6 @@ export class AppState implements ReadonlyAppState {
     this.showForks = Boolean(props.showForks);
     this.showArchived = Boolean(props.showArchived);
     this.delay = props.delay || DEFAULT_DELAY;
+    this.cacheDuration = props.cacheDuration || DEFAULT_CACHE_DURATION;
   }
 }

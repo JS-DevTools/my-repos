@@ -1,3 +1,4 @@
+import { stateStore } from ".";
 import { ApiErrorResponse } from "../api-client/api-response";
 import { github } from "../github";
 import { GitHubAccount } from "../github/github-account";
@@ -27,6 +28,8 @@ export function fetchData(account: GitHubAccount, updateAccount: UpdateAccount, 
  * and the specified update callback will be called multiple times.
  */
 export async function fetchDataAsync(account: GitHubAccount, updateAccount: UpdateAccount, updateRepo: UpdateRepo) {
+  let { cacheDuration } = stateStore.state;
+
   // We fetch data in two phases:
   //
   // Phase 1 - Only fetch data that we don't already have cached.
@@ -36,8 +39,8 @@ export async function fetchDataAsync(account: GitHubAccount, updateAccount: Upda
   //           We may run into API rate limits at this point,
   //           but that's ok because we can fallback to the cached data.
   let phases = [
-    new Date(0),  // Phase 1 - Fetch everything that's never been cached
-    new Date(),   // Phase 2 - Fetch everything that's was cached before Phase 1
+    new Date(0),                            // Phase 1 - Fetch everything that's never been cached
+    new Date(Date.now() - cacheDuration),   // Phase 2 - Fetch everything that's was cached before Phase 1
   ];
 
   for (let phase of phases) {
@@ -200,7 +203,7 @@ async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, cache
  */
 function errorHandler(message: string, response: ApiErrorResponse) {
   if (response.status === 403 && response.headers["x-ratelimit-remaining"] === "0") {
-    console.warn(`GitHub API rate limit exceeded. Unable to fetch ${response.url}`);
+    console.warn(`GitHub API rate limit exceeded. Unable to fetch \n${response.url}`);
   }
   else {
     console.error(message, response.error);

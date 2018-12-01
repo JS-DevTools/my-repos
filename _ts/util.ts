@@ -2,8 +2,13 @@
 // and use LocalStorage instead of Fetch, to avoid rate limits
 export const LOCAL_DEV_MODE = location.hostname === "localhost";
 
-// The default delay, based on whether we're in "local dev" mode
+// In "local dev" mode, artificially delay fetch requests by up to 1 second
+// to simulate internet latency.
 export const DEFAULT_DELAY = LOCAL_DEV_MODE ? 1000 : 0;
+
+// In "local dev" mode, used cached content for 30 minutes,
+// rather than re-fetching every time.
+export const DEFAULT_CACHE_DURATION = LOCAL_DEV_MODE ? (1000 * 60 * 30) : 0;
 
 export interface POJOof<T> {
   [key: string]: T;
