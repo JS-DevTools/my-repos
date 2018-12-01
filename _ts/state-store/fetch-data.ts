@@ -13,7 +13,8 @@ export type UpdateRepo = (repo: Partial<GitHubRepo>) => void;
  * is received.
  */
 export function fetchData(account: GitHubAccount, updateAccount: UpdateAccount, updateRepo: UpdateRepo) {
-  fetchDataAsync(account, updateAccount, updateRepo)
+  Promise.resolve()
+    .then(() => fetchDataAsync(account, updateAccount, updateRepo))
     .catch((error) => {
       console.error(`Error fetching data for account: ${account.login}.`, error);
       account.error = (error as Error).message;

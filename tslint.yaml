@@ -151,6 +151,13 @@ rules:
   # Template strings are nice, but sometimes concatenation is more readable
   prefer-template: false
 
+  # Require the `async` keyword for functions or methods that return a Promise.
+  # Don't require `async` for simple arrow functions and function statements.
+  promise-function-async:
+    - true
+    - check-function-declaration
+    - check-method-declaration
+
   # Prefer single-quoted strings, but allow for exceptions
   quotemark:
     - true
