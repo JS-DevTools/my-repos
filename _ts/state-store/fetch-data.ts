@@ -99,7 +99,7 @@ async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: Updat
   }
   else {
     // We successfully fetched the GitHub account
-    diff = accountResponse.body;
+    diff = account = accountResponse.body;
 
     if (reposResponse.error) {
       // An error occurred while fetching the repos, so add the error message to the account
@@ -202,10 +202,7 @@ async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, cache
  * Log errors to the console.  Log API rate limit errors as warnings.
  */
 function errorHandler(message: string, response: ApiErrorResponse) {
-  if (response.status === 403 && response.headers["x-ratelimit-remaining"] === "0") {
-    console.warn(`GitHub API rate limit exceeded. Unable to fetch \n${response.url}`);
-  }
-  else {
+  if (!github.isRateLimitExceeded(response)) {
     console.error(message, response.error);
   }
 }
