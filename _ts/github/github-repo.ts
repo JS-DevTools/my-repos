@@ -25,17 +25,44 @@ export class GitHubRepo implements GitHubRepoPOJO {
   public name = "";
   public full_name = "";
   public description = "";
-  public login!: string;
   public archived = false;
   public fork = false;
   public forks_count = 0;
   public stargazers_count = 0;
   public watchers_count = 0;
   public open_issues_count = 0;
-  public open_pulls_count = 0;
-  public issues_includes_pulls = true;
   public language = "";
   public html_url = "";
+
+  /**
+   * The number of open pull requests for this GitHub repo.
+   * This is separate from the number of open issues.
+   */
+  public open_pulls_count = 0;
+
+  /**
+   * Indicates whether the `open_issues_count` field includes both issues and PRs.
+   * The GitHub API only returns the combined number, so this flag is initially true.
+   * But once we determine the two different numbers, this flag is set to false.
+   */
+  public issues_includes_pulls = true;
+
+  /**
+   * The GitHub account login that this repo belongs to.
+   */
+  public login!: string;
+
+  /**
+   * If this repo is published to a package registry (such as npm, ruby gems, pypi, etc.),
+   * then this is the package name.
+   *
+   * NOTE: Monorepos that contain many packages are not currently supported.
+   */
+  public package_name = "";
+
+  /**
+   * Information about this repo's dependencies.
+   */
   public dependencies = new Dependencies();
 
   /**
