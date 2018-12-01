@@ -1,8 +1,8 @@
 import { POJOof } from "../util";
 
-export type ApiResponse<T> = MappedApiResponse<T> | ApiErrorResponse;
+export type FetchResponse<T> = TypedResponse<T> | ErrorResponse;
 
-export interface UnmappedApiResponse {
+export interface UntypedResponse {
   ok: boolean;
   error?: Error;
   status: number;
@@ -12,13 +12,13 @@ export interface UnmappedApiResponse {
   rawBody: unknown;
 }
 
-export interface MappedApiResponse<T> extends UnmappedApiResponse {
+export interface TypedResponse<T> extends UntypedResponse {
   ok: true;
   error: undefined;
   body: T;
 }
 
-export interface ApiErrorResponse extends UnmappedApiResponse {
+export interface ErrorResponse extends UntypedResponse {
   ok: false;
   error: Error;
 }

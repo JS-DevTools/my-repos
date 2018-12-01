@@ -1,6 +1,6 @@
 import { prettify } from "../util";
 
-export class ApiError extends Error {
+export class FetchError extends Error {
   public readonly url: string;
 
   public constructor(url: string, message: string, responseBody?: unknown) {

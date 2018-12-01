@@ -1,43 +1,41 @@
 import { POJOof } from "../util";
-import { ApiError } from "./api-error";
-import { ApiErrorResponse, ApiResponse, MappedApiResponse, UnmappedApiResponse } from "./api-response";
+import { FetchError } from "./fetch-error";
+import { ErrorResponse, FetchResponse, TypedResponse, UntypedResponse } from "./fetch-response";
 
-export type ResponseMapper<T> = (response: UnmappedApiResponse) => MappedApiResponse<T>;
+export type ResponseMapper<T> = (response: UntypedResponse) => TypedResponse<T>;
 
 /**
- * Maps a raw Fetch Response to a typed ApiResponse, if possible.
- * Otherwise, returns an ApiErrorResponse.
+ * Maps a raw Fetch Response to a TypedResponse, if possible.
+ * Otherwise, returns an ErrorResponse.
  */
-export async function mapResponse<T>(rawResponse: Response, mapper: ResponseMapper<T>)
-  : Promise<Readonly<ApiResponse<T>>> {
-
+export async function mapResponse<T>(rawResponse: Response, mapper: ResponseMapper<T>): Promise<Readonly<FetchResponse<T>>> {
   let { ok, status, statusText, url } = rawResponse;
-  let apiResponse: Partial<UnmappedApiResponse> = { ok, status, statusText, url };
+  let untypedResponse: Partial<UntypedResponse> = { ok, status, statusText, url };
 
   try {
     // Parse the headers, even if it's an error response
-    apiResponse.headers = headersToPOJO(rawResponse.headers);
+    untypedResponse.headers = headersToPOJO(rawResponse.headers);
 
     // Parse the body, even if it's an error response, since the body may contain error details
-    apiResponse.rawBody = await parseResponseBody(rawResponse);
+    untypedResponse.rawBody = await parseResponseBody(rawResponse);
 
-    if (apiResponse.ok) {
+    if (untypedResponse.ok) {
       // Map the response body to the desired format
-      let mappedApiResponse = mapper(apiResponse as UnmappedApiResponse);
-      return mappedApiResponse;
+      let typedResponse = mapper(untypedResponse as UntypedResponse);
+      return typedResponse;
     }
     else {
-      apiResponse.error = new ApiError(
-        url, `returned an HTTP ${status} (${statusText || "Error"}) response`, apiResponse.rawBody);
+      untypedResponse.error = new FetchError(
+        url, `returned an HTTP ${status} (${statusText || "Error"}) response`, untypedResponse.rawBody);
     }
   }
   catch (err) {
-    apiResponse.error = err as Error;
+    untypedResponse.error = err as Error;
   }
 
   // If we get here, then an error occurred
-  apiResponse.ok = false;
-  return apiResponse as ApiErrorResponse;
+  untypedResponse.ok = false;
+  return untypedResponse as ErrorResponse;
 }
 
 /**

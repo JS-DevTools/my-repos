@@ -1,5 +1,5 @@
 import { stateStore } from ".";
-import { ApiErrorResponse } from "../api-client/api-response";
+import { ErrorResponse } from "../fetch";
 import { github } from "../github";
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
@@ -201,7 +201,7 @@ async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, cache
 /**
  * Log errors to the console.  Log API rate limit errors as warnings.
  */
-function errorHandler(message: string, response: ApiErrorResponse) {
+function errorHandler(message: string, response: ErrorResponse) {
   if (!github.isRateLimitExceeded(response)) {
     console.error(message, response.error);
   }
