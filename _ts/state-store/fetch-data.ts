@@ -1,3 +1,4 @@
+import { ApiErrorResponse } from "../api-client/api-response";
 import { github } from "../github";
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
@@ -89,7 +90,7 @@ async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: Updat
 
   if (accountResponse.error) {
     // An error occurred while fetching the account
-    console.error(`Error fetching data for account: ${account.login}.`, accountResponse.error);
+    errorHandler(`Error fetching data for account: ${account.login}.`, accountResponse);
     diff.error = accountResponse.error.message;
   }
   else {
@@ -98,7 +99,7 @@ async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: Updat
 
     if (reposResponse.error) {
       // An error occurred while fetching the repos, so add the error message to the account
-      console.error(`Error fetching repos for account: ${account.login}.`, reposResponse.error);
+      errorHandler(`Error fetching repos for account: ${account.login}.`, reposResponse);
       diff.error = reposResponse.error.message;
     }
     else {
@@ -142,7 +143,7 @@ async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRe
   let prCountResponse = await github.fetchPullCount(repo);
 
   if (prCountResponse.error) {
-    console.error(`Error retrieving the number of open PRs for ${repo.full_name}.`, prCountResponse.error);
+    errorHandler(`Error retrieving the number of open PRs for ${repo.full_name}.`, prCountResponse);
   }
   else {
     let open_pulls_count = prCountResponse.body;
@@ -179,7 +180,7 @@ async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, cache
   let dependenciesResponse = await packageRegistry.fetchDependencies(repo);
 
   if (dependenciesResponse.error) {
-    console.error(`Error fetching dependency stats for ${repo.full_name}.`, dependenciesResponse.error);
+    errorHandler(`Error fetching dependency stats for ${repo.full_name}.`, dependenciesResponse);
   }
   else {
     let dependencies = dependenciesResponse.body;
@@ -190,5 +191,17 @@ async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, cache
       full_name: repo.full_name,
       dependencies,
     });
+  }
+}
+
+/**
+ * Log errors to the console.  Log API rate limit errors as warnings.
+ */
+function errorHandler(message: string, response: ApiErrorResponse) {
+  if (response.status === 403 && response.headers["x-ratelimit-remaining"] === "0") {
+    console.warn(`GitHub API rate limit exceeded. Unable to fetch ${response.url}`);
+  }
+  else {
+    console.error(message, response.error);
   }
 }
