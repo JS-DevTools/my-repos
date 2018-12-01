@@ -13,6 +13,8 @@ export interface UnmappedApiResponse {
 }
 
 export interface MappedApiResponse<T> extends UnmappedApiResponse {
+  ok: true;
+  error: undefined;
   body: T;
 }
 

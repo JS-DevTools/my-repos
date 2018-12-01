@@ -35,7 +35,12 @@ export class GitHub {
         last_refresh: new Date(),
       });
 
-      return { ...response, body };
+      return {
+        ...response,
+        ok: true,
+        error: undefined,
+        body,
+      };
     });
   }
 
@@ -75,7 +80,12 @@ export class GitHub {
         }
       }
 
-      return { ...response, body: repos };
+      return {
+        ...response,
+        ok: true,
+        error: undefined,
+        body: repos,
+      };
     });
   }
 
@@ -106,7 +116,12 @@ export class GitHub {
         }
       }
 
-      return { ...response, body: prCount };
+      return {
+        ...response,
+        ok: true,
+        error: undefined,
+        body: prCount,
+      };
     });
   }
 }

@@ -18,6 +18,8 @@ export class PackageRegistry {
     let rawResponse = new Response();
     return mapResponse<Dependencies>(rawResponse, (response) => ({
       ...response,
+      ok: true,
+      error: undefined,
       body: new Dependencies(),
     }));
   }
