@@ -22,7 +22,6 @@ export interface JsonPOJO extends POJOof<string | number | boolean | JsonPOJO | 
  * Returns the given value as a pretty-formatted string
  */
 export function prettify(value: unknown): string {
-  // tslint:disable-next-line:strict-type-predicates
   if (value && typeof value === "object") {
     return JSON.stringify(value, undefined, 2);
   }

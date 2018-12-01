@@ -168,6 +168,10 @@ rules:
   # Allow boolean expressions to use any truthy/falsy value, not just boolean
   strict-boolean-expressions: false
 
+  # Disabling this rule until this TSLint bug is fixed:
+  # https://github.com/palantir/tslint/issues/4107
+  strict-type-predicates: false
+
   # Don't require a default for every switch statement
   switch-default: false
 

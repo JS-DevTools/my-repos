@@ -21,7 +21,6 @@ export class GitHub {
     const url = `https://api.github.com/users/${account.login}`;
 
     return this._gitHubApiRequest(url, (response) => {
-      // tslint:disable-next-line:strict-type-predicates
       if (typeof response.rawBody !== "object") {
         throw new ApiError(url, "did not return a JSON object as expected", response.rawBody);
       }

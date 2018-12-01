@@ -115,8 +115,6 @@ function setItem(key: string, value: POJO): void {
  * Deserializes date strings when parsing JSON
  */
 function reviver(key: string, value: unknown): unknown {
-  // TSLint Bug - https://github.com/palantir/tslint/issues/4107
-  // tslint:disable-next-line:strict-type-predicates
   if (typeof value === "string" && jsonDatePattern.test(value)) {
     value = new Date(value);
   }
