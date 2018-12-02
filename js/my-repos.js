@@ -21892,6 +21892,57 @@
 	//# sourceMappingURL=app-state.js.map
 
 	/**
+	 * Information about a GitHub repo's dependencies
+	 */
+	class Dependencies {
+	    constructor(props = {}) {
+	        /**
+	         * Development dependencies
+	         */
+	        this.dev = {
+	            total: 0,
+	            up_to_date: 0,
+	            out_of_date: 0,
+	            advisories: 0,
+	            html_url: "",
+	        };
+	        /**
+	         * Runtime dependencies
+	         */
+	        this.runtime = {
+	            total: 0,
+	            up_to_date: 0,
+	            out_of_date: 0,
+	            advisories: 0,
+	            html_url: "",
+	        };
+	        /**
+	         * The date/time that the dependencies were last fetched from GitHub
+	         */
+	        this.last_refresh = new Date(0);
+	        Object.assign(this, props);
+	    }
+	}
+	//# sourceMappingURL=dependencies.js.map
+
+	function dependenciesResponse(props = {}) {
+	    return {
+	        ok: true,
+	        error: undefined,
+	        status: 200,
+	        statusText: "OK",
+	        url: "",
+	        headers: {
+	            "content-type": "application/json",
+	        },
+	        rawBody: "",
+	        body: props.body || new Dependencies(),
+	        ...props,
+	    };
+	}
+	//# sourceMappingURL=dependencies-response.js.map
+
+	/**
 	 * Introduces an artificial delay during local development to simulate internet latency
 	 */
 	async function artificialDelay() {
@@ -22014,85 +22065,55 @@
 	//# sourceMappingURL=index.js.map
 
 	/**
-	 * Information about a GitHub repo's dependencies
-	 */
-	class Dependencies {
-	    constructor(props = {}) {
-	        /**
-	         * The total number of dependencies
-	         */
-	        this.total = 0;
-	        /**
-	         * The number of dependencies that are up-to-date
-	         */
-	        this.up_to_date = 0;
-	        /**
-	         * The number of dependencies that are out-of-date
-	         */
-	        this.out_of_date = 0;
-	        /**
-	         * The number of dependencies that have security advistories
-	         */
-	        this.advisories = 0;
-	        /**
-	         * The link to a web page that shows the package's dependencies
-	         */
-	        this.html_url = "";
-	        /**
-	         * The date/time that the dependencies were last fetched from GitHub
-	         */
-	        this.last_refresh = new Date(0);
-	        Object.assign(this, props);
-	    }
-	}
-	//# sourceMappingURL=dependencies.js.map
-
-	function noDependencies(url = "") {
-	    return {
-	        ok: true,
-	        error: undefined,
-	        status: 200,
-	        statusText: "OK",
-	        url,
-	        headers: {
-	            "content-type": "application/json",
-	        },
-	        rawBody: "",
-	        body: new Dependencies({
-	            last_refresh: new Date(),
-	        }),
-	    };
-	}
-
-	/**
 	 * Fetches JavaScript dependencies for the specified GitHub repo from David-DM
 	 */
 	async function fetchJavaScriptDependencies(repo) {
-	    let url = `https://david-dm.org/${repo.full_name}/info.json`;
-	    let response = await fetch(url, (rawResponse) => {
-	        if (!isDavidResponseBody(rawResponse.rawBody)) {
-	            throw new FetchError(url, "returned an invalid dependency object", rawResponse.rawBody);
+	    let [devDepsResponse, runtimeDepsResponse] = await Promise.all([
+	        fetchDependencyTotals(repo, "dev"),
+	        fetchDependencyTotals(repo, "runtime"),
+	    ]);
+	    let dependencies = new Dependencies({
+	        last_refresh: new Date(),
+	    });
+	    if (devDepsResponse.ok) {
+	        dependencies.dev = devDepsResponse.body;
+	    }
+	    if (runtimeDepsResponse.ok) {
+	        dependencies.runtime = runtimeDepsResponse.body;
+	    }
+	    return dependenciesResponse({ body: dependencies });
+	}
+	/**
+	 * Fetches the development or runtime dependency totals from David-DM
+	 */
+	async function fetchDependencyTotals(repo, type) {
+	    let url, html_url;
+	    if (type === "dev") {
+	        url = `https://david-dm.org/${repo.full_name}/dev-info.json`;
+	        html_url = `https://david-dm.org/${repo.full_name}?type=dev`;
+	    }
+	    else {
+	        url = `https://david-dm.org/${repo.full_name}/info.json`;
+	        html_url = `https://david-dm.org/${repo.full_name}`;
+	    }
+	    return fetch(url, (response) => {
+	        if (!isDavidResponseBody(response.rawBody)) {
+	            throw new FetchError(url, "returned an invalid dependency object", response.rawBody);
 	        }
-	        let { totals } = rawResponse.rawBody;
+	        let { totals } = response.rawBody;
 	        return {
-	            ...rawResponse,
+	            ...response,
 	            ok: true,
 	            error: undefined,
-	            body: new Dependencies({
+	            body: {
 	                total: totals.upToDate + totals.outOfDate,
 	                up_to_date: totals.upToDate,
 	                out_of_date: totals.outOfDate,
 	                advisories: totals.advisories,
-	                html_url: `https://david-dm.org/${repo.full_name}`,
-	                last_refresh: new Date(),
-	            }),
+	                html_url,
+	            },
 	        };
 	    });
-	    if (response.error) {
-	        // David-DM returns an error if it's unable to determine the repo's dependencies.
-	        return noDependencies(url);
-	    }
-	    return response;
 	}
 	// tslint:disable:no-any no-unsafe-any
 	function isDavidResponseBody(body) {
@@ -22117,7 +22138,7 @@
 	                return fetchJavaScriptDependencies(repo);
 	            default:
 	                // Not yet implemented for this language
-	                return noDependencies();
+	                return dependenciesResponse();
 	        }
 	    }
 	    catch (error) {
@@ -22132,6 +22153,7 @@
 	        };
 	    }
 	}
+	//# sourceMappingURL=fetch-dependencies.js.map
 
 	//# sourceMappingURL=index.js.map
 
@@ -25966,36 +25988,56 @@
 	                react_1("span", { className: "badge-count" }, repo.issues_includes_pulls ?
 	                    repo.open_issues_count === 0 ? 0 : "?" :
 	                    repo.open_pulls_count)),
-	            DependencyBadge(props))));
+	            react_1(DependencyBadge, Object.assign({}, props)))));
 	}
 	function DependencyBadge(props) {
-	    let { repo } = props;
-	    if (repo.dependencies.total === 0) {
+	    let { dev, runtime } = props.repo.dependencies;
+	    let total = dev.total + runtime.total;
+	    let upToDate = dev.up_to_date + runtime.up_to_date;
+	    let outOfDate = dev.out_of_date + runtime.out_of_date;
+	    let advisories = dev.advisories + runtime.advisories;
+	    if (total === 0) {
 	        // This repo doesn't have any dependencies, so don't display this badge
 	        return null; // tslint:disable-line:no-null-keyword
 	    }
-	    let hasError;
+	    let href;
+	    let className;
 	    let label;
 	    let count;
-	    if (repo.dependencies.out_of_date) {
-	        hasError = true;
+	    if (outOfDate) {
 	        label = "Out of Date";
-	        count = repo.dependencies.out_of_date;
+	        count = outOfDate;
+	        if (runtime.out_of_date) {
+	            href = runtime.html_url;
+	            className = "badge-error";
+	        }
+	        else {
+	            href = dev.html_url;
+	            className = "badge-warning";
+	        }
 	    }
-	    else if (repo.dependencies.advisories) {
-	        hasError = true;
+	    else if (advisories) {
 	        label = "Insecure";
-	        count = repo.dependencies.advisories;
+	        count = advisories;
+	        if (runtime.advisories) {
+	            href = runtime.html_url;
+	            className = "badge-error";
+	        }
+	        else {
+	            href = dev.html_url;
+	            className = "badge-warning";
+	        }
 	    }
 	    else {
-	        hasError = false;
+	        href = runtime.html_url;
+	        className = "badge-ok";
 	        label = "Up-to-Date";
-	        count = repo.dependencies.up_to_date;
+	        count = upToDate;
 	    }
-	    return (react_1("a", { href: repo.dependencies.html_url, className: `badge ${hasError ? "badge-error" : "badge-ok"} dependencies` },
+	    return (react_1("a", { href: href, className: `badge ${className} dependencies` },
 	        react_1(Octicon, { name: "package" }),
 	        react_1("span", { className: "badge-label" }, label),
-	        react_1("span", { className: "badge-count" }, `${count} / ${repo.dependencies.total}`)));
+	        react_1("span", { className: "badge-count" }, `${count} / ${total}`)));
 	}
 	//# sourceMappingURL=repo-item.js.map
 

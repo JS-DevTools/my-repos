@@ -58,46 +58,69 @@ export function RepoItem(props: RepoItemProps) {
           </span>
         </a>
 
-        {DependencyBadge(props)}
+        <DependencyBadge {...props} />
       </nav>
     </li>
   );
 }
 
 function DependencyBadge(props: RepoItemProps) {
-  let { repo } = props;
+  let { dev, runtime } = props.repo.dependencies;
 
-  if (repo.dependencies.total === 0) {
+  let total = dev.total + runtime.total;
+  let upToDate = dev.up_to_date + runtime.up_to_date;
+  let outOfDate = dev.out_of_date + runtime.out_of_date;
+  let advisories = dev.advisories + runtime.advisories;
+
+  if (total === 0) {
     // This repo doesn't have any dependencies, so don't display this badge
     return null;   // tslint:disable-line:no-null-keyword
   }
 
-  let hasError: boolean;
+  let href: string;
+  let className: string;
   let label: string;
   let count: number;
 
-  if (repo.dependencies.out_of_date) {
-    hasError = true;
+  if (outOfDate) {
     label = "Out of Date";
-    count = repo.dependencies.out_of_date;
+    count = outOfDate;
+
+    if (runtime.out_of_date) {
+      href = runtime.html_url;
+      className = "badge-error";
+    }
+    else {
+      href = dev.html_url;
+      className = "badge-warning";
+    }
   }
-  else if (repo.dependencies.advisories) {
-    hasError = true;
+  else if (advisories) {
     label = "Insecure";
-    count = repo.dependencies.advisories;
+    count = advisories;
+
+    if (runtime.advisories) {
+      href = runtime.html_url;
+      className = "badge-error";
+    }
+    else {
+      href = dev.html_url;
+      className = "badge-warning";
+    }
   }
   else {
-    hasError = false;
+    href = runtime.html_url;
+    className = "badge-ok";
     label = "Up-to-Date";
-    count = repo.dependencies.up_to_date;
+    count = upToDate;
   }
 
   return (
-    <a href={repo.dependencies.html_url}
-      className={`badge ${hasError ? "badge-error" : "badge-ok"} dependencies`}>
+    <a href={href}
+      className={`badge ${className} dependencies`}>
       <Octicon name="package" />
       <span className="badge-label">{label}</span>
-      <span className="badge-count">{`${count} / ${repo.dependencies.total}`}</span>
+      <span className="badge-count">{`${count} / ${total}`}</span>
     </a>
   );
 }

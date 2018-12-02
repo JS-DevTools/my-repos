@@ -1,8 +1,8 @@
 import { FetchResponse } from "../fetch";
 import { GitHubRepo } from "../github/github-repo";
 import { Dependencies } from "./dependencies";
+import { dependenciesResponse } from "./dependencies-response";
 import { fetchJavaScriptDependencies } from "./fetch-javascript-dependencies";
-import { noDependencies } from "./no-dependencies";
 
 /**
  * Fetches the dependencies for the specified GitHub repo
@@ -18,7 +18,7 @@ export async function fetchDependencies(repo: GitHubRepo): Promise<FetchResponse
 
       default:
         // Not yet implemented for this language
-        return noDependencies();
+        return dependenciesResponse();
     }
   }
   catch (error) {

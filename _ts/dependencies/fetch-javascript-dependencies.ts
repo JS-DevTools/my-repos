@@ -1,44 +1,70 @@
 import { fetch, FetchError, FetchResponse } from "../fetch";
 import { GitHubRepo } from "../github/github-repo";
 import { JsonPOJO } from "../util";
-import { Dependencies } from "./dependencies";
-import { noDependencies } from "./no-dependencies";
+import { Dependencies, DependencyTotals } from "./dependencies";
+import { dependenciesResponse } from "./dependencies-response";
 
 /**
  * Fetches JavaScript dependencies for the specified GitHub repo from David-DM
  */
 export async function fetchJavaScriptDependencies(repo: GitHubRepo): Promise<FetchResponse<Dependencies>> {
-  let url = `https://david-dm.org/${repo.full_name}/info.json`;
+  let [devDepsResponse, runtimeDepsResponse] = await Promise.all([
+    fetchDependencyTotals(repo, "dev"),
+    fetchDependencyTotals(repo, "runtime"),
+  ]);
 
-  let response = await fetch(url, (rawResponse) => {
-    if (!isDavidResponseBody(rawResponse.rawBody)) {
-      throw new FetchError(url, "returned an invalid dependency object", rawResponse.rawBody);
+  let dependencies = new Dependencies({
+    last_refresh: new Date(),
+  });
+
+  if (devDepsResponse.ok) {
+    dependencies.dev = devDepsResponse.body;
+  }
+
+  if (runtimeDepsResponse.ok) {
+    dependencies.runtime = runtimeDepsResponse.body;
+  }
+
+  return dependenciesResponse({ body: dependencies });
+}
+
+/**
+ * Fetches the development or runtime dependency totals from David-DM
+ */
+async function fetchDependencyTotals(repo: GitHubRepo, type: "dev" | "runtime"): Promise<FetchResponse<DependencyTotals>> {
+  let url: string, html_url: string;
+
+  if (type === "dev") {
+    url = `https://david-dm.org/${repo.full_name}/dev-info.json`;
+    html_url = `https://david-dm.org/${repo.full_name}?type=dev`;
+  }
+  else {
+    url = `https://david-dm.org/${repo.full_name}/info.json`;
+    html_url = `https://david-dm.org/${repo.full_name}`;
+  }
+
+  return fetch(url, (response) => {
+    if (!isDavidResponseBody(response.rawBody)) {
+      throw new FetchError(url, "returned an invalid dependency object", response.rawBody);
     }
 
-    let { totals } = rawResponse.rawBody;
+    let { totals } = response.rawBody;
 
     return {
-      ...rawResponse,
+      ...response,
       ok: true,
       error: undefined,
-      body: new Dependencies({
+      body: {
         total: totals.upToDate + totals.outOfDate,
         up_to_date: totals.upToDate,
         out_of_date: totals.outOfDate,
         advisories: totals.advisories,
-        html_url: `https://david-dm.org/${repo.full_name}`,
-        last_refresh: new Date(),
-      }),
+        html_url,
+      },
     };
   });
-
-  if (response.error) {
-    // David-DM returns an error if it's unable to determine the repo's dependencies.
-    return noDependencies(url);
-  }
-
-  return response;
 }
+
 
 type VersionNumber = string;
 
