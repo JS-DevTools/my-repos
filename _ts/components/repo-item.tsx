@@ -6,6 +6,12 @@ interface RepoItemProps {
   repo: GitHubRepo;
 }
 
+enum Status {
+  OK = "badge-ok",
+  Warning = "badge-warning",
+  Error = "badge-error",
+}
+
 export function RepoItem(props: RepoItemProps) {
   let { repo } = props;
 
@@ -18,35 +24,35 @@ export function RepoItem(props: RepoItemProps) {
 
       <nav className="badges">
         <a href={`${repo.html_url}/network/members`}
-          className={`badge ${repo.forks_count ? "badge-ok" : ""} forks`}>
+          className={`badge ${repo.forks_count ? Status.OK : ""} forks`}>
           <Octicon name="repo-forked" />
           <span className="badge-label">Forks</span>
           <span className="badge-count">{repo.forks_count}</span>
         </a>
 
         <a href={`${repo.html_url}/stargazers`}
-          className={`badge ${repo.stargazers_count ? "badge-ok" : ""} stars`}>
+          className={`badge ${repo.stargazers_count ? Status.OK : ""} stars`}>
           <Octicon name="star" />
           <span className="badge-label">Stars</span>
           <span className="badge-count">{repo.stargazers_count}</span>
         </a>
 
         <a href={`${repo.html_url}/watchers`}
-          className={`badge ${repo.watchers_count ? "badge-ok" : ""} watchers`}>
+          className={`badge ${repo.watchers_count ? Status.OK : ""} watchers`}>
           <Octicon name="eye" />
           <span className="badge-label">Watchers</span>
           <span className="badge-count">{repo.watchers_count}</span>
         </a>
 
         <a href={`${repo.html_url}/issues`}
-          className={`badge ${repo.open_issues_count ? "badge-warning" : "badge-ok"} issues`}>
+          className={`badge ${repo.open_issues_count ? Status.Warning : Status.OK} issues`}>
           <Octicon name={repo.open_issues_count ? "issue-opened" : "issue-closed"} />
           <span className="badge-label">Issues</span>
           <span className="badge-count">{repo.open_issues_count}</span>
         </a>
 
         <a href={`${repo.html_url}/pulls`}
-          className={`badge ${repo.open_pulls_count ? "badge-warning" : "badge-ok"} pulls`}>
+          className={`badge ${repo.open_pulls_count ? Status.Warning : Status.OK} pulls`}>
           <Octicon name="git-pull-request" />
           <span className="badge-label">PRs</span>
           <span className="badge-count">
@@ -79,7 +85,7 @@ function DependencyBadge(props: RepoItemProps) {
 
   let href: string;
   let title: string;
-  let className: string;
+  let className: Status;
   let label: string;
   let count: number;
 
@@ -89,12 +95,12 @@ function DependencyBadge(props: RepoItemProps) {
 
     if (runtime.out_of_date) {
       href = runtime.html_url;
-      className = "badge-error";
+      className = Status.Error;
       title = "Some runtime dependencies need updated";
     }
     else {
       href = dev.html_url;
-      className = "badge-warning";
+      className = Status.Warning;
       title = "Some dev dependencies need updated";
     }
   }
@@ -104,19 +110,19 @@ function DependencyBadge(props: RepoItemProps) {
 
     if (runtime.advisories) {
       href = runtime.html_url;
-      className = "badge-error";
+      className = Status.Error;
       title = "Some runtime dependencies have known security vulnerabilities";
     }
     else {
       href = dev.html_url;
-      className = "badge-warning";
+      className = Status.Warning;
       title = "Some dev dependencies have known security vulnerabilities";
     }
   }
   else {
     href = runtime.html_url;
     title = "Dependencies";
-    className = "badge-ok";
+    className = Status.OK;
     label = "Up-to-Date";
     count = upToDate;
   }
