@@ -1,4 +1,4 @@
-import { Dependencies } from "../package-registry/dependencies";
+import { Dependencies } from "../dependencies";
 import { stateStore } from "../state-store";
 
 /**
@@ -14,7 +14,7 @@ export interface GitHubRepoPOJO {
   stargazers_count: number;
   watchers_count: number;
   open_issues_count: number;
-  language: string;
+  language?: string;
   html_url: string;
 }
 
@@ -31,7 +31,7 @@ export class GitHubRepo implements GitHubRepoPOJO {
   public stargazers_count = 0;
   public watchers_count = 0;
   public open_issues_count = 0;
-  public language = "";
+  public language?: string;
   public html_url = "";
 
   /**
@@ -51,14 +51,6 @@ export class GitHubRepo implements GitHubRepoPOJO {
    * The GitHub account login that this repo belongs to.
    */
   public login!: string;
-
-  /**
-   * If this repo is published to a package registry (such as npm, ruby gems, pypi, etc.),
-   * then this is the package name.
-   *
-   * NOTE: Monorepos that contain many packages are not currently supported.
-   */
-  public package_name = "";
 
   /**
    * Information about this repo's dependencies.

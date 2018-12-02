@@ -1,4 +1,5 @@
 import { default as octicons, OcticonName } from "octicons";
+import * as React from "react";
 
 export function Octicon({ name }: { name: OcticonName }) {
   let icon = octicons[name];

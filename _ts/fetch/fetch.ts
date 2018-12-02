@@ -7,7 +7,11 @@ import { mapResponse, ResponseMapper } from "./map-response";
  *
  * NOTE: This function will never throw an error.  If an error occurs, then an ErrorResponse is returned.
  */
-export async function fetch<T>(request: Request, mapper: ResponseMapper<T>): Promise<Readonly<FetchResponse<T>>> {
+export async function fetch<T>(request: Request | string, mapper: ResponseMapper<T>): Promise<Readonly<FetchResponse<T>>> {
+  if (typeof request === "string") {
+    request = new Request(request);
+  }
+
   try {
     // Send the HTTP Request, and possibly simulate network latency
     let [rawResponse] = await Promise.all([
@@ -27,7 +31,7 @@ export async function fetch<T>(request: Request, mapper: ResponseMapper<T>): Pro
       statusText: "Service Unavailable",
       url: request.url,
       headers: {
-        "Content-Type": "text/plain",
+        "content-type": "text/plain",
       },
       rawBody: (error as Error).message,
     };

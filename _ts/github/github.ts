@@ -1,5 +1,5 @@
+import { Dependencies } from "../dependencies";
 import { ErrorResponse, fetch, FetchError, FetchResponse, ResponseMapper } from "../fetch";
-import { Dependencies } from "../package-registry/dependencies";
 import { byName } from "../util";
 import { GitHubAccount, isGitHubAccountPOJO } from "./github-account";
 import { GitHubRepo, isGitHubRepoPOJO } from "./github-repo";
@@ -151,8 +151,7 @@ export class GitHub {
     }
 
     // Send the request
-    let request = new Request(url);
-    let response = await fetch(request, mapper);
+    let response = await fetch(url, mapper);
 
     // If the response is a Rate Limit Exceeded error, then set the flag
     // so we don't send any more requests to the GitHub API

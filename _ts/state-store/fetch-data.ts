@@ -1,9 +1,9 @@
 import { stateStore } from ".";
+import { fetchDependencies } from "../dependencies";
 import { ErrorResponse } from "../fetch";
 import { github } from "../github";
 import { GitHubAccount } from "../github/github-account";
 import { GitHubRepo } from "../github/github-repo";
-import { packageRegistry } from "../package-registry";
 
 export type UpdateAccount = (account: Partial<GitHubAccount>) => void;
 export type UpdateRepo = (repo: Partial<GitHubRepo>) => void;
@@ -125,7 +125,7 @@ async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpi
   // and call the update callback as each piece of data is received
   return Promise.all([
     fetchIssuesAndPullRequests(repo, updateRepo, cacheExpiry),
-    fetchDependencies(repo, updateRepo, cacheExpiry),
+    fetchRepoDependencies(repo, updateRepo, cacheExpiry),
   ]);
 }
 
@@ -175,13 +175,13 @@ async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRe
 /**
  * Fetches the dependencies for the specified repo, and calls the specified update callback.
  */
-async function fetchDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpiry: Date) {
+async function fetchRepoDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpiry: Date) {
   if (repo.dependencies.last_refresh > cacheExpiry) {
     // No need to fetch this repo's dependencies, since the cached version is new enough
     return;
   }
 
-  let dependenciesResponse = await packageRegistry.fetchDependencies(repo);
+  let dependenciesResponse = await fetchDependencies(repo);
 
   if (dependenciesResponse.error) {
     errorHandler(`Error fetching dependency stats for ${repo.full_name}.`, dependenciesResponse);
