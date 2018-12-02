@@ -65,7 +65,6 @@ async function fetchDependencyTotals(repo: GitHubRepo, type: "dev" | "runtime"):
   });
 }
 
-
 type VersionNumber = string;
 
 interface DavidResponseBody {

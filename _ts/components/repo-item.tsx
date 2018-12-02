@@ -78,6 +78,7 @@ function DependencyBadge(props: RepoItemProps) {
   }
 
   let href: string;
+  let title: string;
   let className: string;
   let label: string;
   let count: number;
@@ -89,10 +90,12 @@ function DependencyBadge(props: RepoItemProps) {
     if (runtime.out_of_date) {
       href = runtime.html_url;
       className = "badge-error";
+      title = "Some runtime dependencies need updated";
     }
     else {
       href = dev.html_url;
       className = "badge-warning";
+      title = "Some dev dependencies need updated";
     }
   }
   else if (advisories) {
@@ -102,21 +105,24 @@ function DependencyBadge(props: RepoItemProps) {
     if (runtime.advisories) {
       href = runtime.html_url;
       className = "badge-error";
+      title = "Some runtime dependencies have known security vulnerabilities";
     }
     else {
       href = dev.html_url;
       className = "badge-warning";
+      title = "Some dev dependencies have known security vulnerabilities";
     }
   }
   else {
     href = runtime.html_url;
+    title = "Dependencies";
     className = "badge-ok";
     label = "Up-to-Date";
     count = upToDate;
   }
 
   return (
-    <a href={href}
+    <a href={href} title={title}
       className={`badge ${className} dependencies`}>
       <Octicon name="package" />
       <span className="badge-label">{label}</span>
