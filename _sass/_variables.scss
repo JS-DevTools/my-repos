@@ -9,8 +9,9 @@ $medium-blue: #0366d6;
 $warning-color: #f1e150;
 $warning-color-light: #fff597;
 
-$error-color: #dc3545;
-$error-color-light: #f88591;
+$error-color: #e84f5e;
+$error-color-light: #d56872;
+$error-bg-color: transparentize($error-color, .9);
 
 $bg-color: #fff;
 $text-color: #24292e;
@@ -19,9 +20,6 @@ $light-border: $light-gray;
 
 $info-color: $medium-blue;
 $info-bg-color: transparentize($info-color, .9);
-
-$error-color: red;
-$error-bg-color: transparentize($error-color, .9);
 
 $vertical-space-large: 30px;
 $vertical-space-medium: 20px;
