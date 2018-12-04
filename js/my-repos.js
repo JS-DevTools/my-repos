@@ -26082,9 +26082,9 @@
 	                react_1("h1", null,
 	                    react_1("a", { href: account.html_url },
 	                        account.avatar_url && react_1("img", { src: account.avatar_url, className: "avatar" }),
-	                        account.name)),
-	                react_1("a", { href: `#hide=${account.login}`, onClick: this.handleHideClick },
-	                    react_1(Octicon, { name: "x" }))),
+	                        account.name),
+	                    react_1("a", { href: `#hide=${account.login}`, className: "remove-account", title: `Remove ${account.login}`, onClick: this.handleHideClick },
+	                        react_1(Octicon, { name: "x" })))),
 	            react_1(AccountItemContents, Object.assign({}, this.props))));
 	    }
 	}
@@ -26106,7 +26106,6 @@
 	            react_1("div", { className: "empty-message" }, "There are no repos to show")));
 	    }
 	}
-	//# sourceMappingURL=account-item.js.map
 
 	function AccountList() {
 	    let { accounts } = stateStore.state;
@@ -26144,6 +26143,7 @@
 	            react_1("button", { type: "submit", className: "btn btn-primary" }, submitButtonText || "Add")));
 	    }
 	}
+	//# sourceMappingURL=add-account.js.map
 
 	function FirstTime() {
 	    let { accounts } = stateStore.state;

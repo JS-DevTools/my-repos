@@ -1,27 +1,42 @@
+// tslint:disable:no-duplicate-imports
 import * as React from "react";
+import { MouseEvent } from "react";
 import { GitHubAccount } from "../github/github-account";
+import { stateStore } from "../state-store";
+import { Octicon } from "./octicon";
 import { RepoList } from "./repo-list";
 
 interface AccountItemProps {
   account: GitHubAccount;
 }
 
-export function AccountItem(props: AccountItemProps) {
-  let { account } = props;
+export class AccountItem extends React.Component<AccountItemProps> {
+  public render() {
+    let { account } = this.props;
 
-  return (
-    <section key={account.login} className="account">
-      <header>
-        <h1>
-          <a href={account.html_url}>
-            {account.avatar_url && <img src={account.avatar_url} className="avatar" />}
-            {account.name}
-          </a>
-        </h1>
-      </header>
-      <AccountItemContents {...props} />
-    </section>
-  );
+    return (
+      <section key={account.login} className="account">
+        <header>
+          <h1>
+            <a href={account.html_url}>
+              {account.avatar_url && <img src={account.avatar_url} className="avatar" />}
+              {account.name}
+            </a>
+            <a href={`#remove=${account.login}`} className="remove-account"
+              title={`Remove ${account.login}`} onClick={this.handleRemoveClick}>
+              <Octicon name="x" />
+            </a>
+          </h1>
+        </header>
+        <AccountItemContents {...this.props} />
+      </section>
+    );
+  }
+
+  private readonly handleRemoveClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    stateStore.removeAccount(this.props.account);
+  }
 }
 
 function AccountItemContents(props: AccountItemProps) {

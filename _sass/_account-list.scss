@@ -21,7 +21,7 @@
   }
 
   .account {
-    margin-bottom: $vertical-space-large;
+    margin-bottom: ($vertical-space-large * 2);
 
     header {
       .avatar {
@@ -31,6 +31,16 @@
         border-radius: 10px;
         vertical-align: middle;
         margin-right: $horizontal-space-small;
+      }
+
+      .remove-account {
+        display: none;
+      }
+
+      &:hover .remove-account {
+        display: inline-block;
+        margin-left: .5em;
+        fill: $dark-gray;
       }
     }
 
