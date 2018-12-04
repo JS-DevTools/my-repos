@@ -1,14 +1,13 @@
 import * as React from "react";
-import { GitHubAccount } from "../github/github-account";
+import { GitHubRepo } from "../github/github-repo";
 import { RepoItem } from "./repo-item";
 
 export interface RepoListProps {
-  account: GitHubAccount;
+  repos: GitHubRepo[];
 }
 
 export function RepoList(props: RepoListProps) {
-  let { account } = props;
-  let repos = account.repos.filter((repo) => !repo.isHidden());
+  let { repos } = props;
 
   return (
     <ul className="repo-list">

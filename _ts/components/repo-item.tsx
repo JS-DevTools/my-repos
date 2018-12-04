@@ -1,5 +1,8 @@
+// tslint:disable:no-duplicate-imports
 import * as React from "react";
+import { MouseEvent } from "react";
 import { GitHubRepo } from "../github/github-repo";
+import { stateStore } from "../state-store";
 import { Octicon } from "./octicon";
 
 interface RepoItemProps {
@@ -12,70 +15,81 @@ enum Status {
   Error = "badge-error",
 }
 
-export function RepoItem(props: RepoItemProps) {
-  let { repo } = props;
+export class RepoItem extends React.Component<RepoItemProps> {
+  public render() {
+    let { repo } = this.props;
 
-  return (
-    <li key={repo.name} className={`repo ${repo.fork ? "forked" : ""} ${repo.archived ? "archived" : ""}`}>
-      <h2>
-        <a href={repo.html_url}>{repo.name}</a>
-        {
-          repo.fork &&
-          <Octicon name="repo-forked" title="This repo is a fork of another repo" />
-        }
-        {
-          repo.archived &&
-          <Octicon name="archive" title="This repo has been archived" />
-        }
-      </h2>
-      <h3>{repo.description}</h3>
+    return (
+      <li key={repo.name} className={`repo ${repo.fork ? "forked" : ""} ${repo.archived ? "archived" : ""}`}>
+        <h2>
+          <a href={repo.html_url}>{repo.name}</a>
+          {
+            repo.fork &&
+            <Octicon name="repo-forked" title="This repo is a fork of another repo" />
+          }
+          {
+            repo.archived &&
+            <Octicon name="archive" title="This repo has been archived" />
+          }
+          <a href={`#hide=${repo.full_name}`} className="remove-repo"
+            title={`Hide ${repo.full_name}`} onClick={this.handleHideClick}>
+            <Octicon name="x" />
+          </a>
+        </h2>
+        <h3>{repo.description}</h3>
 
-      <nav className="badges">
-        <a href={`${repo.html_url}/network/members`}
-          className={`badge ${repo.forks_count ? Status.OK : ""} forks`}>
-          <Octicon name="repo-forked" />
-          <span className="badge-label">Forks</span>
-          <span className="badge-count">{repo.forks_count}</span>
-        </a>
+        <nav className="badges">
+          <a href={`${repo.html_url}/network/members`}
+            className={`badge ${repo.forks_count ? Status.OK : ""} forks`}>
+            <Octicon name="repo-forked" />
+            <span className="badge-label">Forks</span>
+            <span className="badge-count">{repo.forks_count}</span>
+          </a>
 
-        <a href={`${repo.html_url}/stargazers`}
-          className={`badge ${repo.stargazers_count ? Status.OK : ""} stars`}>
-          <Octicon name="star" />
-          <span className="badge-label">Stars</span>
-          <span className="badge-count">{repo.stargazers_count}</span>
-        </a>
+          <a href={`${repo.html_url}/stargazers`}
+            className={`badge ${repo.stargazers_count ? Status.OK : ""} stars`}>
+            <Octicon name="star" />
+            <span className="badge-label">Stars</span>
+            <span className="badge-count">{repo.stargazers_count}</span>
+          </a>
 
-        <a href={`${repo.html_url}/watchers`}
-          className={`badge ${repo.watchers_count ? Status.OK : ""} watchers`}>
-          <Octicon name="eye" />
-          <span className="badge-label">Watchers</span>
-          <span className="badge-count">{repo.watchers_count}</span>
-        </a>
+          <a href={`${repo.html_url}/watchers`}
+            className={`badge ${repo.watchers_count ? Status.OK : ""} watchers`}>
+            <Octicon name="eye" />
+            <span className="badge-label">Watchers</span>
+            <span className="badge-count">{repo.watchers_count}</span>
+          </a>
 
-        <a href={`${repo.html_url}/issues`}
-          className={`badge ${repo.open_issues_count ? Status.Warning : Status.OK} issues`}>
-          <Octicon name={repo.open_issues_count ? "issue-opened" : "issue-closed"} />
-          <span className="badge-label">Issues</span>
-          <span className="badge-count">{repo.open_issues_count}</span>
-        </a>
+          <a href={`${repo.html_url}/issues`}
+            className={`badge ${repo.open_issues_count ? Status.Warning : Status.OK} issues`}>
+            <Octicon name={repo.open_issues_count ? "issue-opened" : "issue-closed"} />
+            <span className="badge-label">Issues</span>
+            <span className="badge-count">{repo.open_issues_count}</span>
+          </a>
 
-        <a href={`${repo.html_url}/pulls`}
-          className={`badge ${repo.open_pulls_count ? Status.Warning : Status.OK} pulls`}>
-          <Octicon name="git-pull-request" />
-          <span className="badge-label">PRs</span>
-          <span className="badge-count">
-            {
-              repo.issues_includes_pulls ?
-                repo.open_issues_count === 0 ? 0 : "?" :
-                repo.open_pulls_count
-            }
-          </span>
-        </a>
+          <a href={`${repo.html_url}/pulls`}
+            className={`badge ${repo.open_pulls_count ? Status.Warning : Status.OK} pulls`}>
+            <Octicon name="git-pull-request" />
+            <span className="badge-label">PRs</span>
+            <span className="badge-count">
+              {
+                repo.issues_includes_pulls ?
+                  repo.open_issues_count === 0 ? 0 : "?" :
+                  repo.open_pulls_count
+              }
+            </span>
+          </a>
 
-        <DependencyBadge {...props} />
-      </nav>
-    </li>
-  );
+          <DependencyBadge {...this.props} />
+        </nav>
+      </li>
+    );
+  }
+
+  private readonly handleHideClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    stateStore.toggleHidden(this.props.repo, true);
+  }
 }
 
 function DependencyBadge(props: RepoItemProps) {

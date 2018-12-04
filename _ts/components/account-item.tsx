@@ -41,9 +41,10 @@ export class AccountItem extends React.Component<AccountItemProps> {
 
 function AccountItemContents(props: AccountItemProps) {
   let { account } = props;
+  let repos = account.repos.filter((repo) => !repo.isHidden());
 
-  if (account.repos.length > 0) {
-    return <RepoList account={account} />;
+  if (repos.length > 0) {
+    return <RepoList repos={repos} />;
   }
   else if (account.error) {
     return (

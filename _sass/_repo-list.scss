@@ -12,7 +12,24 @@
   }
 
   .repo {
+    position: relative;
     padding: $vertical-space-small $horizontal-space-medium;
+
+    .remove-repo {
+      display: none;
+      position: absolute;
+      top: $vertical-space-small;
+      right: $horizontal-space-medium;
+      fill: $dark-gray;
+    }
+
+    &:hover {
+      background-color: $lighter-gray;
+
+      .remove-repo {
+        display: inline-block;
+      }
+    }
 
     h2 {
       font-size: 1.2em;
@@ -60,7 +77,7 @@
 
     &:hover {
       text-decoration: none;
-      background-color: $lighter-gray;
+      background-color: $light-gray;
     }
 
     &.badge-warning {
