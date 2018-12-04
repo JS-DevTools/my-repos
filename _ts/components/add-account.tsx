@@ -48,7 +48,7 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
     event.preventDefault();
 
     if (this.state.login) {
-      stateStore.addAccount(this.state.login);
+      stateStore.addAccount(this.state);
       this.setState({ login: "" });
     }
   }

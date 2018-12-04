@@ -2,6 +2,14 @@ import { Dependencies } from "../dependencies";
 import { stateStore } from "../state-store";
 
 /**
+ * The key fields that uniquely identify a GitHub repo
+ */
+export interface GitHubRepoKey {
+  login: string;
+  full_name: string;
+}
+
+/**
  * A GitHub repository, as returned from the GitHub REST API
  */
 export interface GitHubRepoPOJO {

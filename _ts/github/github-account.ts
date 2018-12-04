@@ -1,6 +1,13 @@
 import { GitHubRepo } from "./github-repo";
 
 /**
+ * The key fields that uniquely identify a GitHub account
+ */
+export interface GitHubAccountKey {
+  login: string;
+}
+
+/**
  * A GitHub user or organization account, as returned from the GitHub REST API
  */
 export interface GitHubAccountPOJO {

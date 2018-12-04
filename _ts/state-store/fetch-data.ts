@@ -2,11 +2,11 @@ import { stateStore } from ".";
 import { fetchDependencies } from "../dependencies";
 import { ErrorResponse } from "../fetch";
 import { github } from "../github";
-import { GitHubAccount } from "../github/github-account";
-import { GitHubRepo } from "../github/github-repo";
+import { GitHubAccount, GitHubAccountKey } from "../github/github-account";
+import { GitHubRepo, GitHubRepoKey } from "../github/github-repo";
 
-export type UpdateAccount = (account: Partial<GitHubAccount>) => void;
-export type UpdateRepo = (repo: Partial<GitHubRepo>) => void;
+export type UpdateAccount = (account: GitHubAccountKey & Partial<GitHubAccount>) => void;
+export type UpdateRepo = (repo: GitHubRepoKey & Partial<GitHubRepo>) => void;
 
 /**
  * Begins fetching all the data for the specified GitHub account.  This function returns immediately,
@@ -90,7 +90,7 @@ async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: Updat
     github.fetchRepos(account),
   ]);
 
-  let diff: Partial<GitHubAccount> = { login: account.login };
+  let diff: GitHubAccountKey & Partial<GitHubAccount> = { login: account.login };
 
   if (accountResponse.error) {
     // An error occurred while fetching the account

@@ -1,5 +1,5 @@
-import { GitHubAccount } from "../github/github-account";
-import { GitHubRepo } from "../github/github-repo";
+import { GitHubAccount, GitHubAccountKey } from "../github/github-account";
+import { GitHubRepo, GitHubRepoKey } from "../github/github-repo";
 import { byLogin, byName } from "../util";
 import { AppState, ReadonlyAppState } from "./app-state";
 import { Cache } from "./cache";
@@ -60,7 +60,7 @@ export class StateStore extends EventTarget {
 
       if (!account) {
         // This is a newly-added account. Get its data from the cache, if possible
-        account = this._cache.getAccount(hashAccount.login);
+        account = this._cache.getAccount(hashAccount);
 
         if (!account) {
           // Cache miss.  So create a skeleton GitHubAccount object
@@ -82,7 +82,7 @@ export class StateStore extends EventTarget {
    * Adds a new GitHub account with the specified login to the accounts list,
    * and asynchronously fetches the account info from GitHub
    */
-  public addAccount(login: string) {
+  public addAccount({ login }: GitHubAccountKey) {
     login = login.trim();
 
     // Determine whether the account already exists
@@ -92,7 +92,7 @@ export class StateStore extends EventTarget {
     }
 
     // Get the account data from the cache, if possible
-    account = this._cache.getAccount(login);
+    account = this._cache.getAccount({ login });
 
     if (!account) {
       // Cache miss.  So create a skeleton GitHubAccount object
@@ -112,7 +112,7 @@ export class StateStore extends EventTarget {
   /**
    * Updates the specified GitHub account
    */
-  public updateAccount(diff: Partial<GitHubAccount>) {
+  public updateAccount(diff: GitHubAccountKey & Partial<GitHubAccount>) {
     if (!diff.login) {
       throw new Error(`Account login must be specified when updating an account`);
     }
@@ -130,7 +130,7 @@ export class StateStore extends EventTarget {
   /**
    * Removes the specified GitHub account from the accounts list
    */
-  public removeAccount(account: GitHubAccount) {
+  public removeAccount(account: GitHubAccountKey) {
     let accounts = this.state.accounts.slice();
     let index = accounts.findIndex(byLogin(account.login));
 
@@ -143,7 +143,7 @@ export class StateStore extends EventTarget {
   /**
    * Updates the specified GitHub repo
    */
-  public updateRepo(diff: Partial<GitHubRepo>) {
+  public updateRepo(diff: GitHubRepoKey & Partial<GitHubRepo>) {
     if (!diff.login || !diff.full_name) {
       throw new Error(`Account login and repo name must be specified when updating a repo`);
     }
@@ -165,7 +165,7 @@ export class StateStore extends EventTarget {
   /**
    * Adds or removes the specified GitHub repo from the `hiddenRepos` list
    */
-  public toggleHidden(repo: GitHubRepo, hidden: boolean) {
+  public toggleHidden(repo: GitHubRepoKey, hidden: boolean) {
     let hiddenRepos = new Set(this.state.hiddenRepos);
     if (hidden) {
       hiddenRepos.add(repo.full_name);

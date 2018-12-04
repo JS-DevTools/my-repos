@@ -1,5 +1,5 @@
 import { fetch, FetchError, FetchResponse } from "../fetch";
-import { GitHubRepo } from "../github/github-repo";
+import { GitHubRepoKey } from "../github/github-repo";
 import { JsonPOJO } from "../util";
 import { Dependencies, DependencyTotals } from "./dependencies";
 import { dependenciesResponse } from "./dependencies-response";
@@ -7,7 +7,7 @@ import { dependenciesResponse } from "./dependencies-response";
 /**
  * Fetches JavaScript dependencies for the specified GitHub repo from David-DM
  */
-export async function fetchJavaScriptDependencies(repo: GitHubRepo): Promise<FetchResponse<Dependencies>> {
+export async function fetchJavaScriptDependencies(repo: GitHubRepoKey): Promise<FetchResponse<Dependencies>> {
   let [devDepsResponse, runtimeDepsResponse] = await Promise.all([
     fetchDependencyTotals(repo, "dev"),
     fetchDependencyTotals(repo, "runtime"),
@@ -31,7 +31,7 @@ export async function fetchJavaScriptDependencies(repo: GitHubRepo): Promise<Fet
 /**
  * Fetches the development or runtime dependency totals from David-DM
  */
-async function fetchDependencyTotals(repo: GitHubRepo, type: "dev" | "runtime"): Promise<FetchResponse<DependencyTotals>> {
+async function fetchDependencyTotals(repo: GitHubRepoKey, type: "dev" | "runtime"): Promise<FetchResponse<DependencyTotals>> {
   let url: string, html_url: string;
 
   if (type === "dev") {

@@ -1,8 +1,8 @@
 import { Dependencies } from "../dependencies";
 import { ErrorResponse, fetch, FetchError, FetchResponse, ResponseMapper } from "../fetch";
 import { byName } from "../util";
-import { GitHubAccount, isGitHubAccountPOJO } from "./github-account";
-import { GitHubRepo, isGitHubRepoPOJO } from "./github-repo";
+import { GitHubAccount, GitHubAccountKey, isGitHubAccountPOJO } from "./github-account";
+import { GitHubRepo, GitHubRepoKey, isGitHubRepoPOJO } from "./github-repo";
 
 // Once this flag is true, we'll stop making requests to the GitHub API,
 // since any further requests would also exceed the rate limit
@@ -12,7 +12,7 @@ export class GitHub {
   /**
    * Fetches the specified GitHub account's info, NOT including its repos
    */
-  public async fetchAccount(account: GitHubAccount): Promise<Readonly<FetchResponse<GitHubAccount>>> {
+  public async fetchAccount(account: GitHubAccountKey): Promise<Readonly<FetchResponse<GitHubAccount>>> {
     const url = `https://api.github.com/users/${account.login}`;
 
     return this._gitHubApiRequest(url, (response) => {
@@ -93,7 +93,7 @@ export class GitHub {
    * This is necessary because the `open_issues_count` field on the GitHubRepo object
    * actually includes open issues AND open PRs.
    */
-  public async fetchPullCount(repo: GitHubRepo): Promise<Readonly<FetchResponse<number>>> {
+  public async fetchPullCount(repo: GitHubRepoKey): Promise<Readonly<FetchResponse<number>>> {
     const url = `https://api.github.com/repos/${repo.full_name}/pulls?state=open&per_page=1`;
 
     return this._gitHubApiRequest(url, (response) => {

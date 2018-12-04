@@ -1,5 +1,5 @@
-import { GitHubAccount, isGitHubAccountPOJO } from "../github/github-account";
-import { GitHubRepo, isGitHubRepoPOJO } from "../github/github-repo";
+import { GitHubAccount, GitHubAccountKey, isGitHubAccountPOJO } from "../github/github-account";
+import { GitHubRepo, GitHubRepoKey, isGitHubRepoPOJO } from "../github/github-repo";
 import { JsonPOJO, POJO } from "../util";
 
 interface CachedGitHubAccount {
@@ -19,7 +19,7 @@ export class Cache {
    * Returns the specified GitHub Account from the cache, if it exists.
    * The account is fully re-hydrated, including its repos.
    */
-  public getAccount(login: string): GitHubAccount | undefined {
+  public getAccount({ login }: GitHubAccountKey): GitHubAccount | undefined {
     let { account, repoNames } = (getItem(login) || {}) as unknown as CachedGitHubAccount;
 
     if (isGitHubAccountPOJO(account)) {
@@ -27,8 +27,8 @@ export class Cache {
 
       if (Array.isArray(repoNames)) {
         // Load the account's GitHub repos as well
-        for (let repoName of repoNames) {
-          let repo = this.getRepo(repoName);
+        for (let full_name of repoNames) {
+          let repo = this.getRepo({ login, full_name });
           if (repo) {
             account.repos.push(repo);
           }
@@ -64,7 +64,7 @@ export class Cache {
    * Returns the specified GitHub Repo from the cache, if it exists.
    * The repo is fully re-hydrated, including its dependencies.
    */
-  public getRepo(full_name: string): GitHubRepo | undefined {
+  public getRepo({ full_name }: GitHubRepoKey): GitHubRepo | undefined {
     let cachedRepo = getItem(full_name);
 
     if (isGitHubRepoPOJO(cachedRepo)) {
