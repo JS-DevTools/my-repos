@@ -13,6 +13,7 @@
 
   .repo {
     position: relative;
+    border: solid 1px $bg-color;
     padding: $vertical-space-small $horizontal-space-medium;
 
     .remove-repo {
@@ -24,6 +25,7 @@
     }
 
     &:hover {
+      border-color: $medium-gray;
       background-color: $lighter-gray;
 
       .remove-repo {
