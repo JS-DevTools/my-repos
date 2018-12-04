@@ -1,4 +1,4 @@
-$darker-gray: #586069;
+$darker-gray: #484848;
 $dark-gray: #babbbd;
 $medium-gray: #dfe2e5;
 $light-gray: #eaecef;
@@ -6,20 +6,19 @@ $lighter-gray: #f4f4f4;
 
 $medium-blue: #0366d6;
 
-$warning-color: #f1e150;
-$warning-color-light: #fff597;
+$warning-color: #f3e98a;
+$warning-color-light: lighten($warning-color, 10%);
 
-$error-color: #e84f5e;
-$error-color-light: #d56872;
-$error-bg-color: transparentize($error-color, .9);
+$error-color: #e97580;
+$error-color-light: lighten($error-color, 10%);
+
+$info-color: $medium-blue;
+$info-color-light: lighten($info-color, 10%);
 
 $bg-color: #fff;
 $text-color: #24292e;
 $link-color: $medium-blue;
 $light-border: $light-gray;
-
-$info-color: $medium-blue;
-$info-bg-color: transparentize($info-color, .9);
 
 $vertical-space-large: 30px;
 $vertical-space-medium: 20px;

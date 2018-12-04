@@ -1,14 +1,21 @@
 import { default as octicons, OcticonName } from "octicons";
 import * as React from "react";
 
-export function Octicon({ name }: { name: OcticonName }) {
+export interface OcticonProps {
+  name: OcticonName;
+  title?: string;
+}
+
+export function Octicon({ name, title }: OcticonProps) {
   let icon = octicons[name];
+  let { class: className, ...options } = icon.options;
 
   let props = {
-    ...icon.options,
-    className: icon.options.class,
+    ...options,
+    className,
   };
-  delete props.class;
 
-  return <svg {...props} dangerouslySetInnerHTML={{ __html: icon.path }} />;
+  let __html = title ? `<title>${title}</title>${icon.path}` : icon.path;
+
+  return <svg {...props} dangerouslySetInnerHTML={{ __html }} />;
 }

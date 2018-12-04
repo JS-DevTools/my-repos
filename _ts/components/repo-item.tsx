@@ -19,8 +19,16 @@ export function RepoItem(props: RepoItemProps) {
     <li key={repo.name} className={`repo ${repo.fork ? "forked" : ""} ${repo.archived ? "archived" : ""}`}>
       <h2>
         <a href={repo.html_url}>{repo.name}</a>
+        {
+          repo.fork &&
+          <Octicon name="repo-forked" title="This repo is a fork of another repo" />
+        }
+        {
+          repo.archived &&
+          <Octicon name="archive" title="This repo has been archived" />
+        }
       </h2>
-      {repo.description && <h3>{repo.description}</h3>}
+      <h3>{repo.description}</h3>
 
       <nav className="badges">
         <a href={`${repo.html_url}/network/members`}
