@@ -18,6 +18,7 @@ export function fetchData(account: GitHubAccount, updateAccount: UpdateAccount, 
     .then(() => fetchDataAsync(account, updateAccount, updateRepo))
     .catch((error) => {
       console.error(`Error fetching data for account: ${account.login}.`, error);
+      account.loading = false;
       account.error = (error as Error).message;
       updateAccount(account);
     });
@@ -73,6 +74,12 @@ export async function fetchDataAsync(account: GitHubAccount, updateAccount: Upda
       async (repo) => fetchRepoData(repo, updateRepo, phase))
     );
   }
+
+  // We're done loading all the data for this account, so update its "loading" status
+  updateAccount({
+    login: account.login,
+    loading: false,
+  });
 }
 
 /**
