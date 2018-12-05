@@ -49,7 +49,7 @@
     "version-bump-prompt": "^4.2.1"
   },
   "dependencies": {
-    "octicons": "^8.1.3",
+    "octicons": "^8.2.0",
     "react": "^16.6.3",
     "react-dom": "^16.6.3"
   }
