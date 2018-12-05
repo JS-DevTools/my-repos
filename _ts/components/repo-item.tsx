@@ -1,6 +1,7 @@
 // tslint:disable:no-duplicate-imports
 import * as React from "react";
 import { MouseEvent } from "react";
+import { BuildStatus } from "../ci/build";
 import { GitHubRepo } from "../github/github-repo";
 import { stateStore } from "../state-store";
 import { Octicon } from "./octicon";
@@ -81,6 +82,7 @@ export class RepoItem extends React.Component<RepoItemProps> {
           </a>
 
           <DependencyBadge {...this.props} />
+          <BuildBadge {...this.props} />
         </nav>
       </li>
     );
@@ -155,6 +157,48 @@ function DependencyBadge(props: RepoItemProps) {
       <Octicon name="package" />
       <span className="badge-label">{label}</span>
       <span className="badge-count">{`${count} / ${total}`}</span>
+    </a>
+  );
+}
+
+function BuildBadge(props: RepoItemProps) {
+  let { build } = props.repo;
+
+  if (build.status === BuildStatus.Unknown) {
+    // We don't know the CI build status for this repo, so don't display this badge
+    return null;   // tslint:disable-line:no-null-keyword
+  }
+
+  let className: Status;
+  let label: string;
+
+  switch (build.status) {
+    case BuildStatus.Success:
+      className = Status.OK;
+      label = "Passing";
+      break;
+
+    case BuildStatus.Failed:
+      className = Status.Error;
+      label = "Failed";
+      break;
+
+    case BuildStatus.Cacneled:
+      className = Status.Warning;
+      label = "Canceled";
+      break;
+
+    default:
+      className = Status.Error;
+      label = "Error";
+      break;
+  }
+
+  return (
+    <a href={build.html_url}
+      className={`badge ${className} build`}>
+      <Octicon name="gear" />
+      <span className="badge-label">{`Build: ${label}`}</span>
     </a>
   );
 }

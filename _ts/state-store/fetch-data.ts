@@ -1,4 +1,5 @@
 import { stateStore } from ".";
+import { fetchBuild } from "../ci";
 import { fetchDependencies } from "../dependencies";
 import { ErrorResponse } from "../fetch";
 import { github } from "../github";
@@ -133,6 +134,7 @@ async function fetchRepoData(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpi
   return Promise.all([
     fetchIssuesAndPullRequests(repo, updateRepo, cacheExpiry),
     fetchRepoDependencies(repo, updateRepo, cacheExpiry),
+    fetchRepoBuild(repo, updateRepo, cacheExpiry),
   ]);
 }
 
@@ -201,6 +203,32 @@ async function fetchRepoDependencies(repo: GitHubRepo, updateRepo: UpdateRepo, c
       login: repo.login,
       full_name: repo.full_name,
       dependencies,
+    });
+  }
+}
+
+/**
+ * Fetches the latest CI build for the specified repo, and calls the specified update callback.
+ */
+async function fetchRepoBuild(repo: GitHubRepo, updateRepo: UpdateRepo, cacheExpiry: Date) {
+  if (repo.build.last_refresh > cacheExpiry) {
+    // No need to fetch this repo's dependencies, since the cached version is new enough
+    return;
+  }
+
+  let buildResponse = await fetchBuild(repo);
+
+  if (buildResponse.error) {
+    errorHandler(`Error fetching the latest CI build for ${repo.full_name}.`, buildResponse);
+  }
+  else {
+    let build = buildResponse.body;
+
+    // Update the app state with the repo's build status
+    updateRepo({
+      login: repo.login,
+      full_name: repo.full_name,
+      build,
     });
   }
 }

@@ -1,3 +1,4 @@
+import { Build } from "../ci";
 import { Dependencies } from "../dependencies";
 import { stateStore } from "../state-store";
 
@@ -64,6 +65,11 @@ export class GitHubRepo implements GitHubRepoPOJO {
    * Information about this repo's dependencies.
    */
   public dependencies = new Dependencies();
+
+  /**
+   * Information about this repo's latest CI build.
+   */
+  public build = new Build();
 
   /**
    * The date/time that the repo's data was last fetched from GitHub
