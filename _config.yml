@@ -1,8 +1,10 @@
-repository: JS-DevTools/my-repos
+# Jekyll configuration
+# https://jekyllrb.com/docs/configuration/
 
 title: My GitHub Repos
 description: All your GitHub repos on one page
 logo: img/logo.png
+repository: JS-DevTools/my-repos
 
 author:
   twitter: JS_DevTools
@@ -24,14 +26,20 @@ exclude:
   - .git
   - .vscode
   - node_modules
-  - _ts
+  - package.json
+  - package-lock.json
+  - rollup.config*
+  - tsconfig.json
+  - tslint.yaml
+  - README.md
 
 # Jekyll Optional Front Matter
 # https://github.com/benbalter/jekyll-optional-front-matter/
-# optional_front_matter:
-#   remove_originals: true
-# include:
-#   - README.md
+optional_front_matter:
+  remove_originals: true
+include:
+  - LICENSE.md
+  - CHANGELOG.md
 
 plugins:
   # Plugins that are activated by default on GitHub Pages
