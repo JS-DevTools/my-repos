@@ -7,12 +7,12 @@ logo: img/logo.png
 repository: JS-DevTools/my-repos
 
 author:
-  twitter: JS_DevTools
+  twitter: JSDevTools
 
 google_analytics: UA-68102273-4
 
 twitter:
-  username: JS_DevTools
+  username: JSDevTools
   card: summary
 
 defaults:
