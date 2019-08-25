@@ -86,7 +86,8 @@ export async function fetchDataAsync(account: GitHubAccount, updateAccount: Upda
 /**
  * Fetches the specified GitHub account and its repos
  */
-async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: UpdateAccount, cacheExpiry: Date): Promise<GitHubAccount> {
+async function fetchAccountAndRepos(account: GitHubAccount, updateAccount: UpdateAccount, cacheExpiry: Date):
+Promise<GitHubAccount> {
   if (account.last_refresh > cacheExpiry) {
     // No need to fetch this account, since the cached version is new enough
     return account;

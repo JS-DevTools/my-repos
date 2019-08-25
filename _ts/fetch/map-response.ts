@@ -42,7 +42,7 @@ export async function mapResponse<T>(rawResponse: Response, mapper: ResponseMapp
  * Converts a Fetch Headers object into a simple POJO with string keys and values
  */
 export function headersToPOJO(headers: Headers): POJOof<string> {
-  let pojo = {} as POJOof<string>;
+  let pojo: POJOof<string> = {};
 
   for (let [key, value] of headers.entries()) {
     pojo[key.toLowerCase()] = value;

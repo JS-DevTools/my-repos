@@ -10,11 +10,13 @@ export function Octicon({ name, title }: OcticonProps) {
   let icon = octicons[name];
   let { class: className, ...options } = icon.options;
 
-  let props = {
+  let props: React.SVGProps<SVGSVGElement> = {
     ...options,
+    "aria-hidden": "true",
     className,
   };
 
+  // tslint:disable-next-line: variable-name
   let __html = title ? `<title>${title}</title>${icon.path}` : icon.path;
 
   return <svg {...props} dangerouslySetInnerHTML={{ __html }} />;

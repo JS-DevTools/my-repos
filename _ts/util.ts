@@ -14,7 +14,8 @@ export interface POJOof<T> {
   [key: string]: T;
 }
 
-export interface POJO extends POJOof<unknown> { }
+// tslint:disable-next-line: no-any
+export interface POJO extends POJOof<any> { }
 
 export interface JsonPOJO extends POJOof<string | number | boolean | JsonPOJO | JsonPOJO[]> { }
 

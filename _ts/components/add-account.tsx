@@ -44,7 +44,7 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
     this.setState({ login: event.target.value });
   }
 
-  private readonly handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  private readonly handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (this.state.login) {

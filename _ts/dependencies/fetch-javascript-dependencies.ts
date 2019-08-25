@@ -31,7 +31,8 @@ export async function fetchJavaScriptDependencies(repo: GitHubRepoKey): Promise<
 /**
  * Fetches the development or runtime dependency totals from David-DM
  */
-async function fetchDependencyTotals(repo: GitHubRepoKey, type: "dev" | "runtime"): Promise<FetchResponse<DependencyTotals>> {
+async function fetchDependencyTotals(repo: GitHubRepoKey, type: "dev" | "runtime"):
+Promise<FetchResponse<DependencyTotals>> {
   let url: string, html_url: string;
 
   if (type === "dev") {

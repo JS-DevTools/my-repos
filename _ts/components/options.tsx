@@ -50,5 +50,8 @@ function handleOptionClick(event: MouseEvent) {
     case "toggle_archived":
       stateStore.setState({ showArchived: !stateStore.state.showArchived });
       break;
+
+    default:
+      console.warn(`Unexpected target ID: ${event.currentTarget.id}`);
   }
 }
