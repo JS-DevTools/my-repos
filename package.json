@@ -27,7 +27,7 @@
     "start": "jekyll serve",
     "test": "npm run lint",
     "upgrade": "npm-check -u",
-    "bump": "bump --prompt --grep js/* --tag --push --all",
+    "bump": "bump js/* --tag --push --all",
     "release": "npm run upgrade && npm run test && npm run build && npm run bump"
   },
   "devDependencies": {
