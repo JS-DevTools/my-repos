@@ -26,7 +26,7 @@
     "watch:jekyll": "jekyll serve --livereload",
     "start": "jekyll serve",
     "test": "npm run lint",
-    "upgrade": "npm-check -u",
+    "upgrade": "npm-check -u && npm audit fix",
     "bump": "bump js/* --tag --push --all",
     "release": "npm run upgrade && npm run test && npm run build && npm run bump"
   },
