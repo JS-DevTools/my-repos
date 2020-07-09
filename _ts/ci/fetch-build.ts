@@ -1,6 +1,7 @@
 import { FetchResponse } from "../fetch";
 import { GitHubRepoKey } from "../github/github-repo";
-import { Build } from "./build";
+import { Build, BuildStatus } from "./build";
+import { fetchGitHubActionsBuild } from "./fetch-github-actions-build";
 import { fetchTravisBuild } from "./fetch-travis-build";
 
 /**
@@ -8,8 +9,16 @@ import { fetchTravisBuild } from "./fetch-travis-build";
  */
 export async function fetchBuild(repo: GitHubRepoKey): Promise<FetchResponse<Build>> {
   try {
-    // We currently only support Travis CI
-    return fetchTravisBuild(repo);
+    // Try to get the CI build from GitHub Actions first
+    let response = await fetchGitHubActionsBuild(repo);
+
+    if (response.ok && response.body.status !== BuildStatus.Unknown) {
+      return response;
+    }
+    else {
+      // There's no GitHub Actions build, so try Travis CI instead
+      return fetchTravisBuild(repo);
+    }
   }
   catch (error) {
     return {
