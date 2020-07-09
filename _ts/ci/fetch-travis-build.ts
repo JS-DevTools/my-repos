@@ -84,12 +84,13 @@ function mapStatus(last_build_status: TravisBuildStatus | null) {
   }
 }
 
-// tslint:disable:no-any no-unsafe-any
-export function isTravisResponseBody(body: any): body is TravisResponseBody {
-  return body &&
-    typeof body === "object" &&
-    typeof body.id === "number" &&
-    (body.active === null || typeof body.active === "boolean") &&
-    (body.last_build_id === null || typeof body.last_build_id === "number") &&
-    (body.last_build_status === null || typeof body.last_build_status === "number");
+export function isTravisResponseBody(body: unknown): body is TravisResponseBody {
+  let travis = body as TravisResponseBody;
+
+  return travis &&
+    typeof travis === "object" &&
+    typeof travis.id === "number" &&
+    (travis.active === null || typeof travis.active === "boolean") &&
+    (travis.last_build_id === null || typeof travis.last_build_id === "number") &&
+    (travis.last_build_status === null || typeof travis.last_build_status === "number");
 }
