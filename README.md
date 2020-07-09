@@ -10,7 +10,7 @@ Just go to **[myrepos.io](https://myrepos.io/)** to personalize your own page
 
 Contributing
 --------------------------
-Contributions, enhancements, and bug-fixes are welcome!  [File an issue](https://github.com/JS-DevTools/my-repos/issues) on GitHub and [submit a pull request](https://github.com/JS-DevTools/my-repos/pulls).
+Contributions, enhancements, and bug-fixes are welcome!  [Open an issue](https://github.com/JS-DevTools/my-repos/issues) on GitHub and [submit a pull request](https://github.com/JS-DevTools/my-repos/pulls).
 
 #### Building/Testing
 To build/test the project locally on your computer:
