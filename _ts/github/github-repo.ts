@@ -6,7 +6,14 @@ import { stateStore } from "../state-store";
  * The key fields that uniquely identify a GitHub repo
  */
 export interface GitHubRepoKey {
+  /**
+   * The GitHub login name (e.g. "JS-DevTools")
+   */
   login: string;
+
+  /**
+   * The fully-qualified repo name (e.g. "JS-DevTools/my-repos")
+   */
   full_name: string;
 }
 
