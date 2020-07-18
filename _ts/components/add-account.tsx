@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-invalid-this */
 import * as React from "react";
-// tslint:disable-next-line:no-duplicate-imports
 import { ChangeEvent, FormEvent } from "react";
 import { stateStore } from "../state-store";
 
@@ -42,7 +42,7 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
 
   private readonly handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.setState({ login: event.target.value });
-  }
+  };
 
   private readonly handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -51,5 +51,5 @@ export class AddAccount extends React.Component<AddAccountProps, State> {
       stateStore.addAccount(this.state);
       this.setState({ login: "" });
     }
-  }
+  };
 }

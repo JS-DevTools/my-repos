@@ -1,4 +1,4 @@
-// tslint:disable:no-duplicate-imports
+/* eslint-disable @typescript-eslint/no-invalid-this */
 import * as React from "react";
 import { MouseEvent } from "react";
 import { BuildStatus } from "../ci/build";
@@ -91,7 +91,7 @@ export class RepoItem extends React.Component<RepoItemProps> {
   private readonly handleHideClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     stateStore.toggleHidden(this.props.repo, true);
-  }
+  };
 }
 
 function DependencyBadge(props: RepoItemProps) {
@@ -104,7 +104,7 @@ function DependencyBadge(props: RepoItemProps) {
 
   if (total === 0) {
     // This repo doesn't have any dependencies, so don't display this badge
-    return null;   // tslint:disable-line:no-null-keyword
+    return null;
   }
 
   let href: string;
@@ -166,7 +166,7 @@ function BuildBadge(props: RepoItemProps) {
 
   if (build.status === BuildStatus.Unknown) {
     // We don't know the CI build status for this repo, so don't display this badge
-    return null;   // tslint:disable-line:no-null-keyword
+    return null;
   }
 
   let className: Status;

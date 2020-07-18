@@ -14,7 +14,6 @@ export interface POJOof<T> {
   [key: string]: T;
 }
 
-// tslint:disable-next-line: no-any
 export interface POJO extends POJOof<any> { }
 
 export interface JsonPOJO extends POJOof<string | number | boolean | JsonPOJO | JsonPOJO[]> { }
@@ -43,7 +42,7 @@ export function random(min: number, max: number): number {
 /**
  * Returns a CSS class string that indicates the number of accounts.
  */
-export function accountCountCssClass(accounts: ReadonlyArray<unknown>): string {
+export function accountCountCssClass(accounts: readonly unknown[]): string {
   switch (accounts.length) {
     case 0:
       return "no-accounts";

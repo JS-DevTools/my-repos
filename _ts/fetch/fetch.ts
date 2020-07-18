@@ -20,7 +20,7 @@ export async function fetch<T>(request: Request | string, mapper: ResponseMapper
     ]);
 
     // Convert teh raw Fetch Response to an FetchResponse
-    return mapResponse(rawResponse, mapper);
+    return await mapResponse(rawResponse, mapper);
   }
   catch (error) {
     // Return an error response

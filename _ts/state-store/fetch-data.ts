@@ -72,7 +72,7 @@ export async function fetchDataAsync(account: GitHubAccount, updateAccount: Upda
 
     // Fetch data for each repo
     await Promise.all(sortedRepos.map(
-      async (repo) => fetchRepoData(repo, updateRepo, phase))
+      async(repo) => fetchRepoData(repo, updateRepo, phase))
     );
   }
 
@@ -166,7 +166,7 @@ async function fetchIssuesAndPullRequests(repo: GitHubRepo, updateRepo: UpdateRe
     if (issues_includes_pulls) {
       // The `open_issues_count` field actually includes open issues AND open PRs.
       // So remove the PRs from the count
-      open_issues_count = open_issues_count - open_pulls_count;
+      open_issues_count -= open_pulls_count;
       issues_includes_pulls = false;
     }
 

@@ -37,7 +37,7 @@ export class StateStore extends EventTarget {
     Object.assign(this.state, partialState);
     writeStateToHash(this.state);
 
-    let stateChangeEvent = new CustomEvent<{}>(statechange);
+    let stateChangeEvent = new CustomEvent<object>(statechange);
     this.dispatchEvent(stateChangeEvent);
   }
 
@@ -114,7 +114,7 @@ export class StateStore extends EventTarget {
    */
   public updateAccount(diff: GitHubAccountKey & Partial<GitHubAccount>) {
     if (!diff.login) {
-      throw new Error(`Account login must be specified when updating an account`);
+      throw new Error("Account login must be specified when updating an account");
     }
 
     let accounts = this.state.accounts.slice();
@@ -145,7 +145,7 @@ export class StateStore extends EventTarget {
    */
   public updateRepo(diff: GitHubRepoKey & Partial<GitHubRepo>) {
     if (!diff.login || !diff.full_name) {
-      throw new Error(`Account login and repo name must be specified when updating a repo`);
+      throw new Error("Account login and repo name must be specified when updating a repo");
     }
 
     let accounts = this.state.accounts.slice();

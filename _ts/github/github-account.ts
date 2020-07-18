@@ -36,7 +36,7 @@ export class GitHubAccount implements GitHubAccountPOJO {
   /**
    * Indicates whether we're currently fetching the account info from GitHub
    */
-  public loading: boolean = false;
+  public loading = false;
 
   /**
    * The date/time that the repo's data was last fetched from GitHub
@@ -53,7 +53,6 @@ export class GitHubAccount implements GitHubAccountPOJO {
   }
 }
 
-// tslint:disable:no-any no-unsafe-any
 export function isGitHubAccountPOJO(account: any): account is GitHubAccountPOJO {
   return account &&
     typeof account === "object" &&

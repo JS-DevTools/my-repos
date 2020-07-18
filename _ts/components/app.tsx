@@ -6,10 +6,10 @@ import { FirstTime } from "./first-time";
 import { Options } from "./options";
 import { PageHeader } from "./page-header";
 
-export class App extends React.Component<{}, ReadonlyAppState> {
+export class App extends React.Component<object, ReadonlyAppState> {
   public readonly state: ReadonlyAppState;
 
-  public constructor(props: Readonly<{}>) {
+  public constructor(props: Readonly<object>) {
     super(props);
 
     // Connect the StateStore with this app instance

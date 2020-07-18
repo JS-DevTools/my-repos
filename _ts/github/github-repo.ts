@@ -121,7 +121,6 @@ export class GitHubRepo implements GitHubRepoPOJO {
   }
 }
 
-// tslint:disable:no-any no-unsafe-any
 export function isGitHubRepoPOJO(repo: any): repo is GitHubRepoPOJO {
   return repo &&
     typeof repo === "object" &&

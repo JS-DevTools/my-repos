@@ -16,7 +16,6 @@ export function Octicon({ name, title }: OcticonProps) {
     className,
   };
 
-  // tslint:disable-next-line: variable-name
   let __html = title ? `<title>${title}</title>${icon.path}` : icon.path;
 
   return <svg {...props} dangerouslySetInnerHTML={{ __html }} />;

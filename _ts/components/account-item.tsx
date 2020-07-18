@@ -1,4 +1,4 @@
-// tslint:disable:no-duplicate-imports
+/* eslint-disable @typescript-eslint/no-invalid-this */
 import * as React from "react";
 import { MouseEvent } from "react";
 import { GitHubAccount } from "../github/github-account";
@@ -36,7 +36,7 @@ export class AccountItem extends React.Component<AccountItemProps> {
   private readonly handleRemoveClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     stateStore.removeAccount(this.props.account);
-  }
+  };
 }
 
 function AccountItemContents(props: AccountItemProps) {

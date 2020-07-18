@@ -95,7 +95,6 @@ interface DavidResponseBody {
   };
 }
 
-// tslint:disable:no-any no-unsafe-any
 export function isDavidResponseBody(body: any): body is DavidResponseBody {
   return body &&
     typeof body === "object" &&

@@ -139,7 +139,7 @@ export class GitHub {
       // We can't make any more requests to the GitHub API
       return {
         ok: false,
-        error: new FetchError("https://api.github.com", `GitHub API rate limit exceeded`),
+        error: new FetchError("https://api.github.com", "GitHub API rate limit exceeded"),
         status: 403,
         statusText: "Forbidden",
         url: "https://api.github.com",
@@ -156,7 +156,7 @@ export class GitHub {
     // If the response is a Rate Limit Exceeded error, then set the flag
     // so we don't send any more requests to the GitHub API
     if (response.error && !githubRateLimitExceeded && this.isRateLimitExceeded(response)) {
-      console.warn(`GitHub API rate limit exceeded`);
+      console.warn("GitHub API rate limit exceeded");
       githubRateLimitExceeded = true;
     }
 

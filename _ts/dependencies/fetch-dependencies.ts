@@ -14,7 +14,7 @@ export async function fetchDependencies(repo: GitHubRepo): Promise<FetchResponse
     switch (language) {
       case "javascript":
       case "typescript":
-        return fetchJavaScriptDependencies(repo);
+        return await fetchJavaScriptDependencies(repo);
 
       default:
         // Not yet implemented for this language

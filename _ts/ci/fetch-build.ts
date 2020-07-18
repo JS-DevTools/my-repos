@@ -17,7 +17,7 @@ export async function fetchBuild(repo: GitHubRepoKey): Promise<FetchResponse<Bui
     }
     else {
       // There's no GitHub Actions build, so try Travis CI instead
-      return fetchTravisBuild(repo);
+      return await fetchTravisBuild(repo);
     }
   }
   catch (error) {

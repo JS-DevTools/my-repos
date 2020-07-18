@@ -2,7 +2,7 @@ import { GitHubAccount } from "../github/github-account";
 import { DEFAULT_CACHE_DURATION, DEFAULT_DELAY } from "../util";
 
 export interface ReadonlyAppState {
-  readonly accounts: ReadonlyArray<GitHubAccount>;
+  readonly accounts: readonly GitHubAccount[];
   readonly hiddenRepos: ReadonlySet<string>;
   readonly showForks: boolean;
   readonly showArchived: boolean;

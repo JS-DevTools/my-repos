@@ -3,7 +3,14 @@
 # https://jstools.dev/eslint-config/
 
 root: true
-extends: "@jsdevtools"
+extends:
+  - plugin:react/recommended
+  - "@jsdevtools"
 
 env:
   browser: true
+
+rules:
+  # Disable casing rules, due to all the snake_case GitHub API stuff
+  camelcase: off
+  "@typescript-eslint/naming-convention": off

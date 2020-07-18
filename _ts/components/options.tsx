@@ -1,4 +1,3 @@
-// tslint:disable:no-duplicate-imports
 import * as React from "react";
 import { MouseEvent } from "react";
 import { stateStore } from "../state-store";
@@ -15,7 +14,7 @@ export function Options() {
   }
 
   if (!hasForks && !hasArchived) {
-    return null;  // tslint:disable-line:no-null-keyword
+    return null;
   }
 
   return (
